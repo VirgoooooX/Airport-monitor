@@ -1,0 +1,8 @@
+{
+  "airports": [],
+  "checkInterval": 300,
+  "checkTimeout": 30,
+  "logLevel": "info",
+  "storagePath": "L:\\Web\\Airport monitor\\data\\monitor.db",
+  "apiPort": 3000
+}
