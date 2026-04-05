@@ -25,6 +25,7 @@ import {
   getAxisConfig,
   CHART_MARGINS
 } from './chartConfig';
+import { sampleChartData } from '../utils/dataOptimization';
 
 /**
  * Data point for comparison bar chart
@@ -72,8 +73,13 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
   showAvailability = true,
   className = ''
 }) => {
+  // Performance optimization: Sample data if >100 points
+  const sampledData = React.useMemo(() => {
+    return data.length > 100 ? sampleChartData(data, 100) : data;
+  }, [data]);
+
   // Transform data for chart display
-  const chartData = data.map(item => ({
+  const chartData = sampledData.map(item => ({
     category: item.category,
     nodeCount: item.nodeCount,
     avgLatency: item.avgLatency,
@@ -147,6 +153,11 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
       error={error}
       className={className}
     >
+      {data.length > 100 && (
+        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          Displaying {chartData.length} of {data.length} categories (sampled for performance)
+        </div>
+      )}
       <BarChart
         data={chartData}
         layout={layout}

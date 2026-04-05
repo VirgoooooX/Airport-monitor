@@ -8,11 +8,19 @@ import {
   TimeSegmentComparison,
   TimeSegmentStats
 } from '../interfaces/time-analyzer.js';
+import {
+  initAggregationState,
+  updateAggregationState,
+  finalizeAggregation,
+  calculatePercentilesFromSamples,
+  AggregationState
+} from '../utils/chunked-processing.js';
 
 /**
  * Time Analyzer Implementation
  * 
  * Analyzes node performance across different time dimensions.
+ * Uses streaming and chunked processing for memory efficiency with large datasets.
  * **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 1.6**
  */
 export class TimeAnalyzerImpl implements TimeAnalyzer {

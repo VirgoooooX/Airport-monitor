@@ -321,5 +321,115 @@
     "message": "渲染此组件时发生意外错误。",
     "retry": "重试",
     "details": "错误详情"
+  },
+  "reports": {
+    "error": {
+      "title": "加载报告失败",
+      "retry": "重试"
+    },
+    "noData": "暂无报告数据",
+    "generatedAt": "生成时间",
+    "timeRange": "时间范围",
+    "meta": {
+      "queryTime": "查询时间",
+      "dataPoints": "数据点"
+    },
+    "detailsPlaceholder": {
+      "title": "详细指标即将推出",
+      "description": "图表、表格和详细分析将在此处显示"
+    },
+    "quickStats": {
+      "regions": "主要地区",
+      "protocols": "协议",
+      "health": "节点健康度"
+    },
+    "collapse": "折叠",
+    "expand": "展开",
+    "timeDimension": {
+      "hourlyTrend": "24小时趋势",
+      "hourlyTrendDesc": "过去24小时的每小时性能",
+      "dailyTrend": "7天趋势",
+      "dailyTrendDesc": "过去7天的每日性能",
+      "peakPeriods": "高峰时段",
+      "highestLatency": "最高延迟",
+      "lowestLatency": "最低延迟",
+      "timeSegments": "时段对比",
+      "segment": "时段",
+      "avgLatency": "平均延迟",
+      "p95Latency": "P95延迟",
+      "availability": "可用性",
+      "checks": "检查次数",
+      "segments": {
+        "morning": "早上（6-12）",
+        "afternoon": "下午（12-18）",
+        "evening": "晚上（18-24）",
+        "night": "深夜（0-6）"
+      }
+    },
+    "regionalDimension": {
+      "distribution": "地区分布",
+      "distributionDesc": "各地区节点百分比",
+      "comparison": "地区性能对比",
+      "comparisonDesc": "按地区的平均指标",
+      "statistics": "地区统计",
+      "region": "地区",
+      "nodes": "节点数",
+      "avgLatency": "平均延迟",
+      "avgAvailability": "平均可用性",
+      "healthDistribution": "健康度分布"
+    },
+    "protocolDimension": {
+      "distribution": "协议分布",
+      "distributionDesc": "使用各协议的节点百分比",
+      "comparison": "协议性能对比",
+      "comparisonDesc": "按协议的平均指标",
+      "ranking": "协议排名",
+      "rank": "排名",
+      "protocol": "协议",
+      "nodes": "节点数",
+      "avgLatency": "平均延迟",
+      "avgAvailability": "平均可用性"
+    },
+    "nodeDetails": {
+      "title": "节点详情",
+      "nodes": "节点",
+      "name": "节点名称",
+      "protocol": "协议",
+      "region": "地区",
+      "p95Latency": "P95延迟",
+      "availability": "可用性",
+      "stability": "稳定性",
+      "health": "健康度",
+      "qualityScore": "质量",
+      "showing": "显示",
+      "of": "共",
+      "previous": "上一页",
+      "page": "第",
+      "next": "下一页"
+    },
+    "timeRange": {
+      "title": "时间范围",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "apply": "应用自定义范围",
+      "current": "当前范围",
+      "presets": {
+        "1h": "最近1小时",
+        "24h": "最近24小时",
+        "7d": "最近7天",
+        "30d": "最近30天",
+        "custom": "自定义"
+      },
+      "errors": {
+        "required": "开始和结束时间都是必填项",
+        "futureDate": "结束时间不能是未来时间",
+        "invalidRange": "开始时间必须早于结束时间",
+        "exceedsMax": "时间范围不能超过{{days}}天"
+      },
+      "warnings": {
+        "largeRange": "较大的时间范围可能需要更长的加载时间",
+        "oldData": "由于保留策略，部分数据可能不可用"
+      }
+    }
   }
 }

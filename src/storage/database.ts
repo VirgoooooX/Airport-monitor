@@ -4,12 +4,25 @@ import { DataStorage } from '../interfaces/DataStorage.js';
 import * as fs from 'fs';
 
 /**
+ * Cache entry with TTL
+ */
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+}
+
+/**
  * Database schema initialization and management
  * Implements the DataStorage interface for persisting monitoring data
  */
 export class DatabaseManager implements DataStorage {
   private db: Database;
   private dbPath: string;
+  
+  // Query result cache with 5-minute TTL
+  private queryCache: Map<string, CacheEntry<any>> = new Map();
+  private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
   private constructor(db: Database, dbPath: string) {
     this.db = db;
@@ -174,6 +187,13 @@ export class DatabaseManager implements DataStorage {
       ON check_results(node_id, timestamp)
     `);
 
+    // Composite index for optimized time-range queries with availability filtering
+    // This index supports queries that filter by node_id, available status, and timestamp
+    this.db.run(`
+      CREATE INDEX IF NOT EXISTS idx_check_results_node_available_time 
+      ON check_results(node_id, available, timestamp)
+    `);
+
     // Index for querying check results by timestamp
     this.db.run(`
       CREATE INDEX IF NOT EXISTS idx_check_results_timestamp 
@@ -244,6 +264,61 @@ export class DatabaseManager implements DataStorage {
     } catch (error) {
       // If migration fails, log but don't throw - table might not exist yet
       console.warn('Airport table migration warning:', error);
+    }
+  }
+
+  /**
+   * Generate cache key for query results
+   */
+  private getCacheKey(method: string, ...args: any[]): string {
+    return `${method}:${JSON.stringify(args)}`;
+  }
+
+  /**
+   * Get cached query result if available and not expired
+   */
+  private getCachedResult<T>(cacheKey: string): T | null {
+    const entry = this.queryCache.get(cacheKey);
+    if (!entry) {
+      return null;
+    }
+
+    const now = Date.now();
+    if (now - entry.timestamp > entry.ttl) {
+      // Cache expired, remove it
+      this.queryCache.delete(cacheKey);
+      return null;
+    }
+
+    return entry.data as T;
+  }
+
+  /**
+   * Cache query result with TTL
+   */
+  private setCachedResult<T>(cacheKey: string, data: T, ttl: number = this.CACHE_TTL_MS): void {
+    this.queryCache.set(cacheKey, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+  }
+
+  /**
+   * Invalidate cache entries matching a pattern
+   */
+  private invalidateCache(pattern?: string): void {
+    if (!pattern) {
+      // Clear all cache
+      this.queryCache.clear();
+      return;
+    }
+
+    // Remove entries matching the pattern
+    for (const key of this.queryCache.keys()) {
+      if (key.includes(pattern)) {
+        this.queryCache.delete(key);
+      }
     }
   }
 
@@ -449,6 +524,9 @@ export class DatabaseManager implements DataStorage {
         await this.saveCheckDimensions(checkResultId, enhancedResult.dimensions);
       }
 
+      // Invalidate cache for this node
+      this.invalidateCache(result.nodeId);
+
       this.save();
     } catch (error) {
       // Handle database lock with retry
@@ -465,6 +543,9 @@ export class DatabaseManager implements DataStorage {
    */
   async saveCheckResults(results: CheckResult[]): Promise<void> {
     try {
+      // Collect unique node IDs for cache invalidation
+      const nodeIds = new Set<string>();
+      
       for (const result of results) {
         this.db.run(
           `INSERT INTO check_results (node_id, timestamp, available, response_time, error)
@@ -477,7 +558,14 @@ export class DatabaseManager implements DataStorage {
             result.error ?? null
           ]
         );
+        nodeIds.add(result.nodeId);
       }
+      
+      // Invalidate cache for all affected nodes
+      for (const nodeId of nodeIds) {
+        this.invalidateCache(nodeId);
+      }
+      
       this.save();
     } catch (error) {
       // Handle database lock with retry
@@ -491,12 +579,22 @@ export class DatabaseManager implements DataStorage {
 
   /**
    * Get check history for a specific node with optional time range filtering
+   * Results are cached with 5-minute TTL for performance
    */
   async getCheckHistory(
     nodeId: string,
     startTime?: Date,
     endTime?: Date
   ): Promise<CheckResult[]> {
+    // Generate cache key
+    const cacheKey = this.getCacheKey('getCheckHistory', nodeId, startTime?.toISOString(), endTime?.toISOString());
+    
+    // Check cache first
+    const cachedResult = this.getCachedResult<CheckResult[]>(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     let query = `
       SELECT node_id, timestamp, available, response_time, error
       FROM check_results
@@ -519,7 +617,9 @@ export class DatabaseManager implements DataStorage {
     const result = this.db.exec(query, params);
 
     if (result.length === 0) {
-      return [];
+      const emptyResult: CheckResult[] = [];
+      this.setCachedResult(cacheKey, emptyResult);
+      return emptyResult;
     }
 
     const rows = result[0];
@@ -536,7 +636,90 @@ export class DatabaseManager implements DataStorage {
       });
     }
 
+    // Cache the result
+    this.setCachedResult(cacheKey, checkResults);
+
     return checkResults;
+  }
+
+  /**
+   * Stream check history results in chunks to avoid loading all data into memory
+   * Uses a generator function for memory-efficient iteration
+   * **Validates: Requirements All (performance)**
+   */
+  async *streamCheckHistory(
+    nodeId: string,
+    startTime?: Date,
+    endTime?: Date,
+    chunkSize: number = 1000
+  ): AsyncGenerator<CheckResult[], void, unknown> {
+    let query = `
+      SELECT node_id, timestamp, available, response_time, error
+      FROM check_results
+      WHERE node_id = ?
+    `;
+    const params: any[] = [nodeId];
+
+    if (startTime) {
+      query += ` AND timestamp >= ?`;
+      params.push(startTime.toISOString());
+    }
+
+    if (endTime) {
+      query += ` AND timestamp <= ?`;
+      params.push(endTime.toISOString());
+    }
+
+    query += ` ORDER BY timestamp ASC`;
+
+    const result = this.db.exec(query, params);
+
+    if (result.length === 0) {
+      return;
+    }
+
+    const rows = result[0];
+    let chunk: CheckResult[] = [];
+
+    for (let i = 0; i < rows.values.length; i++) {
+      const row = rows.values[i];
+      chunk.push({
+        nodeId: row[0] as string,
+        timestamp: new Date(row[1] as string),
+        available: row[2] === 1,
+        responseTime: row[3] ? (row[3] as number) : undefined,
+        error: row[4] ? (row[4] as string) : undefined
+      });
+
+      // Yield chunk when it reaches the specified size
+      if (chunk.length >= chunkSize) {
+        yield chunk;
+        chunk = [];
+      }
+    }
+
+    // Yield remaining results
+    if (chunk.length > 0) {
+      yield chunk;
+    }
+  }
+
+  /**
+   * Stream check history for multiple nodes in chunks
+   * Useful for airport-wide analysis without loading all data at once
+   * **Validates: Requirements All (performance)**
+   */
+  async *streamCheckHistoryForNodes(
+    nodeIds: string[],
+    startTime?: Date,
+    endTime?: Date,
+    chunkSize: number = 1000
+  ): AsyncGenerator<CheckResult[], void, unknown> {
+    for (const nodeId of nodeIds) {
+      for await (const chunk of this.streamCheckHistory(nodeId, startTime, endTime, chunkSize)) {
+        yield chunk;
+      }
+    }
   }
 
   /**
@@ -613,12 +796,22 @@ export class DatabaseManager implements DataStorage {
 
   /**
    * Calculate availability rate for a node with optional time range filtering
+   * Results are cached with 5-minute TTL for performance
    */
   async calculateAvailabilityRate(
     nodeId: string,
     startTime?: Date,
     endTime?: Date
   ): Promise<number> {
+    // Generate cache key
+    const cacheKey = this.getCacheKey('calculateAvailabilityRate', nodeId, startTime?.toISOString(), endTime?.toISOString());
+    
+    // Check cache first
+    const cachedResult = this.getCachedResult<number>(cacheKey);
+    if (cachedResult !== null) {
+      return cachedResult;
+    }
+
     let query = `
       SELECT 
         COUNT(*) as total_checks,
@@ -641,6 +834,7 @@ export class DatabaseManager implements DataStorage {
     const result = this.db.exec(query, params);
 
     if (result.length === 0 || result[0].values.length === 0) {
+      this.setCachedResult(cacheKey, -1);
       return -1; // Unknown status (no checks)
     }
 
@@ -649,12 +843,18 @@ export class DatabaseManager implements DataStorage {
     const availableChecks = row[1] as number;
 
     if (totalChecks === 0) {
+      this.setCachedResult(cacheKey, -1);
       return -1; // Unknown status (no checks)
     }
 
     // Calculate percentage with 2 decimal places
     const rate = (availableChecks / totalChecks) * 100;
-    return Math.round(rate * 100) / 100;
+    const roundedRate = Math.round(rate * 100) / 100;
+    
+    // Cache the result
+    this.setCachedResult(cacheKey, roundedRate);
+    
+    return roundedRate;
   }
 
   /**

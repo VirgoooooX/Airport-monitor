@@ -321,5 +321,115 @@
     "message": "An unexpected error occurred while rendering this component.",
     "retry": "Try Again",
     "details": "Error Details"
+  },
+  "reports": {
+    "error": {
+      "title": "Failed to Load Report",
+      "retry": "Retry"
+    },
+    "noData": "No report data available",
+    "generatedAt": "Generated at",
+    "timeRange": "Time Range",
+    "meta": {
+      "queryTime": "Query Time",
+      "dataPoints": "Data Points"
+    },
+    "detailsPlaceholder": {
+      "title": "Detailed Metrics Coming Soon",
+      "description": "Charts, tables, and detailed analysis will be displayed here"
+    },
+    "quickStats": {
+      "regions": "Top Regions",
+      "protocols": "Protocols",
+      "health": "Node Health"
+    },
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "timeDimension": {
+      "hourlyTrend": "24-Hour Trend",
+      "hourlyTrendDesc": "Hourly performance over the last 24 hours",
+      "dailyTrend": "7-Day Trend",
+      "dailyTrendDesc": "Daily performance over the last 7 days",
+      "peakPeriods": "Peak Periods",
+      "highestLatency": "Highest Latency",
+      "lowestLatency": "Lowest Latency",
+      "timeSegments": "Time Segment Comparison",
+      "segment": "Segment",
+      "avgLatency": "Avg Latency",
+      "p95Latency": "P95 Latency",
+      "availability": "Availability",
+      "checks": "Checks",
+      "segments": {
+        "morning": "Morning (6-12)",
+        "afternoon": "Afternoon (12-18)",
+        "evening": "Evening (18-24)",
+        "night": "Night (0-6)"
+      }
+    },
+    "regionalDimension": {
+      "distribution": "Regional Distribution",
+      "distributionDesc": "Percentage of nodes in each region",
+      "comparison": "Regional Performance Comparison",
+      "comparisonDesc": "Average metrics by region",
+      "statistics": "Regional Statistics",
+      "region": "Region",
+      "nodes": "Nodes",
+      "avgLatency": "Avg Latency",
+      "avgAvailability": "Avg Availability",
+      "healthDistribution": "Health Distribution"
+    },
+    "protocolDimension": {
+      "distribution": "Protocol Distribution",
+      "distributionDesc": "Percentage of nodes using each protocol",
+      "comparison": "Protocol Performance Comparison",
+      "comparisonDesc": "Average metrics by protocol",
+      "ranking": "Protocol Ranking",
+      "rank": "Rank",
+      "protocol": "Protocol",
+      "nodes": "Nodes",
+      "avgLatency": "Avg Latency",
+      "avgAvailability": "Avg Availability"
+    },
+    "nodeDetails": {
+      "title": "Node Details",
+      "nodes": "nodes",
+      "name": "Node Name",
+      "protocol": "Protocol",
+      "region": "Region",
+      "p95Latency": "P95 Latency",
+      "availability": "Availability",
+      "stability": "Stability",
+      "health": "Health",
+      "qualityScore": "Quality",
+      "showing": "Showing",
+      "of": "of",
+      "previous": "Previous",
+      "page": "Page",
+      "next": "Next"
+    },
+    "timeRange": {
+      "title": "Time Range",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "apply": "Apply Custom Range",
+      "current": "Current range",
+      "presets": {
+        "1h": "Last Hour",
+        "24h": "Last 24 Hours",
+        "7d": "Last 7 Days",
+        "30d": "Last 30 Days",
+        "custom": "Custom"
+      },
+      "errors": {
+        "required": "Both start and end times are required",
+        "futureDate": "End time cannot be in the future",
+        "invalidRange": "Start time must be before end time",
+        "exceedsMax": "Time range cannot exceed {{days}} days"
+      },
+      "warnings": {
+        "largeRange": "Large time ranges may take longer to load",
+        "oldData": "Some data may be unavailable due to retention policy"
+      }
+    }
   }
 }

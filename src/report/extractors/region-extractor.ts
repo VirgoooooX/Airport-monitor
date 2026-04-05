@@ -254,7 +254,10 @@ export class RegionExtractor implements IRegionExtractor {
    * @returns Standardized region name, defaults to "其他" if not found
    */
   mapCountryToRegion(country: string): StandardRegion {
-    return COUNTRY_TO_REGION_MAP[country] || '其他';
+    // Use hasOwnProperty to avoid prototype pollution issues
+    return Object.prototype.hasOwnProperty.call(COUNTRY_TO_REGION_MAP, country)
+      ? COUNTRY_TO_REGION_MAP[country]
+      : '其他';
   }
 
   /**

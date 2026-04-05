@@ -40,6 +40,8 @@ export type { HourlyTrendData, DailyTrendData, TrendData, TrendLineChartProps } 
 export { ComparisonBarChart } from './ComparisonBarChart';
 export type { ComparisonDataPoint, ComparisonBarChartProps } from './ComparisonBarChart';
 
-// Additional chart components will be added in later tasks
-// export { DistributionPieChart } from './DistributionPieChart';
-// export { QualityRadarChart } from './QualityRadarChart';
+export { DistributionPieChart } from './DistributionPieChart';
+export type { DistributionDataPoint, DistributionPieChartProps } from './DistributionPieChart';
+
+export { QualityRadarChart } from './QualityRadarChart';
+export type { QualityScoreData, QualityRadarChartProps } from './QualityRadarChart';

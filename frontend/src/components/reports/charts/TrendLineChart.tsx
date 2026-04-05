@@ -21,6 +21,7 @@ import {
   getAxisConfig,
   CHART_MARGINS
 } from './chartConfig';
+import { sampleChartData } from '../utils/dataOptimization';
 
 /**
  * Hourly trend data point (24-hour analysis)
@@ -79,8 +80,13 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
   showP95 = false,
   className = ''
 }) => {
+  // Performance optimization: Sample data if >100 points
+  const sampledData = React.useMemo(() => {
+    return data.length > 100 ? sampleChartData(data, 100) : data;
+  }, [data]);
+
   // Transform data for chart display
-  const chartData = data.map(item => {
+  const chartData = sampledData.map(item => {
     if (type === 'hourly') {
       const hourlyItem = item as HourlyTrendData;
       return {
@@ -155,6 +161,11 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
       error={error}
       className={className}
     >
+      {data.length > 100 && (
+        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          Displaying {chartData.length} of {data.length} data points (sampled for performance)
+        </div>
+      )}
       <LineChart data={chartData} margin={CHART_MARGINS.withLegend}>
         <CartesianGrid {...getGridConfig()} />
         

@@ -29,8 +29,8 @@ describe('ThemeSwitcher', () => {
   it('should render dark and light theme buttons', () => {
     renderWithProviders();
     
-    expect(screen.getByRole('button', { name: /dark mode/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /light mode/i })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /dark mode/i })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /light mode/i })).toBeInTheDocument();
   });
 
   it('should show dark theme as selected by default', () => {
@@ -43,7 +43,7 @@ describe('ThemeSwitcher', () => {
   it('should switch to light theme when light button is clicked', () => {
     renderWithProviders();
     
-    const lightButton = screen.getByRole('button', { name: /light mode/i });
+    const lightButton = screen.getByRole('radio', { name: /light mode/i });
     fireEvent.click(lightButton);
     
     const selectedButton = screen.getByRole('radio', { checked: true });
@@ -54,11 +54,11 @@ describe('ThemeSwitcher', () => {
     renderWithProviders();
     
     // First switch to light
-    const lightButton = screen.getByRole('button', { name: /light mode/i });
+    const lightButton = screen.getByRole('radio', { name: /light mode/i });
     fireEvent.click(lightButton);
     
     // Then switch back to dark
-    const darkButton = screen.getByRole('button', { name: /dark mode/i });
+    const darkButton = screen.getByRole('radio', { name: /dark mode/i });
     fireEvent.click(darkButton);
     
     const selectedButton = screen.getByRole('radio', { checked: true });
@@ -76,7 +76,7 @@ describe('ThemeSwitcher', () => {
   it('should persist theme selection to localStorage', () => {
     renderWithProviders();
     
-    const lightButton = screen.getByRole('button', { name: /light mode/i });
+    const lightButton = screen.getByRole('radio', { name: /light mode/i });
     fireEvent.click(lightButton);
     
     expect(localStorage.getItem('airport-monitor-theme')).toBe('light');

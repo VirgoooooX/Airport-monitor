@@ -9,9 +9,17 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, RefreshCw, AlertCircle, Server, Activity } from 'lucide-react';
+import { ChevronDown, ChevronUp, RefreshCw, AlertCircle, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ReportSummary from './ReportSummary';
+import { TimeDimensionView } from './TimeDimensionView';
+import { RegionalDimensionView } from './RegionalDimensionView';
+import { ProtocolDimensionView } from './ProtocolDimensionView';
+import { NodeDetailsTable } from './NodeDetailsTable';
+import type { TimeRange } from './TimeRangeSelector';
+import { TimeRangeSelector } from './TimeRangeSelector';
+import { LazyChart } from './LazyChart';
+import { LoadingSkeleton } from './LoadingSkeleton';
 
 /**
  * Type definitions for report data
@@ -58,9 +66,8 @@ interface ErrorResponse {
 
 interface DetailedReportViewProps {
   airportId: string;
-  startTime?: Date;
-  endTime?: Date;
-  onTimeRangeChange?: (start: Date, end: Date) => void;
+  initialStartTime?: Date;
+  initialEndTime?: Date;
 }
 
 /**
@@ -68,24 +75,14 @@ interface DetailedReportViewProps {
  */
 function ReportSkeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
+    <div className="space-y-4">
       {/* Summary skeleton */}
-      <div className="glass-panel p-6">
-        <div className="h-6 bg-gray-200 dark:bg-zinc-800 rounded w-1/3 mb-4" />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="space-y-2">
-              <div className="h-4 bg-gray-200 dark:bg-zinc-800 rounded w-2/3" />
-              <div className="h-8 bg-gray-200 dark:bg-zinc-800 rounded w-1/2" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <LoadingSkeleton variant="card" />
 
-      {/* Content skeleton */}
-      <div className="glass-panel p-6">
-        <div className="h-64 bg-gray-200 dark:bg-zinc-800 rounded" />
-      </div>
+      {/* Content skeletons */}
+      <LoadingSkeleton variant="chart" height={300} />
+      <LoadingSkeleton variant="chart" height={300} />
+      <LoadingSkeleton variant="table" count={5} />
     </div>
   );
 }
@@ -123,33 +120,22 @@ function ErrorDisplay({
 }
 
 /**
- * Quality score badge component
- */
-function QualityBadge({ score }: { score: number }) {
-  const getColor = () => {
-    if (score >= 90) return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
-    if (score >= 70) return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
-    if (score >= 50) return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
-    return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
-  };
-
-  return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${getColor()}`}>
-      {score.toFixed(1)}
-    </span>
-  );
-}
-
-/**
  * Main DetailedReportView component
  */
 export default function DetailedReportView({
   airportId,
-  startTime,
-  endTime,
-  onTimeRangeChange
+  initialStartTime,
+  initialEndTime
 }: DetailedReportViewProps) {
   const { t } = useTranslation();
+  
+  // Initialize time range (default: last 24 hours)
+  const [timeRange, setTimeRange] = useState<TimeRange>(() => {
+    const end = initialEndTime || new Date();
+    const start = initialStartTime || new Date(end.getTime() - 24 * 60 * 60 * 1000);
+    return { start, end };
+  });
+
   const [reportData, setReportData] = useState<DetailedReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -166,14 +152,10 @@ export default function DetailedReportView({
     try {
       // Build query parameters
       const params = new URLSearchParams();
-      if (startTime) {
-        params.append('startTime', startTime.toISOString());
-      }
-      if (endTime) {
-        params.append('endTime', endTime.toISOString());
-      }
+      params.append('startTime', timeRange.start.toISOString());
+      params.append('endTime', timeRange.end.toISOString());
 
-      const url = `/api/reports/detailed/${airportId}${params.toString() ? `?${params.toString()}` : ''}`;
+      const url = `/api/reports/detailed/${airportId}?${params.toString()}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -200,17 +182,24 @@ export default function DetailedReportView({
   };
 
   /**
-   * Fetch report on mount and when dependencies change
+   * Fetch report when time range changes
    */
   useEffect(() => {
     fetchReport();
-  }, [airportId, startTime, endTime]);
+  }, [airportId, timeRange]);
 
   /**
    * Handle retry button click
    */
   const handleRetry = () => {
     fetchReport();
+  };
+
+  /**
+   * Handle time range change
+   */
+  const handleTimeRangeChange = (newRange: TimeRange) => {
+    setTimeRange(newRange);
   };
 
   /**
@@ -223,15 +212,25 @@ export default function DetailedReportView({
   /**
    * Render loading state
    */
-  if (loading) {
-    return <ReportSkeleton />;
+  if (loading && !reportData) {
+    return (
+      <div className="space-y-6">
+        <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
+        <ReportSkeleton />
+      </div>
+    );
   }
 
   /**
    * Render error state
    */
-  if (error) {
-    return <ErrorDisplay error={error} onRetry={handleRetry} />;
+  if (error && !reportData) {
+    return (
+      <div className="space-y-6">
+        <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
+        <ErrorDisplay error={error} onRetry={handleRetry} />
+      </div>
+    );
   }
 
   /**
@@ -239,10 +238,13 @@ export default function DetailedReportView({
    */
   if (!reportData) {
     return (
-      <div className="glass-panel p-8 text-center">
-        <p className="text-gray-500 dark:text-zinc-500">
-          {t('reports.noData', 'No report data available')}
-        </p>
+      <div className="space-y-6">
+        <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
+        <div className="glass-panel p-8 text-center">
+          <p className="text-gray-500 dark:text-zinc-500">
+            {t('reports.noData', 'No report data available')}
+          </p>
+        </div>
       </div>
     );
   }
@@ -256,6 +258,9 @@ export default function DetailedReportView({
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      {/* Time Range Selector */}
+      <TimeRangeSelector value={timeRange} onChange={handleTimeRangeChange} />
+
       {/* Airport Report Card */}
       <div className="glass-panel overflow-hidden">
         {/* Card Header - Always Visible */}
@@ -303,7 +308,7 @@ export default function DetailedReportView({
               transition={{ duration: 0.3 }}
               className="border-t border-gray-200 dark:border-zinc-800"
             >
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-8">
                 {/* Time Range Info */}
                 <div className="flex items-center justify-between text-sm text-gray-600 dark:text-zinc-400">
                   <div>
@@ -323,77 +328,40 @@ export default function DetailedReportView({
                   )}
                 </div>
 
-                {/* Placeholder for detailed content */}
-                <div className="bg-gray-50 dark:bg-zinc-900/50 rounded-lg p-8 text-center border-2 border-dashed border-gray-300 dark:border-zinc-700">
-                  <Activity className="w-12 h-12 text-gray-400 dark:text-zinc-600 mx-auto mb-3" />
-                  <p className="text-gray-600 dark:text-zinc-400 font-medium mb-2">
-                    {t('reports.detailsPlaceholder.title', 'Detailed Metrics Coming Soon')}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-zinc-500">
-                    {t('reports.detailsPlaceholder.description', 'Charts, tables, and detailed analysis will be displayed here')}
-                  </p>
-                  <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500 dark:text-zinc-500">
-                    <span>• {reportData.nodes.length} nodes analyzed</span>
-                    <span>• {reportData.regionalDimension.regions.length} regions</span>
-                    <span>• {reportData.protocolDimension.protocols.length} protocols</span>
-                  </div>
-                </div>
+                {/* Time Dimension Analysis */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    {t('reports.timeDimension.title', 'Time Dimension Analysis')}
+                  </h3>
+                  <LazyChart height={300}>
+                    <TimeDimensionView data={reportData.timeDimension} loading={loading} />
+                  </LazyChart>
+                </section>
 
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Regional Distribution */}
-                  <div className="bg-white dark:bg-zinc-900/50 rounded-lg p-4 border border-gray-200 dark:border-zinc-800">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-3">
-                      {t('reports.quickStats.regions', 'Top Regions')}
-                    </h4>
-                    <div className="space-y-2">
-                      {reportData.regionalDimension.distribution.slice(0, 3).map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-zinc-400">{item.region}</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {item.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Regional Dimension Analysis */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    {t('reports.regionalDimension.title', 'Regional Dimension Analysis')}
+                  </h3>
+                  <LazyChart height={300}>
+                    <RegionalDimensionView data={reportData.regionalDimension} loading={loading} />
+                  </LazyChart>
+                </section>
 
-                  {/* Protocol Distribution */}
-                  <div className="bg-white dark:bg-zinc-900/50 rounded-lg p-4 border border-gray-200 dark:border-zinc-800">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-3">
-                      {t('reports.quickStats.protocols', 'Protocols')}
-                    </h4>
-                    <div className="space-y-2">
-                      {reportData.protocolDimension.distribution.slice(0, 3).map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-zinc-400 uppercase">{item.protocol}</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {item.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Protocol Dimension Analysis */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    {t('reports.protocolDimension.title', 'Protocol Dimension Analysis')}
+                  </h3>
+                  <LazyChart height={300}>
+                    <ProtocolDimensionView data={reportData.protocolDimension} loading={loading} />
+                  </LazyChart>
+                </section>
 
-                  {/* Health Distribution */}
-                  <div className="bg-white dark:bg-zinc-900/50 rounded-lg p-4 border border-gray-200 dark:border-zinc-800">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-3">
-                      {t('reports.quickStats.health', 'Node Health')}
-                    </h4>
-                    <div className="space-y-2">
-                      {['excellent', 'good', 'fair', 'offline'].map(status => {
-                        const count = reportData.nodes.filter(n => n.healthStatus === status).length;
-                        if (count === 0) return null;
-                        return (
-                          <div key={status} className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-zinc-400 capitalize">{status}</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">{count}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                {/* Node Details */}
+                <section>
+                  <NodeDetailsTable nodes={reportData.nodes} loading={loading} />
+                </section>
               </div>
             </motion.div>
           )}

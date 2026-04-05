@@ -4,10 +4,11 @@
  * Tests for the tab state management system in SettingsPanel
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../../i18n/config';
+import { ThemeProvider } from '../../../contexts/ThemeContext';
 import SettingsPanel from '../../SettingsPanel';
 
 // Mock fetch for API calls
@@ -35,12 +36,14 @@ describe('Tab State Management', () => {
   const renderSettingsPanel = (props = {}) => {
     return render(
       <I18nextProvider i18n={i18n}>
-        <SettingsPanel
-          isOpen={true}
-          onClose={vi.fn()}
-          onSuccess={vi.fn()}
-          {...props}
-        />
+        <ThemeProvider>
+          <SettingsPanel
+            isOpen={true}
+            onClose={vi.fn()}
+            onSuccess={vi.fn()}
+            {...props}
+          />
+        </ThemeProvider>
       </I18nextProvider>
     );
   };

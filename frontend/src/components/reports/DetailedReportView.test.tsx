@@ -44,8 +44,44 @@ describe('DetailedReportView', () => {
       timeDimension: {
         hourlyTrend: [],
         dailyTrend: [],
-        peakPeriods: {},
-        timeSegments: {}
+        peakPeriods: {
+          highestLatencyPeriod: {
+            startHour: 8,
+            endHour: 10,
+            avgLatency: 150
+          },
+          lowestLatencyPeriod: {
+            startHour: 2,
+            endHour: 4,
+            avgLatency: 80
+          }
+        },
+        timeSegments: {
+          morning: {
+            avgLatency: 120,
+            p95Latency: 180,
+            availabilityRate: 95,
+            checkCount: 1000
+          },
+          afternoon: {
+            avgLatency: 130,
+            p95Latency: 190,
+            availabilityRate: 94,
+            checkCount: 1000
+          },
+          evening: {
+            avgLatency: 140,
+            p95Latency: 200,
+            availabilityRate: 93,
+            checkCount: 1000
+          },
+          night: {
+            avgLatency: 100,
+            p95Latency: 160,
+            availabilityRate: 96,
+            checkCount: 1000
+          }
+        }
       },
       regionalDimension: {
         regions: [
