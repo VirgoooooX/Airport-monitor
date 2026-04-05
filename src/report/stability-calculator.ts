@@ -1,5 +1,6 @@
 import { DatabaseManager } from '../storage/database.js';
 import { StabilityScore } from '../types/index.js';
+import { calculateMaxConsecutiveFailures } from './calculators/failure-tracker.js';
 
 /**
  * StabilityCalculator
@@ -159,18 +160,8 @@ export class StabilityCalculator {
       return 0;
     }
 
-    // Find maximum consecutive failure count
-    let maxConsecutiveFailures = 0;
-    let currentConsecutiveFailures = 0;
-
-    for (const result of history) {
-      if (!result.available) {
-        currentConsecutiveFailures++;
-        maxConsecutiveFailures = Math.max(maxConsecutiveFailures, currentConsecutiveFailures);
-      } else {
-        currentConsecutiveFailures = 0;
-      }
-    }
+    // Use the failure tracker to calculate max consecutive failures
+    const maxConsecutiveFailures = calculateMaxConsecutiveFailures(history);
 
     // Calculate penalty based on max consecutive failures
     // 0 failures = 0 penalty

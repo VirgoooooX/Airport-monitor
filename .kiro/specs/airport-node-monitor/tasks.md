@@ -8,7 +8,7 @@ This implementation plan converts the feature design into actionable coding task
 
 ### Phase 1: Core Enhancements (High Priority)
 
-- [~] 1. Extend data models and database schema for multi-dimensional checks
+- [ ] 1. Extend data models and database schema for multi-dimensional checks
   - [x] 1.1 Add new TypeScript interfaces for enhanced checking
     - Create `CheckDimensionResult` interface in `src/types/models.ts`
     - Create `EnhancedCheckResult` interface extending `CheckResult`
@@ -105,7 +105,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test alert history storage
     - _Requirements: 7.7_
 
-- [~] 7. Implement AlertManager core logic
+- [ ] 7. Implement AlertManager core logic
   - [x] 7.1 Create AlertManager class
     - Create `src/alert/alert-manager.ts`
     - Implement rule registration: `addRule()`, `removeRule()`
@@ -132,7 +132,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test alert generation
     - _Requirements: 7.1, 7.2, 7.4, 7.5_
 
-- [~] 8. Integrate AlertManager into monitoring flow
+- [ ] 8. Integrate AlertManager into monitoring flow
   - [x] 8.1 Wire AlertManager into MonitorController
     - Initialize AlertManager in `src/controller/monitor-controller.ts`
     - Call `evaluateRules()` after each check cycle
@@ -149,7 +149,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test alert cooldown behavior
     - _Requirements: 7.1, 7.5_
 
-- [~] 9. Add alert API endpoints
+- [ ] 9. Add alert API endpoints
   - [x] 9.1 Implement alert REST API
     - Add `GET /api/alerts` endpoint in `src/api/server.ts`
     - Add `GET /api/alerts/:id` endpoint
@@ -166,7 +166,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test alert rule CRUD operations
     - _Requirements: 13.10, 13.11_
 
-- [~] 10. Implement frontend alert center UI
+- [ ] 10. Implement frontend alert center UI
   - [x] 10.1 Create AlertCenter component
     - Create `frontend/src/components/AlertCenter.tsx`
     - Display alert icon with unacknowledged count badge
@@ -193,7 +193,7 @@ This implementation plan converts the feature design into actionable coding task
 
 ### Phase 2: Subscription Enhancements (Medium Priority)
 
-- [~] 12. Implement Clash subscription format parser
+- [ ] 12. Implement Clash subscription format parser
   - [x] 12.1 Create subscription format parser interfaces
     - Create `src/parser/formats/` directory
     - Define `SubscriptionFormatParser` interface
@@ -213,7 +213,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test error handling for invalid YAML
     - _Requirements: 1.3, 14.2_
 
-- [~] 13. Implement additional protocol parsers
+- [ ] 13. Implement additional protocol parsers
   - [x] 13.1 Create protocol parser interfaces
     - Create `src/parser/protocols/` directory
     - Define `ProtocolParser` interface
@@ -248,7 +248,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test error handling for malformed URIs
     - _Requirements: 1.4, 14.2_
 
-- [~] 14. Refactor SubscriptionParser to support multiple formats
+- [ ] 14. Refactor SubscriptionParser to support multiple formats
   - [x] 14.1 Update EnhancedSubscriptionParser
     - Refactor `src/parser/subscription-parser.ts`
     - Initialize format parser array (Base64, Clash)
@@ -268,7 +268,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test mixed protocol support
     - _Requirements: 1.2, 1.3, 1.4_
 
-- [~] 15. Implement subscription auto-update scheduler
+- [ ] 15. Implement subscription auto-update scheduler
   - [x] 15.1 Add subscription update data models
     - Add `SubscriptionUpdateConfig` interface to `src/types/models.ts`
     - Add `SubscriptionUpdate` interface for update history
@@ -303,7 +303,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test update history recording
     - _Requirements: 2.2, 2.3, 2.4, 2.5_
 
-- [~] 16. Integrate subscription update scheduler
+- [ ] 16. Integrate subscription update scheduler
   - [x] 16.1 Wire scheduler into MonitorController
     - Initialize SubscriptionUpdateScheduler in `src/controller/monitor-controller.ts`
     - Start scheduler when monitoring starts
@@ -330,7 +330,7 @@ This implementation plan converts the feature design into actionable coding task
 
 ### Phase 3: Statistics and Export (Medium Priority)
 
-- [~] 18. Add node metadata support
+- [ ] 18. Add node metadata support
   - [x] 18.1 Add metadata data models
     - Add `NodeMetadata` interface to `src/types/models.ts`
     - Include region, country, city, protocolType fields
@@ -352,7 +352,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test country detection
     - _Requirements: 5.3_
 
-- [~] 19. Implement regional and protocol statistics
+- [ ] 19. Implement regional and protocol statistics
   - [x] 19.1 Add statistics interfaces
     - Add `RegionalStatistics` interface to `src/types/models.ts`
     - Add `ProtocolStatistics` interface
@@ -376,7 +376,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test protocol grouping and aggregation
     - _Requirements: 6.6, 6.7_
 
-- [~] 20. Implement stability score calculation
+- [ ] 20. Implement stability score calculation
   - [x] 20.1 Add stability score data models
     - Add `StabilityScore` interface to `src/types/models.ts`
     - _Requirements: 6.5_
@@ -399,7 +399,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test edge cases (all success, all failure)
     - _Requirements: 6.5_
 
-- [~] 21. Add statistics and export API endpoints
+- [ ] 21. Add statistics and export API endpoints
   - [x] 21.1 Implement statistics API endpoints
     - Add `GET /api/reports/by-region` endpoint in `src/api/server.ts`
     - Add `GET /api/reports/by-protocol` endpoint
@@ -422,7 +422,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test JSON export
     - _Requirements: 13.6, 13.12_
 
-- [~] 22. Implement frontend statistics visualization
+- [ ] 22. Implement frontend statistics visualization
   - [x] 22.1 Create NodeFilter component
     - Create `frontend/src/components/NodeFilter.tsx`
     - Add region dropdown filter
@@ -470,7 +470,7 @@ This implementation plan converts the feature design into actionable coding task
 
 ### Phase 4: Deployment Optimization (Low Priority)
 
-- [~] 24. Implement bandwidth check strategy (optional)
+- [ ] 24. Implement bandwidth check strategy (optional)
   - [x] 24.1 Implement BandwidthCheckStrategy
     - Create `BandwidthCheckStrategy` class in `src/checker/strategies/bandwidth-check.ts`
     - Download test file through proxy
@@ -494,7 +494,7 @@ This implementation plan converts the feature design into actionable coding task
     - Test timeout handling
     - _Requirements: 3.5_
 
-- [~] 25. Enhance Docker deployment configuration
+- [ ] 25. Enhance Docker deployment configuration
   - [x] 25.1 Create multi-stage Dockerfile
     - Create `Dockerfile` in project root
     - Stage 1: Build frontend (Node.js Alpine)
@@ -523,7 +523,7 @@ This implementation plan converts the feature design into actionable coding task
     - Exclude test files and development configs
     - _Requirements: 12.1_
 
-- [~] 26. Add configuration management enhancements
+- [ ] 26. Add configuration management enhancements
   - [x] 26.1 Implement check config API endpoints
     - Add `GET /api/config/check` endpoint in `src/api/server.ts`
     - Add `PUT /api/config/check` endpoint
@@ -544,7 +544,7 @@ This implementation plan converts the feature design into actionable coding task
     - Update config on save
     - _Requirements: 8.6, 11.6_
 
-- [~] 27. Enhance error handling and logging
+- [ ] 27. Enhance error handling and logging
   - [x] 27.1 Improve subscription error handling
     - Add try-catch blocks in subscription parsing
     - Return detailed error messages

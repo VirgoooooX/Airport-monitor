@@ -258,6 +258,11 @@ export class DatabaseManager implements DataStorage {
    * Save database to file
    */
   save(): void {
+    // Skip saving for in-memory databases
+    if (this.dbPath === ':memory:') {
+      return;
+    }
+    
     try {
       const data = this.db.export();
       fs.writeFileSync(this.dbPath, data);

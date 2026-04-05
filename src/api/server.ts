@@ -6,6 +6,7 @@ import { DatabaseManager } from '../storage/database.js';
 import { MonitorController } from '../controller/monitor-controller.js';
 import { ReportGeneratorImpl } from '../report/report-generator.js';
 import { DefaultConfigurationManager } from '../config/configuration-manager.js';
+import { createReportRoutes } from './routes/reports.js';
 
 export function startApiServer(
   port: number,
@@ -908,6 +909,11 @@ export function startApiServer(
       res.status(500).json({ error: err.message });
     }
   });
+
+  // ========== DETAILED REPORT API ==========
+  
+  // Mount detailed report routes
+  app.use('/api/reports', createReportRoutes(db));
 
   // 5. Serve frontend static files
   // Use process.cwd() for compatibility with test environment
