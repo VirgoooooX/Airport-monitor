@@ -1,93 +1,20 @@
 import { NodeMetadata, Node } from '../types/index.js';
-
-/**
+import { RegionExtractor } from '../report/extractors/region-extractor.js';/**
  * Metadata Extractor
  * Extracts region, country, and city information from node names and configurations
  */
 export class MetadataExtractor {
-  // Region mapping based on country
-  private static readonly REGION_MAP: Record<string, string> = {
-    // Asia
-    'hong kong': 'asia',
-    'hk': 'asia',
-    'singapore': 'asia',
-    'sg': 'asia',
-    'japan': 'asia',
-    'jp': 'asia',
-    'korea': 'asia',
-    'kr': 'asia',
-    'taiwan': 'asia',
-    'tw': 'asia',
-    'china': 'asia',
-    'cn': 'asia',
-    'india': 'asia',
-    'in': 'asia',
-    'thailand': 'asia',
-    'th': 'asia',
-    'vietnam': 'asia',
-    'vn': 'asia',
-    'malaysia': 'asia',
-    'my': 'asia',
-    'philippines': 'asia',
-    'ph': 'asia',
-    'indonesia': 'asia',
-    'id': 'asia',
-    
-    // Europe
-    'united kingdom': 'europe',
-    'uk': 'europe',
-    'germany': 'europe',
-    'de': 'europe',
-    'france': 'europe',
-    'fr': 'europe',
-    'netherlands': 'europe',
-    'nl': 'europe',
-    'russia': 'europe',
-    'ru': 'europe',
-    'italy': 'europe',
-    'it': 'europe',
-    'spain': 'europe',
-    'es': 'europe',
-    'poland': 'europe',
-    'pl': 'europe',
-    'sweden': 'europe',
-    'se': 'europe',
-    'switzerland': 'europe',
-    'ch': 'europe',
-    'turkey': 'europe',
-    'tr': 'europe',
-    
-    // North America
-    'united states': 'north_america',
-    'us': 'north_america',
-    'usa': 'north_america',
-    'canada': 'north_america',
-    'ca': 'north_america',
-    'mexico': 'north_america',
-    'mx': 'north_america',
-    
-    // South America
-    'brazil': 'south_america',
-    'br': 'south_america',
-    'argentina': 'south_america',
-    'ar': 'south_america',
-    'chile': 'south_america',
-    'cl': 'south_america',
-    
-    // Oceania
-    'australia': 'oceania',
-    'au': 'oceania',
-    'new zealand': 'oceania',
-    'nz': 'oceania',
-    
-    // Africa
-    'south africa': 'africa',
-    'za': 'africa',
-    'egypt': 'africa',
-    'eg': 'africa',
-    'nigeria': 'africa',
-    'ng': 'africa'
-  };
+  private static readonly regionExtractor = new RegionExtractor();
+
+  // Full country names for matching (derived from original REGION_MAP keys length > 2)
+  private static readonly FULL_COUNTRY_NAMES: string[] = [
+    'hong kong', 'singapore', 'japan', 'korea', 'taiwan', 'china', 'india', 
+    'thailand', 'vietnam', 'malaysia', 'philippines', 'indonesia', 'united kingdom', 
+    'germany', 'france', 'netherlands', 'russia', 'italy', 'spain', 'poland', 
+    'sweden', 'switzerland', 'turkey', 'united states', 'usa', 'canada', 'mexico', 
+    'brazil', 'argentina', 'chile', 'australia', 'new zealand', 'south africa', 
+    'egypt', 'nigeria'
+  ];
 
   // Country name normalization (abbreviation to full name)
   private static readonly COUNTRY_NAMES: Record<string, string> = {
@@ -194,8 +121,16 @@ export class MetadataExtractor {
     const country = this.extractCountry(nameLower);
     if (country) {
       metadata.country = country;
-      metadata.region = this.getRegionForCountry(country);
     }
+
+    metadata.region = this.regionExtractor.extractRegion({
+      id: node.id,
+      name: node.name,
+      protocol: node.protocol,
+      address: node.address,
+      port: node.port,
+      metadata: metadata
+    });
 
     // Try to extract city
     const city = this.extractCity(nameLower);
@@ -220,15 +155,13 @@ export class MetadataExtractor {
     }
 
     // Check for full country names
-    for (const [key, region] of Object.entries(this.REGION_MAP)) {
-      if (key.length > 2) { // Skip abbreviations
-        const pattern = new RegExp(`\\b${key}\\b`, 'i');
-        if (pattern.test(nameLower)) {
-          // Capitalize first letter of each word
-          return key.split(' ').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1)
-          ).join(' ');
-        }
+    for (const name of this.FULL_COUNTRY_NAMES) {
+      const pattern = new RegExp(`\\b${name}\\b`, 'i');
+      if (pattern.test(nameLower)) {
+        // Capitalize first letter of each word
+        return name.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
       }
     }
 
@@ -249,11 +182,4 @@ export class MetadataExtractor {
     return undefined;
   }
 
-  /**
-   * Get region for a country
-   */
-  private static getRegionForCountry(country: string): string | undefined {
-    const countryLower = country.toLowerCase();
-    return this.REGION_MAP[countryLower];
-  }
 }
