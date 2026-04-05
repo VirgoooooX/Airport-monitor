@@ -3,8 +3,28 @@
 @tailwind utilities;
 
 @layer base {
+  /* Smooth theme transition for all elements */
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+
+  /* Respect user's motion preferences for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
   body {
-    @apply bg-background text-zinc-100 antialiased min-h-screen selection:bg-indigo-500/30;
+    @apply bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 antialiased min-h-screen selection:bg-indigo-500/30;
     /* subtle noise overlay for extreme premium feel */
     background-image: radial-gradient(circle at 50% 0%, rgba(79, 70, 229, 0.15) 0%, transparent 70%),
                       radial-gradient(circle at 80% 80%, rgba(225, 29, 72, 0.05) 0%, transparent 50%);
@@ -14,10 +34,57 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-surface border border-border backdrop-blur-xl rounded-2xl shadow-2xl;
+    @apply bg-white dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800/50 backdrop-blur-xl rounded-2xl shadow-2xl;
   }
   
   .glass-card {
-    @apply bg-surface hover:bg-white/5 border border-border hover:border-white/20 backdrop-blur-md rounded-xl transition-all duration-300;
+    @apply bg-white dark:bg-zinc-900/50 hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-200 dark:border-zinc-800/50 hover:border-gray-300 dark:hover:border-white/20 backdrop-blur-md rounded-xl transition-all duration-300;
+  }
+
+  /* Custom scrollbar styles for better UX */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(113, 113, 122, 0.5) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-zinc-600;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-zinc-500;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  /* Enhanced focus indicators for accessibility */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900;
+  }
+
+  /* Ensure minimum touch target size for mobile (44x44px) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 }

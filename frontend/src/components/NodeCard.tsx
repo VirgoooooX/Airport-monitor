@@ -53,10 +53,10 @@ export default function NodeCard({ node, onClick, index }: NodeCardProps) {
       </div>
       
       <div className="relative z-10 flex-1 min-w-0">
-        <h4 className="text-white font-medium truncate mb-1">{node.name}</h4>
-        <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-          <span className="uppercase px-1.5 py-0.5 bg-white/10 rounded">{node.protocol}</span>
-          <span className="truncate">{node.address}:{node.port}</span>
+        <h4 className="text-gray-900 dark:text-white font-medium truncate mb-1 min-w-[120px]" title={node.name}>{node.name}</h4>
+        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-zinc-400 font-mono min-w-[150px]">
+          <span className="uppercase px-1.5 py-0.5 bg-gray-900/10 dark:bg-white/10 rounded flex-shrink-0">{node.protocol}</span>
+          <span className="truncate" title={`${node.address}:${node.port}`}>{node.address}:{node.port}</span>
         </div>
       </div>
       

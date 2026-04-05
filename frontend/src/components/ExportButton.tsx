@@ -15,6 +15,7 @@
 import { useState } from 'react';
 import { Download, FileText, FileJson } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface ExportButtonProps {
   startTime?: Date;
@@ -22,6 +23,7 @@ interface ExportButtonProps {
 }
 
 export default function ExportButton({ startTime, endTime }: ExportButtonProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -60,7 +62,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
 
       setIsOpen(false);
     } catch (err: any) {
-      alert('Export failed: ' + err.message);
+      alert(t('export.errors.failed', { message: err.message }));
     } finally {
       setExporting(false);
     }
@@ -74,7 +76,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
         className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-500/50 text-white font-medium rounded-lg transition-colors"
       >
         <Download className="w-4 h-4" />
-        Export Data
+        {t('export.button')}
       </button>
 
       <AnimatePresence>
@@ -87,14 +89,14 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
             className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden z-50"
           >
             <div className="p-3 border-b border-zinc-800">
-              <h3 className="text-sm font-semibold text-white">Export Options</h3>
-              <p className="text-xs text-zinc-400 mt-1">Choose data type and format</p>
+              <h3 className="text-sm font-semibold text-white">{t('export.title')}</h3>
+              <p className="text-xs text-zinc-400 mt-1">{t('export.subtitle')}</p>
             </div>
 
             <div className="p-2">
               {/* Report Export */}
               <div className="mb-3">
-                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-2">Report Data</p>
+                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-2">{t('export.reportData')}</p>
                 <div className="space-y-1">
                   <button
                     onClick={() => handleExport('report', 'csv')}
@@ -102,7 +104,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
                   >
                     <FileText className="w-4 h-4 text-emerald-400" />
-                    <span>Export as CSV</span>
+                    <span>{t('export.formats.csv')}</span>
                   </button>
                   <button
                     onClick={() => handleExport('report', 'json')}
@@ -110,14 +112,14 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
                   >
                     <FileJson className="w-4 h-4 text-blue-400" />
-                    <span>Export as JSON</span>
+                    <span>{t('export.formats.json')}</span>
                   </button>
                 </div>
               </div>
 
               {/* History Export */}
               <div>
-                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-2">Historical Data</p>
+                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-2">{t('export.historicalData')}</p>
                 <div className="space-y-1">
                   <button
                     onClick={() => handleExport('history', 'csv')}
@@ -125,7 +127,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
                   >
                     <FileText className="w-4 h-4 text-emerald-400" />
-                    <span>Export as CSV</span>
+                    <span>{t('export.formats.csv')}</span>
                   </button>
                   <button
                     onClick={() => handleExport('history', 'json')}
@@ -133,7 +135,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
                   >
                     <FileJson className="w-4 h-4 text-blue-400" />
-                    <span>Export as JSON</span>
+                    <span>{t('export.formats.json')}</span>
                   </button>
                 </div>
               </div>
@@ -143,7 +145,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
               <div className="p-3 border-t border-zinc-800 bg-zinc-900/50">
                 <div className="flex items-center gap-2 text-xs text-zinc-400">
                   <div className="w-3 h-3 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-                  <span>Exporting...</span>
+                  <span>{t('export.exporting')}</span>
                 </div>
               </div>
             )}

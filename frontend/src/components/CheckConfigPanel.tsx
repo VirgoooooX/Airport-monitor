@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface CheckConfig {
   tcpTimeout: number;
@@ -16,9 +17,20 @@ interface CheckConfigPanelProps {
   onSuccess?: () => void;
   onError?: (message: string) => void;
   onSuccessMessage?: (message: string) => void;
+  savedData?: CheckConfig;
+  onDataChange?: (data: CheckConfig) => void;
+  onMarkChanged?: (hasChanges: boolean) => void;
 }
 
-export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage }: CheckConfigPanelProps) {
+export default function CheckConfigPanel({ 
+  onSuccess, 
+  onError, 
+  onSuccessMessage,
+  savedData,
+  onDataChange,
+  onMarkChanged
+}: CheckConfigPanelProps) {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<CheckConfig>({
     tcpTimeout: 30,
     httpTimeout: 30,
@@ -29,6 +41,7 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
     bandwidthTestSize: 1024
   });
   
+  const [initialConfig, setInitialConfig] = useState<CheckConfig>(config);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -37,14 +50,35 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
     fetchCheckConfig();
   }, []);
 
+  // Restore saved data when component mounts
+  useEffect(() => {
+    if (savedData) {
+      setConfig(savedData);
+    }
+  }, [savedData]);
+
+  // Track changes and save data
+  useEffect(() => {
+    const hasChanges = JSON.stringify(config) !== JSON.stringify(initialConfig);
+    
+    if (onDataChange) {
+      onDataChange(config);
+    }
+    
+    if (onMarkChanged) {
+      onMarkChanged(hasChanges);
+    }
+  }, [config, initialConfig, onDataChange, onMarkChanged]);
+
   const fetchCheckConfig = async () => {
     try {
       const response = await fetch('/api/config/check');
       if (!response.ok) {
-        throw new Error('Failed to fetch check configuration');
+        throw new Error(t('settings.errors.fetchFailed'));
       }
       const data = await response.json();
       setConfig(data);
+      setInitialConfig(data);
     } catch (err: any) {
       setError(err.message);
     }
@@ -64,14 +98,18 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update check configuration');
+        throw new Error(errorData.error || t('settings.errors.updateFailed'));
       }
       
-      setSuccessMsg('Check configuration saved successfully.');
-      if (onSuccessMessage) onSuccessMessage('Check configuration saved successfully');
+      setSuccessMsg(t('settings.success.checkConfigSaved'));
+      if (onSuccessMessage) onSuccessMessage(t('settings.success.checkConfigSaved'));
+      
+      // Update initial config after successful save
+      setInitialConfig(config);
+      
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      const errorMsg = err.message || 'Failed to save check configuration';
+      const errorMsg = err.message || t('settings.errors.saveFailed');
       setError(errorMsg);
       if (onError) onError(errorMsg);
     } finally {
@@ -90,11 +128,11 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
       className="space-y-4"
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-zinc-800 rounded-xl">
-          <Settings className="w-5 h-5 text-zinc-300" />
+        <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-xl">
+          <Settings className="w-5 h-5 text-gray-700 dark:text-zinc-300" />
         </div>
-        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
-          Check Configuration
+        <h3 className="text-sm font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">
+          {t('settings.checkConfig.title')}
         </h3>
       </div>
 
@@ -112,73 +150,73 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-zinc-500 mb-1">TCP Timeout (s)</label>
+          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.tcpTimeout')}</label>
           <input 
             type="number" 
             min="1"
             max="30"
             value={config.tcpTimeout}
             onChange={e => updateConfig('tcpTimeout', Number(e.target.value))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
         
         <div>
-          <label className="block text-sm text-zinc-500 mb-1">HTTP Timeout (s)</label>
+          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.httpTimeout')}</label>
           <input 
             type="number" 
             min="1"
             max="60"
             value={config.httpTimeout}
             onChange={e => updateConfig('httpTimeout', Number(e.target.value))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
         
         <div>
-          <label className="block text-sm text-zinc-500 mb-1">Latency Timeout (s)</label>
+          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.latencyTimeout')}</label>
           <input 
             type="number" 
             min="1"
             max="30"
             value={config.latencyTimeout}
             onChange={e => updateConfig('latencyTimeout', Number(e.target.value))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
         
         <div>
-          <label className="block text-sm text-zinc-500 mb-1">Bandwidth Timeout (s)</label>
+          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.bandwidthTimeout')}</label>
           <input 
             type="number" 
             min="10"
             max="300"
             value={config.bandwidthTimeout}
             onChange={e => updateConfig('bandwidthTimeout', Number(e.target.value))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm text-zinc-500 mb-1">HTTP Test URL</label>
+        <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.httpTestUrl')}</label>
         <input 
           type="url" 
           value={config.httpTestUrl}
           onChange={e => updateConfig('httpTestUrl', e.target.value)}
-          className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+          className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-zinc-500 mb-1">Bandwidth Test Size (KB)</label>
+          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.bandwidthTestSize')}</label>
           <input 
             type="number" 
             min="1"
             value={config.bandwidthTestSize}
             onChange={e => updateConfig('bandwidthTestSize', Number(e.target.value))}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
         
@@ -188,9 +226,9 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
               type="checkbox" 
               checked={config.bandwidthEnabled}
               onChange={e => updateConfig('bandwidthEnabled', e.target.checked)}
-              className="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+              className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
             />
-            <span className="text-sm text-zinc-400">Enable Bandwidth Check</span>
+            <span className="text-sm text-gray-600 dark:text-zinc-400">{t('settings.checkConfig.bandwidthEnabled')}</span>
           </label>
         </div>
       </div>
@@ -198,9 +236,9 @@ export default function CheckConfigPanel({ onSuccess, onError, onSuccessMessage 
       <button 
         onClick={handleSave}
         disabled={loading}
-        className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+        className="w-full py-2.5 bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 text-gray-900 dark:text-white rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
-        <Save size={16} /> Save Check Configuration
+        <Save size={16} /> {t('settings.checkConfig.saveButton')}
       </button>
     </motion.div>
   );

@@ -1,0 +1,299 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "close": "Close",
+      "confirm": "Confirm",
+      "retry": "Retry",
+      "acknowledge": "Acknowledge",
+      "update": "Update",
+      "create": "Create",
+      "import": "Import"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "loading": "Loading",
+      "error": "Error",
+      "success": "Success",
+      "active": "Active",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "acknowledged": "Acknowledged",
+      "failed": "Failed",
+      "timeout": "Timeout"
+    },
+    "duration": {
+      "seconds": "{{count}}s",
+      "minutes": "{{count}}m",
+      "hours": "{{count}}h",
+      "days": "{{count}}d",
+      "justNow": "Just now",
+      "ago": "{{time}} ago"
+    },
+    "units": {
+      "milliseconds": "ms",
+      "seconds": "s",
+      "minutes": "minutes",
+      "kilobytes": "KB",
+      "nodes": "nodes",
+      "pings": "Pings"
+    }
+  },
+  "dashboard": {
+    "title": "Airport Node Monitor",
+    "subtitle": "Live Metrics & Observability",
+    "loading": "CONNECTING TO ENGINE...",
+    "noAirports": "No airports configured in the monitoring engine.",
+    "noMatchingNodes": "No nodes match the current filters.",
+    "metrics": {
+      "engine": "Monitor Engine",
+      "online": "Online",
+      "offline": "Offline",
+      "nodes": "Monitored Nodes",
+      "dispatch": "Total Dispatch",
+      "active": "Active",
+      "pings": "Pings"
+    },
+    "actions": {
+      "startEngine": "START ENGINE",
+      "stopEngine": "STOP ENGINE",
+      "deleteAirport": "Delete Airport",
+      "showStats": "Show Statistics",
+      "hideStats": "Hide Statistics"
+    },
+    "airport": {
+      "totalNodes": "Total Nodes",
+      "primaryProtocol": "Primary Protocol",
+      "estimatedHealth": "Estimated Health",
+      "systemManaged": "System Managed",
+      "deleteConfirm": "Are you absolutely sure you want to delete airport \"{{name}}\" and permanently erase all its testing logs?"
+    }
+  },
+  "nodes": {
+    "card": {
+      "protocol": "Protocol",
+      "address": "Address",
+      "port": "Port",
+      "stabilityScore": "Stability Score"
+    },
+    "detail": {
+      "title": "Node Details",
+      "configuration": "Node Configuration",
+      "trendTitle": "24H Response Time Trend",
+      "logsTitle": "Recent Check Logs (max 50)",
+      "noTrendData": "No trend data available",
+      "noLogs": "No historical check data gathered yet.",
+      "integrated": "Node is integrated and active.",
+      "table": {
+        "timestamp": "Timestamp",
+        "status": "Status",
+        "latency": "Latency"
+      }
+    }
+  },
+  "settings": {
+    "title": "System Settings",
+    "tabs": {
+      "general": "General",
+      "subscription": "Subscription",
+      "checkConfig": "Check Config",
+      "alertRules": "Alert Rules",
+      "appearance": "Appearance"
+    },
+    "engineParameters": {
+      "title": "Engine Parameters",
+      "checkInterval": "Check Interval (s)",
+      "checkTimeout": "Check Timeout (s)",
+      "saveButton": "Save Parameters"
+    },
+    "alertManagement": {
+      "title": "Alert Management",
+      "description": "Configure alert rules to monitor node availability and performance.",
+      "configureButton": "Configure Alert Rules"
+    },
+    "checkConfig": {
+      "title": "Check Configuration",
+      "tcpTimeout": "TCP Timeout (s)",
+      "httpTimeout": "HTTP Timeout (s)",
+      "httpTestUrl": "HTTP Test URL",
+      "latencyTimeout": "Latency Timeout (s)",
+      "bandwidthTimeout": "Bandwidth Timeout (s)",
+      "bandwidthTestSize": "Bandwidth Test Size (KB)",
+      "bandwidthEnabled": "Enable Bandwidth Check",
+      "saveButton": "Save Check Configuration"
+    },
+    "subscription": {
+      "title": "Add Airport Nodes",
+      "airportName": "Airport Name",
+      "airportNamePlaceholder": "e.g. Premium Proxy v2",
+      "modes": {
+        "url": "URL",
+        "raw": "RAW TEXT",
+        "file": "FILE"
+      },
+      "urlLabel": "Subscription URL (Clash/Base64/v2ray)",
+      "urlPlaceholder": "https://...",
+      "rawLabel": "Paste Raw Subscription Config (Base64 / Yaml)",
+      "rawPlaceholder": "Paste your base64 encoded string or YAML configuration here...",
+      "fileLabel": "Select File (.yaml, .txt)",
+      "importButton": "Import Subscription"
+    },
+    "errors": {
+      "airportNameRequired": "Please provide Airport Name.",
+      "urlRequired": "Please provide Subscription URL.",
+      "rawRequired": "Please provide Raw Subscription Text.",
+      "fileRequired": "Please select a configuration file.",
+      "fetchFailed": "Failed to fetch configuration",
+      "updateFailed": "Failed to update check configuration",
+      "saveFailed": "Failed to save check configuration"
+    },
+    "success": {
+      "configSaved": "Config saved successfully.",
+      "checkConfigSaved": "Check configuration saved successfully.",
+      "imported": "Successfully imported {{name}}."
+    }
+  },
+  "alerts": {
+    "title": "Alerts",
+    "unacknowledged": "{{count}} unacknowledged",
+    "noAlerts": "No alerts",
+    "severity": {
+      "critical": "CRITICAL",
+      "error": "ERROR",
+      "warning": "WARNING"
+    },
+    "rules": {
+      "title": "Alert Rules",
+      "configured": "Configured Rules",
+      "noRules": "No alert rules configured",
+      "createNew": "Create New Rule",
+      "editRule": "Edit Rule",
+      "ruleName": "Rule Name",
+      "ruleNamePlaceholder": "e.g. High Failure Alert",
+      "ruleType": "Rule Type",
+      "threshold": "Threshold",
+      "cooldown": "Cooldown (minutes)",
+      "enableRule": "Enable this rule",
+      "createButton": "Create Rule",
+      "updateButton": "Update Rule",
+      "deleteConfirm": "Delete alert rule \"{{name}}\"?",
+      "types": {
+        "nodeFailureRate": "Node Failure Rate",
+        "airportAvailability": "Airport Availability",
+        "consecutiveFailures": "Consecutive Failures"
+      },
+      "thresholdLabels": {
+        "failureRate": "Failure Rate (%)",
+        "minAvailability": "Min Availability (%)",
+        "failureCount": "Failure Count"
+      },
+      "info": {
+        "type": "Type",
+        "threshold": "Threshold",
+        "cooldown": "Cooldown"
+      }
+    },
+    "success": {
+      "ruleCreated": "Rule created successfully",
+      "ruleUpdated": "Rule updated successfully",
+      "ruleDeleted": "Rule deleted successfully"
+    },
+    "errors": {
+      "ruleNameRequired": "Rule name is required",
+      "fetchFailed": "Failed to fetch alert rules",
+      "createFailed": "Failed to create rule",
+      "updateFailed": "Failed to update rule",
+      "deleteFailed": "Failed to delete rule",
+      "acknowledgeFailed": "Failed to acknowledge alert"
+    }
+  },
+  "filter": {
+    "title": "Filter Nodes",
+    "region": "Region",
+    "protocol": "Protocol",
+    "search": "Search",
+    "allRegions": "All Regions",
+    "allProtocols": "All Protocols",
+    "searchPlaceholder": "Search by name or address..."
+  },
+  "stats": {
+    "title": "Statistics & Reports",
+    "regional": {
+      "title": "Regional Statistics",
+      "subtitle": "Node distribution and performance by region",
+      "availability": "Availability",
+      "avgLatency": "Avg Latency",
+      "topCountries": "Top Countries:",
+      "noData": "No regional data available",
+      "chartTypes": {
+        "bar": "Bar Chart",
+        "pie": "Pie Chart"
+      }
+    },
+    "protocol": {
+      "title": "Protocol Statistics",
+      "subtitle": "Node distribution and performance by protocol",
+      "availability": "Availability",
+      "avgLatency": "Avg Latency",
+      "noData": "No protocol data available",
+      "chartTypes": {
+        "bar": "Bar Chart",
+        "pie": "Pie Chart"
+      }
+    },
+    "chart": {
+      "availability": "Availability (%)",
+      "latency": "Latency (ms)"
+    }
+  },
+  "export": {
+    "button": "Export Data",
+    "title": "Export Options",
+    "subtitle": "Choose data type and format",
+    "reportData": "Report Data",
+    "historicalData": "Historical Data",
+    "formats": {
+      "csv": "Export as CSV",
+      "json": "Export as JSON"
+    },
+    "exporting": "Exporting...",
+    "errors": {
+      "failed": "Export failed: {{message}}"
+    }
+  },
+  "messages": {
+    "engineStarted": "Engine started successfully",
+    "engineStopped": "Engine stopped successfully",
+    "airportDeleted": "Airport \"{{name}}\" deleted successfully",
+    "errors": {
+      "engineToggleFailed": "Failed to toggle engine: {{message}}",
+      "airportDeleteFailed": "Failed to delete airport: {{message}}",
+      "engineUnreachable": "Engine Unreachable",
+      "retryConnection": "Retry Connection"
+    }
+  },
+  "appearance": {
+    "language": {
+      "title": "Language",
+      "description": "Select your preferred language for the interface",
+      "changeFailed": "Failed to change language. Please try again."
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "Select your preferred theme for the interface",
+      "dark": "Dark Mode",
+      "light": "Light Mode",
+      "comingSoon": "Theme customization coming soon"
+    }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred while rendering this component.",
+    "retry": "Try Again",
+    "details": "Error Details"
+  }
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, AlertTriangle, AlertCircle, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Alert {
   id: string;
@@ -14,6 +15,7 @@ interface Alert {
 }
 
 export default function AlertCenter() {
+  const { t } = useTranslation();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -86,10 +88,10 @@ export default function AlertCenter() {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    if (minutes > 0) return `${minutes}m ago`;
-    return 'Just now';
+    if (days > 0) return t('common.duration.ago', { time: t('common.duration.days', { count: days }) });
+    if (hours > 0) return t('common.duration.ago', { time: t('common.duration.hours', { count: hours }) });
+    if (minutes > 0) return t('common.duration.ago', { time: t('common.duration.minutes', { count: minutes }) });
+    return t('common.duration.justNow');
   };
 
   return (
@@ -97,7 +99,7 @@ export default function AlertCenter() {
       {/* Alert Icon with Badge */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-3 bg-surface border border-border rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+        className="p-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
       >
         <Bell size={20} />
         {unacknowledgedCount > 0 && (
@@ -127,16 +129,16 @@ export default function AlertCenter() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-96 max-h-[32rem] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50"
+              className="absolute right-0 top-full mt-2 w-96 max-h-[32rem] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50"
             >
               {/* Header */}
-              <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50">
-                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <Bell size={16} className="text-indigo-400" />
-                  Alerts
+                  {t('alerts.title')}
                   {unacknowledgedCount > 0 && (
-                    <span className="text-xs text-zinc-500">
-                      ({unacknowledgedCount} unacknowledged)
+                    <span className="text-xs text-gray-500 dark:text-zinc-500">
+                      ({t('alerts.unacknowledged', { count: unacknowledgedCount })})
                     </span>
                   )}
                 </h3>
@@ -145,18 +147,18 @@ export default function AlertCenter() {
               {/* Alert List */}
               <div className="overflow-y-auto max-h-[28rem] custom-scrollbar">
                 {alerts.length === 0 ? (
-                  <div className="p-8 text-center text-zinc-500">
+                  <div className="p-8 text-center text-gray-500 dark:text-zinc-500">
                     <Bell size={32} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">No alerts</p>
+                    <p className="text-sm">{t('alerts.noAlerts')}</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-zinc-800/50">
+                  <div className="divide-y divide-gray-200 dark:divide-zinc-800/50">
                     {alerts.map((alert) => (
                       <motion.div
                         key={alert.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className={`p-4 hover:bg-zinc-800/30 transition-colors ${
+                        className={`p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors ${
                           alert.acknowledged ? 'opacity-50' : ''
                         }`}
                       >
@@ -174,7 +176,7 @@ export default function AlertCenter() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-1">
                               <span
-                                className={`text-xs font-semibold uppercase tracking-wider ${
+                                className={`text-xs font-semibold uppercase tracking-wider flex-shrink-0 ${
                                   alert.severity === 'critical'
                                     ? 'text-rose-400'
                                     : alert.severity === 'error'
@@ -182,13 +184,13 @@ export default function AlertCenter() {
                                     : 'text-amber-400'
                                 }`}
                               >
-                                {alert.severity}
+                                {t(`alerts.severity.${alert.severity}`)}
                               </span>
-                              <span className="text-xs text-zinc-500">
+                              <span className="text-xs text-gray-500 dark:text-zinc-500 flex-shrink-0">
                                 {formatTimestamp(alert.timestamp)}
                               </span>
                             </div>
-                            <p className="text-sm text-zinc-300 mb-2 break-words">
+                            <p className="text-sm text-gray-700 dark:text-zinc-300 mb-2 break-words line-clamp-2" title={alert.message}>
                               {alert.message}
                             </p>
 
@@ -200,13 +202,13 @@ export default function AlertCenter() {
                                 className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
                               >
                                 <Check size={14} />
-                                Acknowledge
+                                {t('common.actions.acknowledge')}
                               </button>
                             )}
                             {alert.acknowledged && (
                               <span className="text-xs text-emerald-500 flex items-center gap-1">
                                 <Check size={14} />
-                                Acknowledged
+                                {t('common.status.acknowledged')}
                               </span>
                             )}
                           </div>

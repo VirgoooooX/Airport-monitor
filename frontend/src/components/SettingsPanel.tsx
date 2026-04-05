@@ -1,276 +1,206 @@
-import { useState, useEffect } from 'react';
+/**
+ * SettingsPanel Component - Redesigned with Tab Navigation
+ * 
+ * Features:
+ * - Tab-based navigation for organized settings
+ * - Framer Motion animations for smooth transitions
+ * - State preservation when switching tabs
+ * - Keyboard navigation support (Tab, ESC)
+ * - Responsive design for mobile and desktop
+ */
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, CloudDownload, Settings } from 'lucide-react';
-import { fetchConfig, updateConfig, importSubscription } from '../hooks/useControls.ts';
-import CheckConfigPanel from './CheckConfigPanel.tsx';
+import { X, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { 
+  TabNavigation, 
+  GeneralTab, 
+  SubscriptionTab, 
+  CheckConfigTab, 
+  AlertRulesTab, 
+  AppearanceTab,
+  type TabId,
+  type TabFormData,
+  createTabs
+} from './tabs';
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void; // Trigger refresh
-  onOpenAlertRules?: () => void; // Open alert rules panel
-  onError?: (message: string) => void; // Error callback for toast
-  onSuccessMessage?: (message: string) => void; // Success callback for toast
+  onSuccess: () => void;
+  onOpenAlertRules?: () => void;
+  onError?: (message: string) => void;
+  onSuccessMessage?: (message: string) => void;
 }
 
-export default function SettingsPanel({ isOpen, onClose, onSuccess, onOpenAlertRules, onError, onSuccessMessage }: SettingsPanelProps) {
-  const [interval, setIntervalVal] = useState(300);
-  const [timeout, setTimeoutVal] = useState(30);
+export default function SettingsPanel({ 
+  isOpen, 
+  onClose, 
+  onSuccess, 
+  onOpenAlertRules,
+  onError,
+  onSuccessMessage 
+}: SettingsPanelProps) {
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<TabId>('general');
+  const tabs = createTabs(t);
   
-  const [subUrl, setSubUrl] = useState('');
-  const [airportName, setAirportName] = useState('');
-  const [importMode, setImportMode] = useState<'url' | 'raw' | 'file'>('url');
-  const [rawText, setRawText] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // Map to store form data for each tab
+  const tabDataMap = useRef<Map<TabId, TabFormData>>(new Map());
   
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  // Track which tabs have unsaved changes
+  const [tabsWithChanges, setTabsWithChanges] = useState<Set<TabId>>(new Set());
 
+  // Keyboard navigation support
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // ESC key closes the panel
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Reset to general tab when panel opens
   useEffect(() => {
     if (isOpen) {
-      fetchConfig().then(cfg => {
-        setIntervalVal(cfg.checkInterval || 300);
-        setTimeoutVal(cfg.checkTimeout || 30);
-      }).catch(() => {});
+      setActiveTab('general');
     }
   }, [isOpen]);
 
-  const handleSaveConfig = async () => {
-    try {
-      setLoading(true);
-      setError(''); setSuccessMsg('');
-      await updateConfig({ checkInterval: interval, checkTimeout: timeout });
-      setSuccessMsg('Config saved successfully.');
-      onSuccess();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleImport = async () => {
-    if (!airportName) {
-      setError('Please provide Airport Name.');
-      return;
-    }
-    if (importMode === 'url' && !subUrl) {
-      setError('Please provide Subscription URL.');
-      return;
-    }
-    if (importMode === 'raw' && !rawText.trim()) {
-      setError('Please provide Raw Subscription Text.');
-      return;
-    }
-    if (importMode === 'file' && !selectedFile) {
-      setError('Please select a configuration file.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(''); setSuccessMsg('');
-
-      let payloadText = rawText;
-      if (importMode === 'file' && selectedFile) {
-        payloadText = await selectedFile.text();
+  const handleTabChange = useCallback((tabId: TabId) => {
+    setActiveTab(tabId);
+  }, []);
+  
+  // Save form data for a specific tab
+  const saveTabData = useCallback((tabId: TabId, data: TabFormData) => {
+    tabDataMap.current.set(tabId, data);
+  }, []);
+  
+  // Get saved form data for a specific tab
+  const getTabData = useCallback((tabId: TabId): TabFormData | undefined => {
+    return tabDataMap.current.get(tabId);
+  }, []);
+  
+  // Mark a tab as having unsaved changes
+  const markTabAsChanged = useCallback((tabId: TabId, hasChanges: boolean) => {
+    setTabsWithChanges(prev => {
+      const newSet = new Set(prev);
+      if (hasChanges) {
+        newSet.add(tabId);
+      } else {
+        newSet.delete(tabId);
       }
-
-      await importSubscription(importMode === 'url' ? subUrl : '', airportName, importMode !== 'url' ? payloadText : '');
-      setSuccessMsg(`Successfully imported ${airportName}.`);
-      setSubUrl(''); setAirportName(''); setRawText(''); setSelectedFile(null);
-
-      onSuccess();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return newSet;
+    });
+  }, []);
+  
+  // Handle successful save - clear the specific tab's unsaved changes marker
+  const handleTabSuccess = useCallback((tabId: TabId) => {
+    markTabAsChanged(tabId, false);
+    if (onSuccess) onSuccess();
+  }, [markTabAsChanged, onSuccess]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[15vh]">
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-gray-900/50 dark:bg-zinc-950/80 backdrop-blur-sm"
           />
           
+          {/* Modal - Responsive sizing */}
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col 
+                       max-h-[90vh] 
+                       sm:max-w-2xl 
+                       md:max-w-3xl 
+                       lg:max-w-4xl"
           >
             {/* Header */}
-            <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-zinc-900/50">
+            <div className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-white/5 bg-white dark:bg-zinc-900/50">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-800 rounded-xl">
-                  <Settings className="w-5 h-5 text-zinc-300" />
+                <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-xl">
+                  <Settings className="w-5 h-5 text-gray-700 dark:text-zinc-300" />
                 </div>
-                <h2 className="text-xl font-bold text-white">System Settings</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h2>
               </div>
-              <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors">
+              <button 
+                onClick={onClose} 
+                className="p-2 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900
+                          touch-target"
+                aria-label="Close settings"
+              >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Content */}
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-              
-              {error && (
-                <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-sm">
-                  {error}
-                </div>
-              )}
-              {successMsg && (
-                <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm">
-                  {successMsg}
-                </div>
-              )}
+            {/* Tab Navigation */}
+            <TabNavigation 
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              tabsWithChanges={tabsWithChanges}
+            />
 
-              {/* Core Config */}
-              <div className="space-y-4 mb-8">
-                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Engine Parameters</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-zinc-500 mb-1">Check Interval (s)</label>
-                    <input 
-                      type="number" 
-                      value={interval}
-                      onChange={e => setIntervalVal(Number(e.target.value))}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            {/* Tab Content - Scrollable with custom scrollbar */}
+            <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
+              <AnimatePresence mode="wait">
+                <div key={activeTab} role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+                  {activeTab === 'general' && (
+                    <GeneralTab 
+                      onSuccess={() => handleTabSuccess('general')}
+                      savedData={getTabData('general')}
+                      onDataChange={(data) => saveTabData('general', data)}
+                      onMarkChanged={(hasChanges) => markTabAsChanged('general', hasChanges)}
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-zinc-500 mb-1">Check Timeout (s)</label>
-                    <input 
-                      type="number" 
-                      value={timeout}
-                      onChange={e => setTimeoutVal(Number(e.target.value))}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  )}
+                  {activeTab === 'subscription' && (
+                    <SubscriptionTab 
+                      onSuccess={() => handleTabSuccess('subscription')}
+                      onError={onError}
+                      onSuccessMessage={onSuccessMessage}
+                      savedData={getTabData('subscription')}
+                      onDataChange={(data) => saveTabData('subscription', data)}
+                      onMarkChanged={(hasChanges) => markTabAsChanged('subscription', hasChanges)}
                     />
-                  </div>
-                </div>
-                <button 
-                  onClick={handleSaveConfig}
-                  disabled={loading}
-                  className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  <Save size={16} /> Save Parameters
-                </button>
-              </div>
-
-              {/* Alert Rules Management */}
-              {onOpenAlertRules && (
-                <div className="space-y-4 mb-8 pt-6 border-t border-zinc-800/50">
-                  <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Alert Management</h3>
-                  <button 
-                    onClick={() => {
-                      onClose();
-                      onOpenAlertRules();
-                    }}
-                    className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-lg flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <Settings size={16} /> Configure Alert Rules
-                  </button>
-                </div>
-              )}
-
-              {/* Check Configuration */}
-              <div className="space-y-4 mb-8 pt-6 border-t border-zinc-800/50">
-                <CheckConfigPanel 
-                  onSuccess={onSuccess} 
-                  onError={onError}
-                  onSuccessMessage={onSuccessMessage}
-                />
-              </div>
-
-              {/* Imports */}
-              <div className="space-y-4 pt-6 border-t border-zinc-800/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Add Airport Nodes</h3>
-                  <div className="flex bg-zinc-950 rounded-lg p-1 border border-zinc-800">
-                    <button
-                      onClick={() => setImportMode('url')}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${importMode === 'url' ? 'bg-indigo-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                    >
-                      URL
-                    </button>
-                    <button
-                      onClick={() => setImportMode('raw')}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${importMode === 'raw' ? 'bg-indigo-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                    >
-                      RAW TEXT
-                    </button>
-                    <button
-                      onClick={() => setImportMode('file')}
-                      className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${importMode === 'file' ? 'bg-indigo-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                    >
-                      FILE
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-zinc-500 mb-1">Airport Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Premium Proxy v2"
-                    value={airportName}
-                    onChange={e => setAirportName(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white mb-4 focus:outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-                
-                {importMode === 'url' && (
-                  <div>
-                    <label className="block text-sm text-zinc-500 mb-1">Subscription URL (Clash/Base64/v2ray)</label>
-                    <input 
-                      type="url" 
-                      placeholder="https://..."
-                      value={subUrl}
-                      onChange={e => setSubUrl(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  )}
+                  {activeTab === 'checkConfig' && (
+                    <CheckConfigTab 
+                      onSuccess={() => handleTabSuccess('checkConfig')}
+                      onError={onError}
+                      onSuccessMessage={onSuccessMessage}
+                      savedData={getTabData('checkConfig')}
+                      onDataChange={(data) => saveTabData('checkConfig', data)}
+                      onMarkChanged={(hasChanges) => markTabAsChanged('checkConfig', hasChanges)}
                     />
-                  </div>
-                )}
-                {importMode === 'raw' && (
-                  <div>
-                    <label className="block text-sm text-zinc-500 mb-1">Paste Raw Subscription Config (Base64 / Yaml)</label>
-                    <textarea 
-                      placeholder="Paste your base64 encoded string or YAML configuration here..."
-                      value={rawText}
-                      onChange={e => setRawText(e.target.value)}
-                      rows={5}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none font-mono text-xs"
+                  )}
+                  {activeTab === 'alertRules' && (
+                    <AlertRulesTab 
+                      onClose={onClose}
+                      onOpenAlertRules={onOpenAlertRules}
                     />
-                  </div>
-                )}
-                {importMode === 'file' && (
-                  <div>
-                     <label className="block text-sm text-zinc-500 mb-1">Select File (.yaml, .txt)</label>
-                     <input 
-                       type="file" 
-                       accept=".yaml,.yml,.txt"
-                       onChange={e => setSelectedFile(e.target.files?.[0] || null)}
-                       className="w-full text-zinc-300 bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20"
-                     />
-                  </div>
-                )}
-                <button 
-                  onClick={handleImport}
-                  disabled={loading}
-                  className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  <CloudDownload size={16} /> Import Subscription
-                </button>
-              </div>
-
+                  )}
+                  {activeTab === 'appearance' && (
+                    <AppearanceTab />
+                  )}
+                </div>
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>

@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Network, TrendingUp, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface ProtocolStatistics {
   protocol: string;
@@ -32,6 +33,7 @@ interface ProtocolStatsPanelProps {
 }
 
 export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStatsPanelProps) {
+  const { t } = useTranslation();
   const [protocolStats, setProtocolStats] = useState<ProtocolStatistics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
   if (protocolStats.length === 0) {
     return (
       <div className="glass-panel p-8">
-        <p className="text-zinc-500 text-center">No protocol data available</p>
+        <p className="text-zinc-500 text-center">{t('stats.protocol.noData')}</p>
       </div>
     );
   }
@@ -114,8 +116,8 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
             <Network className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Protocol Statistics</h3>
-            <p className="text-sm text-zinc-400">Node distribution and performance by protocol</p>
+            <h3 className="text-lg font-semibold text-white">{t('stats.protocol.title')}</h3>
+            <p className="text-sm text-zinc-400">{t('stats.protocol.subtitle')}</p>
           </div>
         </div>
 
@@ -129,7 +131,7 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Bar Chart
+            {t('stats.protocol.chartTypes.bar')}
           </button>
           <button
             onClick={() => setChartType('pie')}
@@ -139,7 +141,7 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Pie Chart
+            {t('stats.protocol.chartTypes.pie')}
           </button>
         </div>
       </div>
@@ -170,8 +172,8 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
               <Legend 
                 wrapperStyle={{ fontSize: '12px' }}
               />
-              <Bar dataKey="availability" fill="#8b5cf6" name="Availability (%)" />
-              <Bar dataKey="latency" fill="#ec4899" name="Latency (ms)" />
+              <Bar dataKey="availability" fill="#8b5cf6" name={t('stats.chart.availability')} />
+              <Bar dataKey="latency" fill="#ec4899" name={t('stats.chart.latency')} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -217,7 +219,7 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-white font-medium uppercase">{stat.protocol}</h4>
               <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded">
-                {stat.nodeCount} nodes
+                {stat.nodeCount} {t('common.units.nodes')}
               </span>
             </div>
 
@@ -225,7 +227,7 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
               <div className="flex items-center justify-between">
                 <span className="text-sm text-zinc-400 flex items-center gap-1">
                   <Activity className="w-3 h-3" />
-                  Availability
+                  {t('stats.protocol.availability')}
                 </span>
                 <span className={`text-sm font-semibold ${
                   stat.avgAvailabilityRate >= 90 ? 'text-emerald-400' :
@@ -239,10 +241,10 @@ export default function ProtocolStatsPanel({ startTime, endTime }: ProtocolStats
               <div className="flex items-center justify-between">
                 <span className="text-sm text-zinc-400 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
-                  Avg Latency
+                  {t('stats.protocol.avgLatency')}
                 </span>
                 <span className="text-sm font-semibold text-purple-400">
-                  {stat.avgResponseTime}ms
+                  {stat.avgResponseTime}{t('common.units.milliseconds')}
                 </span>
               </div>
             </div>

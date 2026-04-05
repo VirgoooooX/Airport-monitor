@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Trash2, AlertTriangle, Edit2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AlertRule {
   id: string;
@@ -17,6 +18,7 @@ interface AlertRulesPanelProps {
 }
 
 export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProps) {
+  const { t } = useTranslation();
   const [rules, setRules] = useState<AlertRule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,7 +36,7 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
   const fetchRules = async () => {
     try {
       const res = await fetch('/api/alert-rules');
-      if (!res.ok) throw new Error('Failed to fetch alert rules');
+      if (!res.ok) throw new Error(t('alerts.errors.fetchFailed'));
       const data = await res.json();
       setRules(data);
     } catch (err: any) {
@@ -70,7 +72,7 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
 
   const handleSave = async () => {
     if (!formName.trim()) {
-      setError('Rule name is required');
+      setError(t('alerts.errors.ruleNameRequired'));
       return;
     }
 
@@ -94,8 +96,8 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        if (!res.ok) throw new Error('Failed to update rule');
-        setSuccessMsg('Rule updated successfully');
+        if (!res.ok) throw new Error(t('alerts.errors.updateFailed'));
+        setSuccessMsg(t('alerts.success.ruleUpdated'));
       } else {
         // Create new rule
         const res = await fetch('/api/alert-rules', {
@@ -103,8 +105,8 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        if (!res.ok) throw new Error('Failed to create rule');
-        setSuccessMsg('Rule created successfully');
+        if (!res.ok) throw new Error(t('alerts.errors.createFailed'));
+        setSuccessMsg(t('alerts.success.ruleCreated'));
       }
 
       await fetchRules();
@@ -117,7 +119,7 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete alert rule "${name}"?`)) return;
+    if (!window.confirm(t('alerts.rules.deleteConfirm', { name }))) return;
 
     try {
       setLoading(true);
@@ -125,8 +127,8 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
       const res = await fetch(`/api/alert-rules/${id}`, {
         method: 'DELETE'
       });
-      if (!res.ok) throw new Error('Failed to delete rule');
-      setSuccessMsg('Rule deleted successfully');
+      if (!res.ok) throw new Error(t('alerts.errors.deleteFailed'));
+      setSuccessMsg(t('alerts.success.ruleDeleted'));
       await fetchRules();
     } catch (err: any) {
       setError(err.message);
@@ -138,22 +140,22 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
   const getRuleTypeLabel = (type: AlertRule['type']) => {
     switch (type) {
       case 'node_failure_rate':
-        return 'Node Failure Rate';
+        return t('alerts.rules.types.nodeFailureRate');
       case 'airport_availability':
-        return 'Airport Availability';
+        return t('alerts.rules.types.airportAvailability');
       case 'consecutive_failures':
-        return 'Consecutive Failures';
+        return t('alerts.rules.types.consecutiveFailures');
     }
   };
 
   const getThresholdLabel = (type: AlertRule['type']) => {
     switch (type) {
       case 'node_failure_rate':
-        return 'Failure Rate (%)';
+        return t('alerts.rules.thresholdLabels.failureRate');
       case 'airport_availability':
-        return 'Min Availability (%)';
+        return t('alerts.rules.thresholdLabels.minAvailability');
       case 'consecutive_failures':
-        return 'Failure Count';
+        return t('alerts.rules.thresholdLabels.failureCount');
     }
   };
 
@@ -181,7 +183,7 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
                 <div className="p-2 bg-zinc-800 rounded-xl">
                   <AlertTriangle className="w-5 h-5 text-amber-400" />
                 </div>
-                <h2 className="text-xl font-bold text-white">Alert Rules</h2>
+                <h2 className="text-xl font-bold text-white">{t('alerts.rules.title')}</h2>
               </div>
               <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors">
                 <X size={20} />
@@ -204,10 +206,10 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
 
               {/* Existing Rules List */}
               <div className="mb-8">
-                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">Configured Rules</h3>
+                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{t('alerts.rules.configured')}</h3>
                 {rules.length === 0 ? (
                   <div className="text-center py-8 text-zinc-500 bg-zinc-950 border border-zinc-800 rounded-xl">
-                    No alert rules configured
+                    {t('alerts.rules.noRules')}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -226,15 +228,15 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
                                   : 'bg-zinc-700/50 text-zinc-500 border border-zinc-700'
                               }`}
                             >
-                              {rule.enabled ? 'Enabled' : 'Disabled'}
+                              {rule.enabled ? t('common.status.enabled') : t('common.status.disabled')}
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-zinc-400">
-                            <span>Type: {getRuleTypeLabel(rule.type)}</span>
+                            <span>{t('alerts.rules.info.type')}: {getRuleTypeLabel(rule.type)}</span>
                             <span>•</span>
-                            <span>Threshold: {rule.threshold}{rule.type === 'consecutive_failures' ? '' : '%'}</span>
+                            <span>{t('alerts.rules.info.threshold')}: {rule.threshold}{rule.type === 'consecutive_failures' ? '' : '%'}</span>
                             <span>•</span>
-                            <span>Cooldown: {rule.cooldownMinutes}m</span>
+                            <span>{t('alerts.rules.info.cooldown')}: {rule.cooldownMinutes}m</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -261,14 +263,14 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
               {/* Create/Edit Form */}
               <div className="pt-6 border-t border-zinc-800/50">
                 <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-                  {isEditing ? 'Edit Rule' : 'Create New Rule'}
+                  {isEditing ? t('alerts.rules.editRule') : t('alerts.rules.createNew')}
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-zinc-500 mb-1">Rule Name</label>
+                    <label className="block text-sm text-zinc-500 mb-1">{t('alerts.rules.ruleName')}</label>
                     <input
                       type="text"
-                      placeholder="e.g. High Failure Alert"
+                      placeholder={t('alerts.rules.ruleNamePlaceholder')}
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
                       className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
@@ -276,15 +278,15 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
                   </div>
 
                   <div>
-                    <label className="block text-sm text-zinc-500 mb-1">Rule Type</label>
+                    <label className="block text-sm text-zinc-500 mb-1">{t('alerts.rules.ruleType')}</label>
                     <select
                       value={formType}
                       onChange={(e) => setFormType(e.target.value as AlertRule['type'])}
                       className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors"
                     >
-                      <option value="node_failure_rate">Node Failure Rate</option>
-                      <option value="airport_availability">Airport Availability</option>
-                      <option value="consecutive_failures">Consecutive Failures</option>
+                      <option value="node_failure_rate">{t('alerts.rules.types.nodeFailureRate')}</option>
+                      <option value="airport_availability">{t('alerts.rules.types.airportAvailability')}</option>
+                      <option value="consecutive_failures">{t('alerts.rules.types.consecutiveFailures')}</option>
                     </select>
                   </div>
 
@@ -301,7 +303,7 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-500 mb-1">Cooldown (minutes)</label>
+                      <label className="block text-sm text-zinc-500 mb-1">{t('alerts.rules.cooldown')}</label>
                       <input
                         type="number"
                         value={formCooldown}
@@ -321,7 +323,7 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
                       className="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
                     />
                     <label htmlFor="enabled" className="text-sm text-zinc-300">
-                      Enable this rule
+                      {t('alerts.rules.enableRule')}
                     </label>
                   </div>
 
@@ -332,14 +334,14 @@ export default function AlertRulesPanel({ isOpen, onClose }: AlertRulesPanelProp
                       className="flex-1 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                     >
                       <Save size={16} />
-                      {isEditing ? 'Update Rule' : 'Create Rule'}
+                      {isEditing ? t('alerts.rules.updateButton') : t('alerts.rules.createButton')}
                     </button>
                     {isEditing && (
                       <button
                         onClick={resetForm}
                         className="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
                       >
-                        Cancel
+                        {t('common.actions.cancel')}
                       </button>
                     )}
                   </div>
