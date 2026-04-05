@@ -12,7 +12,6 @@
  * Preservation Scope:
  * - TimeDimensionView translation keys (reports.timeDimension.*)
  * - RegionalDimensionView translation keys (reports.regionalDimension.*)
- * - ProtocolDimensionView translation keys (reports.protocolDimension.*)
  * - NodeDetailsTable translation keys (reports.nodeDetails.*)
  * - Other report namespace keys (reports.error, reports.noData, etc.)
  * 
@@ -27,11 +26,9 @@ import * as fc from 'fast-check';
 import i18n from '../../../i18n/config';
 import { TimeDimensionView } from '../TimeDimensionView';
 import { RegionalDimensionView } from '../RegionalDimensionView';
-import { ProtocolDimensionView } from '../ProtocolDimensionView';
 import { NodeDetailsTable } from '../NodeDetailsTable';
 import type { TimeDimensionData } from '../TimeDimensionView';
 import type { RegionalDimensionData } from '../RegionalDimensionView';
-import type { ProtocolDimensionData } from '../ProtocolDimensionView';
 import type { DetailedNodeMetrics } from '../NodeDetailsTable';
 
 // Mock framer-motion to avoid animation issues in tests
@@ -695,17 +692,6 @@ describe('Preservation Property: Other Report Components Translations', () => {
       expect(i18n.t('reports.regionalDimension.avgAvailability')).toBe('平均可用性');
     });
 
-    it('should preserve all ProtocolDimensionView translation keys in Chinese', async () => {
-      await i18n.changeLanguage('zh');
-
-      expect(i18n.t('reports.protocolDimension.distribution')).toBe('协议分布');
-      expect(i18n.t('reports.protocolDimension.comparison')).toBe('协议性能对比');
-      expect(i18n.t('reports.protocolDimension.ranking')).toBe('协议排名');
-      expect(i18n.t('reports.protocolDimension.rank')).toBe('排名');
-      expect(i18n.t('reports.protocolDimension.protocol')).toBe('协议');
-      expect(i18n.t('reports.protocolDimension.nodes')).toBe('节点数');
-    });
-
     it('should preserve all NodeDetailsTable translation keys in Chinese', async () => {
       await i18n.changeLanguage('zh');
 
@@ -730,10 +716,6 @@ describe('Preservation Property: Other Report Components Translations', () => {
       // RegionalDimensionView
       expect(i18n.t('reports.regionalDimension.distribution')).toBe('Regional Distribution');
       expect(i18n.t('reports.regionalDimension.statistics')).toBe('Regional Statistics');
-
-      // ProtocolDimensionView
-      expect(i18n.t('reports.protocolDimension.distribution')).toBe('Protocol Distribution');
-      expect(i18n.t('reports.protocolDimension.ranking')).toBe('Protocol Ranking');
 
       // NodeDetailsTable
       expect(i18n.t('reports.nodeDetails.title')).toBe('Node Details');

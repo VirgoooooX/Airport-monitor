@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 import ReportSummary from './ReportSummary';
 import { TimeDimensionView } from './TimeDimensionView';
 import { RegionalDimensionView } from './RegionalDimensionView';
-import { ProtocolDimensionView } from './ProtocolDimensionView';
 import { NodeDetailsTable } from './NodeDetailsTable';
 import type { TimeRange } from './TimeRangeSelector';
 import { TimeRangeSelector } from './TimeRangeSelector';
@@ -96,12 +95,6 @@ function ReportSkeleton() {
       </div>
 
       {/* Regional Dimension Analysis skeleton */}
-      <div className="space-y-4">
-        <SkeletonBase height="1.75rem" className="w-64" />
-        <LoadingSkeleton variant="chart" height={300} />
-      </div>
-
-      {/* Protocol Dimension Analysis skeleton */}
       <div className="space-y-4">
         <SkeletonBase height="1.75rem" className="w-64" />
         <LoadingSkeleton variant="chart" height={300} />
@@ -397,16 +390,6 @@ export default function DetailedReportView({
                   </h3>
                   <LazyChart height={300}>
                     <RegionalDimensionView data={reportData.regionalDimension} loading={loading} />
-                  </LazyChart>
-                </section>
-
-                {/* Protocol Dimension Analysis */}
-                <section>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    {t('reports.protocolDimension.title', 'Protocol Dimension Analysis')}
-                  </h3>
-                  <LazyChart height={300}>
-                    <ProtocolDimensionView data={reportData.protocolDimension} loading={loading} />
                   </LazyChart>
                 </section>
 

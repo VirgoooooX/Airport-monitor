@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, BarChart3, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useDashboardData, type NodeInfo } from './hooks/useDashboardData.ts';
@@ -11,7 +11,7 @@ import SettingsPanel from './components/SettingsPanel.tsx';
 import AlertCenter from './components/AlertCenter.tsx';
 import AlertRulesPanel from './components/AlertRulesPanel.tsx';
 import NodeFilter, { type FilterState } from './components/NodeFilter.tsx';
-import AirportStatsPanel from './components/AirportStatsPanel.tsx';
+import SimplifiedAirportPanel from './components/SimplifiedAirportPanel.tsx';
 import ExportButton from './components/ExportButton.tsx';
 import LanguageSwitcher from './components/LanguageSwitcher.tsx';
 import ThemeSwitcher from './components/ThemeSwitcher.tsx';
@@ -34,7 +34,6 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAlertRulesOpen, setIsAlertRulesOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
-  const [showStats, setShowStats] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ region: '', protocol: '', search: '' });
   const [collapsedAirports, setCollapsedAirports] = useState<Set<string>>(new Set());
   const [selectedAirportForReport, setSelectedAirportForReport] = useState<string | null>(null);
@@ -221,16 +220,6 @@ function App() {
             animate={{ opacity: 1, scale: 1 }}
             className="flex items-center gap-3"
           >
-            <button
-              onClick={() => setShowStats(!showStats)}
-              className={`p-3 border rounded-xl transition-colors ${
-                showStats 
-                  ? 'bg-indigo-500 border-indigo-500 text-white' 
-                  : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
-              }`}
-            >
-              <BarChart3 size={20} />
-            </button>
             <AlertCenter />
             <LanguageSwitcher onError={showError} />
             <ThemeSwitcher variant="icon" />
@@ -246,21 +235,15 @@ function App() {
         {/* Global Metrics Panel */}
         <MetricsHeader status={status} onToggleEngine={handleToggleEngine} loadingToggle={isToggling} />
 
-        {/* Statistics Panels (conditionally shown) */}
-        {showStats && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6 mb-12"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('stats.title')}</h2>
-              <ExportButton />
-            </div>
-            
-            <AirportStatsPanel />
-          </motion.div>
-        )}
+        {/* Regional Statistics Panel (Always shown) */}
+        <div className="space-y-6 mb-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('stats.title')}</h2>
+            <ExportButton />
+          </div>
+          
+          <SimplifiedAirportPanel />
+        </div>
 
         {/* Node Filter */}
         {protocols.length > 0 && (

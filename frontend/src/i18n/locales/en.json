@@ -246,7 +246,9 @@
       },
       "availability": "Availability",
       "avgLatency": "Avg Latency",
-      "score": "Score"
+      "score": "Score",
+      "onlineNodes": "Online Nodes",
+      "offlineNodes": "Offline Nodes"
     },
     "regional": {
       "title": "Regional Statistics",
@@ -407,19 +409,6 @@
       "avgLatency": "Avg Latency",
       "avgAvailability": "Avg Availability",
       "healthDistribution": "Health Distribution"
-    },
-    "protocolDimension": {
-      "title": "Protocol Dimension Analysis",
-      "distribution": "Protocol Distribution",
-      "distributionDesc": "Percentage of nodes using each protocol",
-      "comparison": "Protocol Performance Comparison",
-      "comparisonDesc": "Average metrics by protocol",
-      "ranking": "Protocol Ranking",
-      "rank": "Rank",
-      "protocol": "Protocol",
-      "nodes": "Nodes",
-      "avgLatency": "Avg Latency",
-      "avgAvailability": "Avg Availability"
     },
     "nodeDetails": {
       "title": "Node Details",

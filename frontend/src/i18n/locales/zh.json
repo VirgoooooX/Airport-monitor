@@ -246,7 +246,9 @@
       },
       "availability": "可用性",
       "avgLatency": "平均延迟",
-      "score": "评分"
+      "score": "评分",
+      "onlineNodes": "在线节点",
+      "offlineNodes": "离线节点"
     },
     "regional": {
       "title": "地区统计",
@@ -407,19 +409,6 @@
       "avgLatency": "平均延迟",
       "avgAvailability": "平均可用性",
       "healthDistribution": "健康度分布"
-    },
-    "protocolDimension": {
-      "title": "协议维度分析",
-      "distribution": "协议分布",
-      "distributionDesc": "使用各协议的节点百分比",
-      "comparison": "协议性能对比",
-      "comparisonDesc": "按协议的平均指标",
-      "ranking": "协议排名",
-      "rank": "排名",
-      "protocol": "协议",
-      "nodes": "节点数",
-      "avgLatency": "平均延迟",
-      "avgAvailability": "平均可用性"
     },
     "nodeDetails": {
       "title": "节点详情",
