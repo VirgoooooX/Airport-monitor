@@ -63,13 +63,17 @@
       "stopEngine": "STOP ENGINE",
       "deleteAirport": "Delete Airport",
       "showStats": "Show Statistics",
-      "hideStats": "Hide Statistics"
+      "hideStats": "Hide Statistics",
+      "collapse": "Collapse",
+      "expand": "Expand"
     },
     "airport": {
       "totalNodes": "Total Nodes",
       "primaryProtocol": "Primary Protocol",
       "estimatedHealth": "Estimated Health",
       "systemManaged": "System Managed",
+      "onlineNodes": "Online Nodes",
+      "avgLatency": "Avg Latency",
       "deleteConfirm": "Are you absolutely sure you want to delete airport \"{{name}}\" and permanently erase all its testing logs?"
     }
   },
@@ -222,6 +226,28 @@
   },
   "stats": {
     "title": "Statistics & Reports",
+    "airport": {
+      "title": "Airport Quality Assessment",
+      "subtitle": "Performance and stability metrics aggregated by airport",
+      "noData": "No airport data available",
+      "sortBy": "Sort by",
+      "fields": {
+        "quality": "Quality Score",
+        "availability": "Availability",
+        "latency": "Latency",
+        "nodes": "Node Count",
+        "name": "Name"
+      },
+      "quality": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor"
+      },
+      "availability": "Availability",
+      "avgLatency": "Avg Latency",
+      "score": "Score"
+    },
     "regional": {
       "title": "Regional Statistics",
       "subtitle": "Node distribution and performance by region",

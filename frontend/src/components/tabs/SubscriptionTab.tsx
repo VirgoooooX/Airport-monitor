@@ -7,7 +7,7 @@
  * - File import
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { CloudDownload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { importSubscription } from '../../hooks/useControls';
@@ -22,7 +22,7 @@ interface SubscriptionTabData {
   rawText: string;
 }
 
-export default function SubscriptionTab({ onSuccess, onError, onSuccessMessage, savedData, onDataChange, onMarkChanged }: TabContentProps) {
+function SubscriptionTab({ onSuccess, onError, onSuccessMessage, savedData, onDataChange, onMarkChanged }: TabContentProps) {
   const { t } = useTranslation();
   const [subUrl, setSubUrl] = useState('');
   const [airportName, setAirportName] = useState('');
@@ -182,8 +182,12 @@ export default function SubscriptionTab({ onSuccess, onError, onSuccessMessage, 
         />
       </div>
       
-      {importMode === 'url' && (
-        <div>
+      {/* Fixed height container to prevent layout shift when switching modes */}
+      <div className="relative min-h-[160px]">
+        <div 
+          className="absolute inset-0 transition-opacity duration-200" 
+          style={{ opacity: importMode === 'url' ? 1 : 0, pointerEvents: importMode === 'url' ? 'auto' : 'none' }}
+        >
           <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">
             {t('settings.subscription.urlLabel')}
           </label>
@@ -195,10 +199,11 @@ export default function SubscriptionTab({ onSuccess, onError, onSuccessMessage, 
             className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
-      )}
-      
-      {importMode === 'raw' && (
-        <div>
+        
+        <div 
+          className="absolute inset-0 transition-opacity duration-200" 
+          style={{ opacity: importMode === 'raw' ? 1 : 0, pointerEvents: importMode === 'raw' ? 'auto' : 'none' }}
+        >
           <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">
             {t('settings.subscription.rawLabel')}
           </label>
@@ -210,10 +215,11 @@ export default function SubscriptionTab({ onSuccess, onError, onSuccessMessage, 
             className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none font-mono text-xs"
           />
         </div>
-      )}
-      
-      {importMode === 'file' && (
-        <div>
+        
+        <div 
+          className="absolute inset-0 transition-opacity duration-200" 
+          style={{ opacity: importMode === 'file' ? 1 : 0, pointerEvents: importMode === 'file' ? 'auto' : 'none' }}
+        >
           <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">
             {t('settings.subscription.fileLabel')}
           </label>
@@ -224,7 +230,7 @@ export default function SubscriptionTab({ onSuccess, onError, onSuccessMessage, 
             className="w-full text-gray-700 dark:text-zinc-300 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20"
           />
         </div>
-      )}
+      </div>
 
       <button 
         onClick={handleImport}
@@ -236,3 +242,5 @@ export default function SubscriptionTab({ onSuccess, onError, onSuccessMessage, 
     </div>
   );
 }
+
+export default memo(SubscriptionTab);

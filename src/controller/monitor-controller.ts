@@ -187,7 +187,13 @@ export class MonitorController {
     
     // Re-verify config
     this.config = await this.configManager.loadConfig(this.configPath!);
-    const allNodes = this.config.airports.flatMap(a => a.nodes);
+    
+    // Load nodes from database instead of config file
+    // This ensures we get all nodes that were imported via API
+    const airports = this.db!.getAirports();
+    const allNodes = airports.flatMap(airport => this.db!.getNodesByAirport(airport.id));
+    
+    this.logger.info(`Starting engine with ${allNodes.length} nodes from database`);
     
     this.scheduler = new NodeCheckScheduler(this.checker, this.db!, allNodes);
     
@@ -371,13 +377,25 @@ export class MonitorController {
       ? this.scheduler.getStatus()
       : { running: false, totalChecks: 0 };
 
-    const airports = this.config
-      ? this.config.airports.map(a => ({
-          id: a.id,
-          name: a.name,
-          nodeCount: a.nodes.length,
-        }))
-      : [];
+    // Get airports from database instead of config
+    // This ensures we show the actual data that's being monitored
+    let airports: { id: string; name: string; nodeCount: number }[] = [];
+    
+    if (this.db) {
+      const dbAirports = this.db.getAirports();
+      airports = dbAirports.map(a => ({
+        id: a.id,
+        name: a.name,
+        nodeCount: this.db!.getNodesByAirport(a.id).length,
+      }));
+    } else if (this.config) {
+      // Fallback to config if DB not available
+      airports = this.config.airports.map(a => ({
+        id: a.id,
+        name: a.name,
+        nodeCount: a.nodes.length,
+      }));
+    }
 
     return {
       running: schedulerStatus.running,

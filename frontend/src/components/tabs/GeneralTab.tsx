@@ -6,7 +6,7 @@
  * - Check timeout
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { fetchConfig, updateConfig } from '../../hooks/useControls';
@@ -17,10 +17,10 @@ interface GeneralTabData {
   timeout: number;
 }
 
-export default function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabContentProps) {
+function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabContentProps) {
   const { t } = useTranslation();
-  const [interval, setInterval] = useState(300);
-  const [timeout, setTimeout] = useState(30);
+  const [interval, setCheckInterval] = useState(300);
+  const [timeout, setCheckTimeout] = useState(30);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -33,8 +33,8 @@ export default function GeneralTab({ onSuccess, savedData, onDataChange, onMarkC
         interval: cfg.checkInterval || 300,
         timeout: cfg.checkTimeout || 30
       };
-      setInterval(data.interval);
-      setTimeout(data.timeout);
+      setCheckInterval(data.interval);
+      setCheckTimeout(data.timeout);
       setInitialData(data);
     }).catch(() => {});
   }, []);
@@ -43,8 +43,8 @@ export default function GeneralTab({ onSuccess, savedData, onDataChange, onMarkC
   useEffect(() => {
     if (savedData) {
       const data = savedData as GeneralTabData;
-      setInterval(data.interval);
-      setTimeout(data.timeout);
+      setCheckInterval(data.interval);
+      setCheckTimeout(data.timeout);
     }
   }, [savedData]);
 
@@ -105,7 +105,7 @@ export default function GeneralTab({ onSuccess, savedData, onDataChange, onMarkC
             id="check-interval"
             type="number" 
             value={interval}
-            onChange={e => setInterval(Number(e.target.value))}
+            onChange={e => setCheckInterval(Number(e.target.value))}
             className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white 
                       focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 
                       transition-all touch-target"
@@ -124,7 +124,7 @@ export default function GeneralTab({ onSuccess, savedData, onDataChange, onMarkC
             id="check-timeout"
             type="number" 
             value={timeout}
-            onChange={e => setTimeout(Number(e.target.value))}
+            onChange={e => setCheckTimeout(Number(e.target.value))}
             className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white 
                       focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 
                       transition-all touch-target"
@@ -151,3 +151,5 @@ export default function GeneralTab({ onSuccess, savedData, onDataChange, onMarkC
     </div>
   );
 }
+
+export default memo(GeneralTab);

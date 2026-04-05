@@ -47,22 +47,50 @@ export function startApiServer(
   });
 
   // 2. Get list of airports and basic nodes info
-  app.get('/api/airports', (req, res) => {
+  app.get('/api/airports', async (req, res) => {
     try {
       const airports = db.getAirports();
+      
+      // Get latest status for all nodes
+      const latestStatus = await db.getLatestStatus();
+      
+      console.log(`[API] /api/airports - Found ${latestStatus.size} nodes with latest status`);
       
       const airportsMap = new Map();
       for (const airport of airports) {
         // Fetch nodes specific to this airport
         const nodes = db.getNodesByAirport(airport.id);
+        
+        console.log(`[API] Airport ${airport.name} has ${nodes.length} nodes`);
+        
+        // Enrich nodes with latest check result
+        const enrichedNodes = nodes.map(node => {
+          const latestCheck = latestStatus.get(node.id);
+          if (latestCheck) {
+            console.log(`[API] Node ${node.name} - Latest check: available=${latestCheck.available}, responseTime=${latestCheck.responseTime}ms`);
+          } else {
+            console.log(`[API] Node ${node.name} - No check data found`);
+          }
+          return {
+            ...node,
+            lastCheck: latestCheck ? {
+              timestamp: latestCheck.timestamp,
+              available: latestCheck.available,
+              responseTime: latestCheck.responseTime,
+              error: latestCheck.error
+            } : null
+          };
+        });
+        
         airportsMap.set(airport.id, {
           ...airport,
-          nodes: nodes
+          nodes: enrichedNodes
         });
       }
 
       res.json(Array.from(airportsMap.values()));
     } catch (err: any) {
+      console.error('[API] Error in /api/airports:', err);
       res.status(500).json({ error: err.message });
     }
   });

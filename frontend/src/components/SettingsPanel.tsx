@@ -83,11 +83,6 @@ export default function SettingsPanel({
     tabDataMap.current.set(tabId, data);
   }, []);
   
-  // Get saved form data for a specific tab
-  const getTabData = useCallback((tabId: TabId): TabFormData | undefined => {
-    return tabDataMap.current.get(tabId);
-  }, []);
-  
   // Mark a tab as having unsaved changes
   const markTabAsChanged = useCallback((tabId: TabId, hasChanges: boolean) => {
     setTabsWithChanges(prev => {
@@ -106,6 +101,19 @@ export default function SettingsPanel({
     markTabAsChanged(tabId, false);
     if (onSuccess) onSuccess();
   }, [markTabAsChanged, onSuccess]);
+
+  // Stable per-tab callbacks - avoid creating new function refs on every render
+  const onGeneralSuccess    = useCallback(() => handleTabSuccess('general'),      [handleTabSuccess]);
+  const onGeneralChange     = useCallback((data: TabFormData) => saveTabData('general', data),      [saveTabData]);
+  const onGeneralMark       = useCallback((v: boolean) => markTabAsChanged('general', v),           [markTabAsChanged]);
+
+  const onSubSuccess        = useCallback(() => handleTabSuccess('subscription'),  [handleTabSuccess]);
+  const onSubChange         = useCallback((data: TabFormData) => saveTabData('subscription', data), [saveTabData]);
+  const onSubMark           = useCallback((v: boolean) => markTabAsChanged('subscription', v),      [markTabAsChanged]);
+
+  const onCheckSuccess      = useCallback(() => handleTabSuccess('checkConfig'),   [handleTabSuccess]);
+  const onCheckChange       = useCallback((data: TabFormData) => saveTabData('checkConfig', data),  [saveTabData]);
+  const onCheckMark         = useCallback((v: boolean) => markTabAsChanged('checkConfig', v),       [markTabAsChanged]);
 
   return (
     <AnimatePresence>
@@ -160,47 +168,45 @@ export default function SettingsPanel({
 
             {/* Tab Content - Scrollable with custom scrollbar */}
             <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
-              <AnimatePresence mode="wait">
-                <div key={activeTab} role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
-                  {activeTab === 'general' && (
-                    <GeneralTab 
-                      onSuccess={() => handleTabSuccess('general')}
-                      savedData={getTabData('general')}
-                      onDataChange={(data) => saveTabData('general', data)}
-                      onMarkChanged={(hasChanges) => markTabAsChanged('general', hasChanges)}
-                    />
-                  )}
-                  {activeTab === 'subscription' && (
-                    <SubscriptionTab 
-                      onSuccess={() => handleTabSuccess('subscription')}
-                      onError={onError}
-                      onSuccessMessage={onSuccessMessage}
-                      savedData={getTabData('subscription')}
-                      onDataChange={(data) => saveTabData('subscription', data)}
-                      onMarkChanged={(hasChanges) => markTabAsChanged('subscription', hasChanges)}
-                    />
-                  )}
-                  {activeTab === 'checkConfig' && (
-                    <CheckConfigTab 
-                      onSuccess={() => handleTabSuccess('checkConfig')}
-                      onError={onError}
-                      onSuccessMessage={onSuccessMessage}
-                      savedData={getTabData('checkConfig')}
-                      onDataChange={(data) => saveTabData('checkConfig', data)}
-                      onMarkChanged={(hasChanges) => markTabAsChanged('checkConfig', hasChanges)}
-                    />
-                  )}
-                  {activeTab === 'alertRules' && (
-                    <AlertRulesTab 
-                      onClose={onClose}
-                      onOpenAlertRules={onOpenAlertRules}
-                    />
-                  )}
-                  {activeTab === 'appearance' && (
-                    <AppearanceTab />
-                  )}
+              <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+                <div className={activeTab === 'general' ? 'block' : 'hidden'}>
+                  <GeneralTab 
+                    onSuccess={onGeneralSuccess}
+                    savedData={tabDataMap.current.get('general')}
+                    onDataChange={onGeneralChange}
+                    onMarkChanged={onGeneralMark}
+                  />
                 </div>
-              </AnimatePresence>
+                <div className={activeTab === 'subscription' ? 'block' : 'hidden'}>
+                  <SubscriptionTab 
+                    onSuccess={onSubSuccess}
+                    onError={onError}
+                    onSuccessMessage={onSuccessMessage}
+                    savedData={tabDataMap.current.get('subscription')}
+                    onDataChange={onSubChange}
+                    onMarkChanged={onSubMark}
+                  />
+                </div>
+                <div className={activeTab === 'checkConfig' ? 'block' : 'hidden'}>
+                  <CheckConfigTab 
+                    onSuccess={onCheckSuccess}
+                    onError={onError}
+                    onSuccessMessage={onSuccessMessage}
+                    savedData={tabDataMap.current.get('checkConfig')}
+                    onDataChange={onCheckChange}
+                    onMarkChanged={onCheckMark}
+                  />
+                </div>
+                <div className={activeTab === 'alertRules' ? 'block' : 'hidden'}>
+                  <AlertRulesTab 
+                    onClose={onClose}
+                    onOpenAlertRules={onOpenAlertRules}
+                  />
+                </div>
+                <div className={activeTab === 'appearance' ? 'block' : 'hidden'}>
+                  <AppearanceTab />
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>

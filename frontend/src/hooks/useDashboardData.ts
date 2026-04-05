@@ -19,6 +19,12 @@ export interface NodeInfo {
   address: string;
   port: number;
   config: any;
+  lastCheck?: {
+    timestamp: Date;
+    available: boolean;
+    responseTime?: number;
+    error?: string;
+  } | null;
 }
 
 export interface AirportInfo {

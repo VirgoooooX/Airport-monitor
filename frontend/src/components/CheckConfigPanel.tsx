@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Save, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -122,11 +121,7 @@ export default function CheckConfigPanel({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
-    >
+    <div className="space-y-4">
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-xl">
           <Settings className="w-5 h-5 text-gray-700 dark:text-zinc-300" />
@@ -240,6 +235,6 @@ export default function CheckConfigPanel({
       >
         <Save size={16} /> {t('settings.checkConfig.saveButton')}
       </button>
-    </motion.div>
+    </div>
   );
 }

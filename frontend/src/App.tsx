@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, BarChart3 } from 'lucide-react';
+import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useDashboardData, type NodeInfo } from './hooks/useDashboardData.ts';
@@ -11,8 +11,7 @@ import SettingsPanel from './components/SettingsPanel.tsx';
 import AlertCenter from './components/AlertCenter.tsx';
 import AlertRulesPanel from './components/AlertRulesPanel.tsx';
 import NodeFilter, { type FilterState } from './components/NodeFilter.tsx';
-import RegionalStatsPanel from './components/RegionalStatsPanel.tsx';
-import ProtocolStatsPanel from './components/ProtocolStatsPanel.tsx';
+import AirportStatsPanel from './components/AirportStatsPanel.tsx';
 import ExportButton from './components/ExportButton.tsx';
 import LanguageSwitcher from './components/LanguageSwitcher.tsx';
 import ThemeSwitcher from './components/ThemeSwitcher.tsx';
@@ -28,6 +27,7 @@ function App() {
   const [isToggling, setIsToggling] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ region: '', protocol: '', search: '' });
+  const [collapsedAirports, setCollapsedAirports] = useState<Set<string>>(new Set());
   const { toasts, closeToast, success, error: showError } = useToast();
 
   // Extract unique regions and protocols from all nodes
@@ -102,6 +102,18 @@ function App() {
         showError(t('messages.errors.airportDeleteFailed', { message: err.message }));
       }
     }
+  };
+
+  const toggleAirportCollapse = (airportId: string) => {
+    setCollapsedAirports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(airportId)) {
+        newSet.delete(airportId);
+      } else {
+        newSet.add(airportId);
+      }
+      return newSet;
+    });
   };
 
   if (loading) {
@@ -198,10 +210,7 @@ function App() {
               <ExportButton />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <RegionalStatsPanel />
-              <ProtocolStatsPanel />
-            </div>
+            <AirportStatsPanel />
           </motion.div>
         )}
 
@@ -224,11 +233,75 @@ function App() {
               transition={{ delay: 0.2 + airportIdx * 0.1 }}
             >
               <div className="flex items-center gap-4 mb-6">
+                <button
+                  onClick={() => toggleAirportCollapse(airport.id)}
+                  className="p-2 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors"
+                  aria-label={collapsedAirports.has(airport.id) ? t('dashboard.actions.expand') : t('dashboard.actions.collapse')}
+                >
+                  {collapsedAirports.has(airport.id) ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                </button>
+                
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <Server className="text-indigo-400 w-5 h-5" /> 
                   {airport.name}
                 </h2>
+
+                {/* Inline Dashboard Metrics */}
+                <div className="flex items-center gap-6 ml-4">
+                  {/* Total Nodes */}
+                  <div className="flex items-center gap-2">
+                    <Server size={14} className="text-gray-400 dark:text-zinc-500" />
+                    <span className="text-sm text-gray-600 dark:text-zinc-400">{t('dashboard.airport.totalNodes')}:</span>
+                    <span className="text-lg font-bold text-gray-900 dark:text-white">{airport.nodes.length}</span>
+                  </div>
+
+                  {/* Online Nodes */}
+                  <div className="flex items-center gap-2">
+                    <Globe2 size={14} className="text-emerald-500" />
+                    <span className="text-sm text-gray-600 dark:text-zinc-400">{t('dashboard.airport.onlineNodes')}:</span>
+                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                      {airport.nodes.filter(n => n.lastCheck?.available).length}
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-zinc-500">
+                      ({airport.nodes.length > 0 ? Math.round((airport.nodes.filter(n => n.lastCheck?.available).length / airport.nodes.length) * 100) : 0}%)
+                    </span>
+                  </div>
+
+                  {/* Average Latency */}
+                  <div className="flex items-center gap-2">
+                    <Activity size={14} className="text-gray-400 dark:text-zinc-500" />
+                    <span className="text-sm text-gray-600 dark:text-zinc-400">{t('dashboard.airport.avgLatency')}:</span>
+                    <span className={`text-lg font-bold ${
+                      (() => {
+                        const onlineNodes = airport.nodes.filter(n => n.lastCheck?.available && n.lastCheck?.responseTime !== undefined);
+                        if (onlineNodes.length === 0) return 'text-gray-400 dark:text-zinc-600';
+                        const avg = onlineNodes.reduce((sum, n) => sum + (n.lastCheck?.responseTime || 0), 0) / onlineNodes.length;
+                        if (avg < 100) return 'text-emerald-600 dark:text-emerald-400';
+                        if (avg < 300) return 'text-amber-600 dark:text-amber-400';
+                        return 'text-orange-600 dark:text-orange-400';
+                      })()
+                    }`}>
+                      {(() => {
+                        const onlineNodes = airport.nodes.filter(n => n.lastCheck?.available && n.lastCheck?.responseTime !== undefined);
+                        if (onlineNodes.length === 0) return '--';
+                        const avg = onlineNodes.reduce((sum, n) => sum + (n.lastCheck?.responseTime || 0), 0) / onlineNodes.length;
+                        return `${Math.round(avg)}ms`;
+                      })()}
+                    </span>
+                  </div>
+
+                  {/* Primary Protocol */}
+                  <div className="flex items-center gap-2">
+                    <SignalHigh size={14} className="text-indigo-400" />
+                    <span className="text-sm text-gray-600 dark:text-zinc-400">{t('dashboard.airport.primaryProtocol')}:</span>
+                    <span className="text-sm font-semibold text-indigo-400 uppercase">
+                      {airport.nodes.length > 0 ? airport.nodes[0].protocol : 'Unknown'}
+                    </span>
+                  </div>
+                </div>
+
                 <div className="h-px flex-1 bg-gradient-to-r from-gray-200 dark:from-white/10 to-transparent" />
+                
                 <button 
                   onClick={() => handleDeleteAirport(airport.id, airport.name)}
                   className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors flex items-center gap-1 text-sm font-medium border border-transparent hover:border-rose-500/20"
@@ -237,34 +310,19 @@ function App() {
                 </button>
               </div>
 
-              {/* Airport Summary Board */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800/50 rounded-xl p-4 flex flex-col justify-center">
-                  <p className="text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-1 font-semibold flex items-center gap-1"><Server size={12}/> {t('dashboard.airport.totalNodes')}</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{airport.nodes.length}</p>
+              {/* Node Cards - Collapsible */}
+              {!collapsedAirports.has(airport.id) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {airport.nodes.map((node, i) => (
+                    <NodeCard 
+                      key={node.id} 
+                      node={node} 
+                      index={i} 
+                      onClick={setSelectedNode} 
+                    />
+                  ))}
                 </div>
-                <div className="bg-white dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800/50 rounded-xl p-4 flex flex-col justify-center">
-                  <p className="text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-1 font-semibold flex items-center gap-1"><SignalHigh size={12}/> {t('dashboard.airport.primaryProtocol')}</p>
-                  <p className="text-xl font-semibold text-indigo-400 max-w-full truncate uppercase pl-1">
-                    {airport.nodes.length > 0 ? airport.nodes[0].protocol : 'Unknown'}
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800/50 rounded-xl p-4 flex flex-col justify-center">
-                  <p className="text-xs text-emerald-500/70 uppercase tracking-widest mb-1 font-semibold flex items-center gap-1"><Globe2 size={12}/> {t('dashboard.airport.estimatedHealth')}</p>
-                  <p className="text-xl font-medium text-gray-700 dark:text-zinc-300 tracking-tight">{t('dashboard.airport.systemManaged')}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {airport.nodes.map((node, i) => (
-                  <NodeCard 
-                    key={node.id} 
-                    node={node} 
-                    index={i} 
-                    onClick={setSelectedNode} 
-                  />
-                ))}
-              </div>
+              )}
             </motion.section>
           ))}
           

@@ -63,13 +63,17 @@
       "stopEngine": "停止引擎",
       "deleteAirport": "删除机场",
       "showStats": "显示统计",
-      "hideStats": "隐藏统计"
+      "hideStats": "隐藏统计",
+      "collapse": "折叠",
+      "expand": "展开"
     },
     "airport": {
       "totalNodes": "节点总数",
       "primaryProtocol": "主要协议",
       "estimatedHealth": "预估健康度",
       "systemManaged": "系统管理",
+      "onlineNodes": "在线节点",
+      "avgLatency": "平均延迟",
       "deleteConfirm": "您确定要删除机场\"{{name}}\"并永久清除其所有测试日志吗？"
     }
   },
@@ -222,6 +226,28 @@
   },
   "stats": {
     "title": "统计与报告",
+    "airport": {
+      "title": "机场质量评估",
+      "subtitle": "按机场汇总的性能和稳定性指标",
+      "noData": "暂无机场数据",
+      "sortBy": "排序",
+      "fields": {
+        "quality": "质量评分",
+        "availability": "可用性",
+        "latency": "延迟",
+        "nodes": "节点数",
+        "name": "名称"
+      },
+      "quality": {
+        "excellent": "优秀",
+        "good": "良好",
+        "fair": "一般",
+        "poor": "较差"
+      },
+      "availability": "可用性",
+      "avgLatency": "平均延迟",
+      "score": "评分"
+    },
     "regional": {
       "title": "地区统计",
       "subtitle": "按地区划分的节点分布和性能",
