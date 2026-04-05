@@ -1,0 +1,44 @@
+# Node modules
+node_modules
+frontend/node_modules
+
+# Build output
+dist
+frontend/dist
+
+# Data directories
+data
+*.db
+
+# Test files
+tests
+*.test.ts
+*.test.js
+jest.config.js
+
+# Development configs
+.vscode
+.git
+.gitignore
+
+# Documentation
+docs
+README.md
+*.md
+
+# Logs
+*.log
+logs
+
+# Environment files
+.env
+.env.local
+
+# Spec files
+.kiro
+
+# Example files
+example-config.json
+
+# Build artifacts
+frontend/build-error.log

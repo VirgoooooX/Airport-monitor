@@ -1,9 +1,8 @@
-import { Node, SubscriptionFormat, NodeProtocol } from '../types/index.js';
+import { Node, SubscriptionFormat } from '../types/index.js';
 import { SubscriptionParser } from '../interfaces/SubscriptionParser.js';
 import * as https from 'https';
 import * as http from 'http';
 import { URL } from 'url';
-import { parse as parseYaml } from 'yaml';
 import { SubscriptionFormatParser } from './formats/format-parser.js';
 import { Base64SubscriptionParser } from './formats/base64-parser.js';
 import { ClashSubscriptionParser } from './formats/clash-parser.js';
@@ -37,11 +36,15 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
     try {
       parsedUrl = new URL(url);
     } catch (error) {
-      throw new Error(`Invalid URL: ${url}`);
+      const errorMsg = `Invalid subscription URL format: ${url}`;
+      console.error(`[SubscriptionParser] ${errorMsg}`, error);
+      throw new Error(errorMsg);
     }
 
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-      throw new Error(`Unsupported protocol: ${parsedUrl.protocol}. Only http and https are supported.`);
+      const errorMsg = `Unsupported protocol: ${parsedUrl.protocol}. Only http and https are supported.`;
+      console.error(`[SubscriptionParser] ${errorMsg}`);
+      throw new Error(errorMsg);
     }
 
     let lastError: Error | null = null;
@@ -49,15 +52,18 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
     // Retry logic with exponential backoff
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
       try {
+        console.log(`[SubscriptionParser] Fetching subscription (attempt ${attempt + 1}/${this.maxRetries}): ${url}`);
         const content = await this.fetchWithTimeout(url, this.timeout);
         
         if (!content || content.trim().length === 0) {
-          throw new Error('Empty subscription content received');
+          throw new Error('Empty subscription content received from server');
         }
         
+        console.log(`[SubscriptionParser] Successfully fetched subscription (${content.length} bytes)`);
         return content;
       } catch (error) {
         lastError = error as Error;
+        console.error(`[SubscriptionParser] Fetch attempt ${attempt + 1} failed:`, error);
         
         // Don't retry on invalid URL or empty content
         if (error instanceof Error && 
@@ -68,12 +74,16 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
         
         // Wait before retry (exponential backoff)
         if (attempt < this.maxRetries - 1) {
-          await this.sleep(Math.pow(2, attempt) * 1000);
+          const waitTime = Math.pow(2, attempt) * 1000;
+          console.log(`[SubscriptionParser] Waiting ${waitTime}ms before retry...`);
+          await this.sleep(waitTime);
         }
       }
     }
 
-    throw new Error(`Failed to fetch subscription after ${this.maxRetries} attempts: ${lastError?.message}`);
+    const errorMsg = `Failed to fetch subscription after ${this.maxRetries} attempts: ${lastError?.message}`;
+    console.error(`[SubscriptionParser] ${errorMsg}`);
+    throw new Error(errorMsg);
   }
 
   /**
@@ -84,41 +94,11 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
       return SubscriptionFormat.UNKNOWN;
     }
 
-    const trimmed = content.trim();
-    
-    // Check if it's Base64 encoded
-    if (!this.isBase64(trimmed)) {
-      return SubscriptionFormat.UNKNOWN;
-    }
-
-    // Decode and check content
-    let decoded: string;
-    try {
-      decoded = Buffer.from(trimmed, 'base64').toString('utf-8');
-    } catch (error) {
-      return SubscriptionFormat.UNKNOWN;
-    }
-
-    const lines = decoded.split('\n').filter(line => line.trim().length > 0);
-    
-    if (lines.length === 0) {
-      return SubscriptionFormat.UNKNOWN;
-    }
-
-    // Check if all lines are VMess
-    const allVmess = lines.every(line => line.trim().startsWith('vmess://'));
-    if (allVmess) {
-      return SubscriptionFormat.BASE64_VMESS;
-    }
-
-    // Check if it contains mixed protocols
-    const hasVmess = lines.some(line => line.trim().startsWith('vmess://'));
-    const hasTrojan = lines.some(line => line.trim().startsWith('trojan://'));
-    const hasSs = lines.some(line => line.trim().startsWith('ss://'));
-    const hasVless = lines.some(line => line.trim().startsWith('vless://'));
-
-    if (hasVmess || hasTrojan || hasSs || hasVless) {
-      return SubscriptionFormat.BASE64_MIXED;
+    // Try each parser to detect format
+    for (const parser of this.formatParsers) {
+      if (parser.canParse(content)) {
+        return parser.detectFormat(content);
+      }
     }
 
     return SubscriptionFormat.UNKNOWN;
@@ -128,162 +108,32 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
    * Parse subscription content to extract nodes
    */
   parseSubscription(content: string): Node[] {
+    if (!content || content.trim().length === 0) {
+      const errorMsg = 'Cannot parse empty subscription content';
+      console.error(`[SubscriptionParser] ${errorMsg}`);
+      throw new Error(errorMsg);
+    }
+
+    console.log(`[SubscriptionParser] Attempting to parse subscription content (${content.length} bytes)`);
+    
     // Try each parser until one succeeds
     for (const parser of this.formatParsers) {
-      if (parser.canParse(content)) {
-        return parser.parse(content);
+      try {
+        if (parser.canParse(content)) {
+          console.log(`[SubscriptionParser] Detected format: ${parser.constructor.name}`);
+          const nodes = parser.parse(content);
+          console.log(`[SubscriptionParser] Successfully parsed ${nodes.length} nodes`);
+          return nodes;
+        }
+      } catch (error) {
+        console.error(`[SubscriptionParser] Parser ${parser.constructor.name} failed:`, error);
+        // Continue to next parser
       }
     }
     
-    throw new Error('Unsupported subscription format. Only Base64-encoded VMess/mixed or Clash YAML formats are supported.');
-  }
-
-  /**
-   * Parse Clash Proxies array
-   */
-  private parseClashProxies(proxies: any[]): Node[] {
-    const nodes: Node[] = [];
-    for (const p of proxies) {
-      if (!p.name || !p.server || !p.port || !p.type) continue;
-      
-      let protocol: NodeProtocol;
-      if (p.type === 'vmess') protocol = NodeProtocol.VMESS;
-      else if (p.type === 'trojan') protocol = NodeProtocol.TROJAN;
-      else if (p.type === 'ss') protocol = NodeProtocol.SHADOWSOCKS;
-      else if (p.type === 'vless') protocol = NodeProtocol.VLESS;
-      else continue; // skip unsupported like shadowsocksr
-
-      nodes.push({
-        id: this.generateNodeId(p.server, p.port),
-        airportId: '',
-        name: p.name,
-        protocol: protocol,
-        address: p.server,
-        port: parseInt(p.port, 10),
-        config: p // Keep the whole clash config block
-      });
-    }
-
-    if (nodes.length === 0) {
-      throw new Error('No valid proxies found in Clash subscription');
-    }
-    return nodes;
-  }
-
-  /**
-   * Parse VMess protocol node
-   */
-  private parseVmessNode(uri: string): Node {
-    const base64Part = uri.substring('vmess://'.length);
-    const decoded = Buffer.from(base64Part, 'base64').toString('utf-8');
-    const config = JSON.parse(decoded);
-
-    return {
-      id: this.generateNodeId(config.ps || config.add, config.port),
-      airportId: '', // Will be set by ConfigurationManager
-      name: config.ps || `${config.add}:${config.port}`,
-      protocol: NodeProtocol.VMESS,
-      address: config.add,
-      port: parseInt(config.port, 10),
-      config: {
-        id: config.id,
-        alterId: config.aid || 0,
-        security: config.scy || 'auto',
-        network: config.net || 'tcp',
-        type: config.type || 'none',
-        host: config.host || '',
-        path: config.path || '',
-        tls: config.tls || '',
-        sni: config.sni || ''
-      }
-    };
-  }
-
-  /**
-   * Parse Trojan protocol node
-   */
-  private parseTrojanNode(uri: string): Node {
-    // Format: trojan://password@host:port?params#name
-    const url = new URL(uri);
-    const password = url.username;
-    const host = url.hostname;
-    const port = parseInt(url.port, 10);
-    const name = decodeURIComponent(url.hash.substring(1)) || `${host}:${port}`;
-
-    return {
-      id: this.generateNodeId(host, port),
-      airportId: '',
-      name,
-      protocol: NodeProtocol.TROJAN,
-      address: host,
-      port,
-      config: {
-        password,
-        sni: url.searchParams.get('sni') || host,
-        allowInsecure: url.searchParams.get('allowInsecure') === '1'
-      }
-    };
-  }
-
-  /**
-   * Parse Shadowsocks protocol node
-   */
-  private parseShadowsocksNode(uri: string): Node {
-    // Format: ss://base64(method:password)@host:port#name
-    const hashIndex = uri.indexOf('#');
-    const name = hashIndex > 0 ? decodeURIComponent(uri.substring(hashIndex + 1)) : '';
-    const mainPart = hashIndex > 0 ? uri.substring(0, hashIndex) : uri;
-    
-    const atIndex = mainPart.indexOf('@');
-    const base64Part = mainPart.substring('ss://'.length, atIndex);
-    const serverPart = mainPart.substring(atIndex + 1);
-    
-    const decoded = Buffer.from(base64Part, 'base64').toString('utf-8');
-    const [method, password] = decoded.split(':');
-    const [host, portStr] = serverPart.split(':');
-    const port = parseInt(portStr, 10);
-
-    return {
-      id: this.generateNodeId(host, port),
-      airportId: '',
-      name: name || `${host}:${port}`,
-      protocol: NodeProtocol.SHADOWSOCKS,
-      address: host,
-      port,
-      config: {
-        method,
-        password
-      }
-    };
-  }
-
-  /**
-   * Parse VLESS protocol node
-   */
-  private parseVlessNode(uri: string): Node {
-    // Format: vless://uuid@host:port?params#name
-    const url = new URL(uri);
-    const uuid = url.username;
-    const host = url.hostname;
-    const port = parseInt(url.port, 10);
-    const name = decodeURIComponent(url.hash.substring(1)) || `${host}:${port}`;
-
-    return {
-      id: this.generateNodeId(host, port),
-      airportId: '',
-      name,
-      protocol: NodeProtocol.VLESS,
-      address: host,
-      port,
-      config: {
-        id: uuid,
-        encryption: url.searchParams.get('encryption') || 'none',
-        flow: url.searchParams.get('flow') || '',
-        network: url.searchParams.get('type') || 'tcp',
-        security: url.searchParams.get('security') || 'none',
-        sni: url.searchParams.get('sni') || host
-      }
-    };
+    const errorMsg = 'Unsupported subscription format. Only Base64-encoded VMess/mixed or Clash YAML formats are supported.';
+    console.error(`[SubscriptionParser] ${errorMsg}`);
+    throw new Error(errorMsg);
   }
 
   /**
@@ -307,12 +157,15 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
         if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
           // Handle simple redirect (1 hop)
           const redirectUrl = new URL(response.headers.location, url).toString();
+          console.log(`[SubscriptionParser] Following redirect to: ${redirectUrl}`);
           this.fetchWithTimeout(redirectUrl, timeout).then(resolve).catch(reject);
           return;
         }
 
         if (response.statusCode !== 200) {
-          reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
+          const errorMsg = `HTTP ${response.statusCode}: ${response.statusMessage || 'Unknown error'}`;
+          console.error(`[SubscriptionParser] ${errorMsg}`);
+          reject(new Error(errorMsg));
           return;
         }
 
@@ -324,37 +177,26 @@ export class DefaultSubscriptionParser implements SubscriptionParser {
         response.on('end', () => {
           resolve(data);
         });
+
+        response.on('error', (error) => {
+          console.error(`[SubscriptionParser] Response error:`, error);
+          reject(new Error(`Response error: ${error.message}`));
+        });
       });
 
       request.on('error', (error) => {
-        reject(new Error(`Network error: ${error.message}`));
+        const errorMsg = `Network error: ${error.message}`;
+        console.error(`[SubscriptionParser] ${errorMsg}`, error);
+        reject(new Error(errorMsg));
       });
 
       request.setTimeout(timeout, () => {
         request.destroy();
-        reject(new Error(`Request timeout after ${timeout}ms`));
+        const errorMsg = `Request timeout after ${timeout}ms`;
+        console.error(`[SubscriptionParser] ${errorMsg}`);
+        reject(new Error(errorMsg));
       });
     });
-  }
-
-  /**
-   * Check if string is valid Base64
-   */
-  private isBase64(str: string): boolean {
-    if (!str || str.length === 0) {
-      return false;
-    }
-    
-    // Base64 regex pattern
-    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-    return base64Regex.test(str.replace(/\s/g, ''));
-  }
-
-  /**
-   * Generate unique node ID
-   */
-  private generateNodeId(host: string, port: number): string {
-    return `node_${host}_${port}_${Date.now()}`;
   }
 
   /**

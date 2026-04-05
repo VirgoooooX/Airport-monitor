@@ -27,5 +27,12 @@ export type {
   AlertType,
   AlertRule,
   AlertSeverity,
-  Alert
+  Alert,
+  SubscriptionUpdateConfig,
+  SubscriptionUpdate,
+  NodeMetadata,
+  CountryStatistics,
+  RegionalStatistics,
+  ProtocolStatistics,
+  StabilityScore
 } from './models.js';

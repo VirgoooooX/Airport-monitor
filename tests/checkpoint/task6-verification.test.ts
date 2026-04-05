@@ -121,7 +121,7 @@ describe('Task 6 Checkpoint - Configuration and Subscription Verification', () =
 
     it('should handle empty subscription content', () => {
       const emptyContent = Buffer.from('').toString('base64');
-      expect(() => subscriptionParser.parseSubscription(emptyContent)).toThrow('Unsupported subscription format');
+      expect(() => subscriptionParser.parseSubscription(emptyContent)).toThrow('Cannot parse empty subscription content');
     });
   });
 

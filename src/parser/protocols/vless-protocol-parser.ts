@@ -117,7 +117,7 @@ export class VLESSProtocolParser implements ProtocolParser {
 
       // Build configuration object
       const config: Record<string, any> = {
-        uuid: uuid,
+        id: uuid,
         encryption: encryption,
         flow: flow,
         security: security,

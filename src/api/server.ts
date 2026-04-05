@@ -20,6 +20,22 @@ export function startApiServer(
   // Helper: Reporter instance
   const reporter = new ReportGeneratorImpl(db);
 
+  // Health check endpoint for Docker
+  app.get('/api/health', (req, res) => {
+    try {
+      // Simple health check - return 200 if server is operational
+      res.status(200).json({ 
+        status: 'healthy',
+        timestamp: new Date().toISOString()
+      });
+    } catch (err: any) {
+      res.status(503).json({ 
+        status: 'unhealthy',
+        error: err.message 
+      });
+    }
+  });
+
   // 1. Get overall monitor status
   app.get('/api/status', (req, res) => {
     try {
@@ -112,9 +128,24 @@ export function startApiServer(
   app.post('/api/config/import', async (req, res) => {
     try {
       const { url, airportName, content } = req.body;
-      if (!airportName || (!url && !content)) {
-        return res.status(400).json({ error: 'Missing url/content or airportName' });
+      
+      // Validate required fields
+      if (!airportName || typeof airportName !== 'string' || airportName.trim().length === 0) {
+        return res.status(400).json({ error: 'Missing or invalid airportName. Must be a non-empty string.' });
       }
+      
+      if (!url && !content) {
+        return res.status(400).json({ error: 'Missing url or content. At least one must be provided.' });
+      }
+      
+      if (url && typeof url !== 'string') {
+        return res.status(400).json({ error: 'Invalid url. Must be a string.' });
+      }
+      
+      if (content && typeof content !== 'string') {
+        return res.status(400).json({ error: 'Invalid content. Must be a string.' });
+      }
+      
       const status = controller.getStatus();
       let airport;
       if (content) {
@@ -124,6 +155,7 @@ export function startApiServer(
       }
       res.json({ success: true, airport });
     } catch (err: any) {
+      console.error('[API] Import subscription failed:', err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -144,9 +176,29 @@ export function startApiServer(
   app.post('/api/config', async (req, res) => {
     try {
       const { checkInterval, checkTimeout } = req.body;
+      
+      // Validate input parameters
+      if (checkInterval !== undefined) {
+        if (typeof checkInterval !== 'number' || checkInterval < 10 || checkInterval > 86400) {
+          return res.status(400).json({ 
+            error: 'checkInterval must be a number between 10 and 86400 seconds' 
+          });
+        }
+      }
+      
+      if (checkTimeout !== undefined) {
+        if (typeof checkTimeout !== 'number' || checkTimeout <= 0) {
+          return res.status(400).json({ 
+            error: 'checkTimeout must be a positive number' 
+          });
+        }
+      }
+      
       // We read from the current config path
       const cpath = controller.getStatus().configPath;
-      if (!cpath) throw new Error('No configuration loaded or created yet.');
+      if (!cpath) {
+        return res.status(400).json({ error: 'No configuration loaded or created yet.' });
+      }
       
       const config = await configManager.loadConfig(cpath);
       if (checkInterval !== undefined) config.checkInterval = checkInterval;
@@ -160,6 +212,112 @@ export function startApiServer(
       });
 
       res.json({ success: true });
+    } catch (err: any) {
+      console.error('[API] Update config failed:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ========== CHECK CONFIGURATION API ==========
+
+  // Get check configuration
+  app.get('/api/config/check', async (req, res) => {
+    try {
+      const cpath = controller.getStatus().configPath;
+      if (!cpath) {
+        return res.status(400).json({ error: 'No configuration loaded' });
+      }
+      
+      const config = await configManager.loadConfig(cpath);
+      
+      // Return check config with defaults if not set
+      const checkConfig = config.checkConfig || {
+        tcpTimeout: 30,
+        httpTimeout: 30,
+        httpTestUrl: 'https://www.google.com/generate_204',
+        latencyTimeout: 30,
+        bandwidthEnabled: false,
+        bandwidthTimeout: 60,
+        bandwidthTestSize: 1024
+      };
+      
+      res.json(checkConfig);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Update check configuration
+  app.put('/api/config/check', async (req, res) => {
+    try {
+      const cpath = controller.getStatus().configPath;
+      if (!cpath) {
+        return res.status(400).json({ error: 'No configuration loaded' });
+      }
+      
+      const { 
+        tcpTimeout, 
+        httpTimeout, 
+        httpTestUrl, 
+        latencyTimeout, 
+        bandwidthEnabled, 
+        bandwidthTimeout, 
+        bandwidthTestSize 
+      } = req.body;
+      
+      // Validate input parameters
+      if (tcpTimeout !== undefined && (typeof tcpTimeout !== 'number' || tcpTimeout < 1 || tcpTimeout > 30)) {
+        return res.status(400).json({ error: 'tcpTimeout must be a number between 1 and 30' });
+      }
+      if (httpTimeout !== undefined && (typeof httpTimeout !== 'number' || httpTimeout < 1 || httpTimeout > 60)) {
+        return res.status(400).json({ error: 'httpTimeout must be a number between 1 and 60' });
+      }
+      if (latencyTimeout !== undefined && (typeof latencyTimeout !== 'number' || latencyTimeout < 1 || latencyTimeout > 30)) {
+        return res.status(400).json({ error: 'latencyTimeout must be a number between 1 and 30' });
+      }
+      if (bandwidthTimeout !== undefined && (typeof bandwidthTimeout !== 'number' || bandwidthTimeout < 10 || bandwidthTimeout > 300)) {
+        return res.status(400).json({ error: 'bandwidthTimeout must be a number between 10 and 300' });
+      }
+      if (bandwidthTestSize !== undefined && (typeof bandwidthTestSize !== 'number' || bandwidthTestSize < 1)) {
+        return res.status(400).json({ error: 'bandwidthTestSize must be a positive number' });
+      }
+      if (httpTestUrl !== undefined && typeof httpTestUrl !== 'string') {
+        return res.status(400).json({ error: 'httpTestUrl must be a string' });
+      }
+      if (bandwidthEnabled !== undefined && typeof bandwidthEnabled !== 'boolean') {
+        return res.status(400).json({ error: 'bandwidthEnabled must be a boolean' });
+      }
+      
+      const config = await configManager.loadConfig(cpath);
+      
+      // Initialize checkConfig if not exists
+      if (!config.checkConfig) {
+        config.checkConfig = {
+          tcpTimeout: 30,
+          httpTimeout: 30,
+          httpTestUrl: 'https://www.google.com/generate_204',
+          latencyTimeout: 30,
+          bandwidthEnabled: false,
+          bandwidthTimeout: 60,
+          bandwidthTestSize: 1024
+        };
+      }
+      
+      // Update check config
+      if (tcpTimeout !== undefined) config.checkConfig.tcpTimeout = tcpTimeout;
+      if (httpTimeout !== undefined) config.checkConfig.httpTimeout = httpTimeout;
+      if (httpTestUrl !== undefined) config.checkConfig.httpTestUrl = httpTestUrl;
+      if (latencyTimeout !== undefined) config.checkConfig.latencyTimeout = latencyTimeout;
+      if (bandwidthEnabled !== undefined) config.checkConfig.bandwidthEnabled = bandwidthEnabled;
+      if (bandwidthTimeout !== undefined) config.checkConfig.bandwidthTimeout = bandwidthTimeout;
+      if (bandwidthTestSize !== undefined) config.checkConfig.bandwidthTestSize = bandwidthTestSize;
+      
+      // Save configuration
+      import('fs').then(fs => {
+        fs.writeFileSync(cpath, JSON.stringify(config, null, 2));
+      });
+      
+      res.json({ success: true, checkConfig: config.checkConfig });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -333,6 +491,392 @@ export function startApiServer(
       
       res.json({ success: true, message: 'Alert rule deleted' });
     } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ========== STATISTICS API ==========
+
+  // 19. Get regional statistics report
+  app.get('/api/reports/by-region', async (req, res) => {
+    try {
+      const { startTime, endTime } = req.query;
+      
+      const options: any = {};
+      if (startTime) {
+        options.startTime = new Date(startTime as string);
+      }
+      if (endTime) {
+        options.endTime = new Date(endTime as string);
+      }
+      
+      const regionalStats = await reporter.generateRegionalReport(options);
+      res.json(regionalStats);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 20. Get protocol statistics report
+  app.get('/api/reports/by-protocol', async (req, res) => {
+    try {
+      const { startTime, endTime } = req.query;
+      
+      const options: any = {};
+      if (startTime) {
+        options.startTime = new Date(startTime as string);
+      }
+      if (endTime) {
+        options.endTime = new Date(endTime as string);
+      }
+      
+      const protocolStats = await reporter.generateProtocolReport(options);
+      res.json(protocolStats);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 21. Get node stability score
+  app.get('/api/nodes/:id/stability', async (req, res) => {
+    try {
+      const nodeId = req.params.id;
+      const { lookbackHours, maxAgeMinutes } = req.query;
+      
+      // Import StabilityCalculator
+      const { StabilityCalculator } = await import('../report/stability-calculator.js');
+      const calculator = new StabilityCalculator(db);
+      
+      const lookback = lookbackHours ? parseInt(lookbackHours as string) : 24;
+      const maxAge = maxAgeMinutes ? parseInt(maxAgeMinutes as string) : 60;
+      
+      const stabilityScore = await calculator.getStabilityScore(nodeId, maxAge);
+      res.json(stabilityScore);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ========== DATA EXPORT API ==========
+
+  // 22. Export report data
+  app.get('/api/export/report', async (req, res) => {
+    try {
+      const { format, startTime, endTime } = req.query;
+      
+      // Validate format parameter
+      const exportFormat = (format as string)?.toLowerCase();
+      if (!exportFormat || !['csv', 'json'].includes(exportFormat)) {
+        return res.status(400).json({ 
+          error: 'Invalid format parameter. Must be "csv" or "json"' 
+        });
+      }
+      
+      // Build report options
+      const options: any = {};
+      if (startTime) {
+        options.startTime = new Date(startTime as string);
+      }
+      if (endTime) {
+        options.endTime = new Date(endTime as string);
+      }
+      
+      // Generate report
+      const report = await reporter.generateReport(options);
+      
+      // Export based on format
+      if (exportFormat === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="report-${Date.now()}.json"`);
+        res.json(report);
+      } else {
+        // CSV format
+        const csv = serializeReportToCSV(report);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="report-${Date.now()}.csv"`);
+        res.send(csv);
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 23. Export check history data
+  app.get('/api/export/history', async (req, res) => {
+    try {
+      const { format, nodeId, airportId, startTime, endTime } = req.query;
+      
+      // Validate format parameter
+      const exportFormat = (format as string)?.toLowerCase();
+      if (!exportFormat || !['csv', 'json'].includes(exportFormat)) {
+        return res.status(400).json({ 
+          error: 'Invalid format parameter. Must be "csv" or "json"' 
+        });
+      }
+      
+      // Collect check history data
+      let historyData: any[] = [];
+      
+      if (nodeId) {
+        // Export history for specific node
+        const start = startTime ? new Date(startTime as string) : undefined;
+        const end = endTime ? new Date(endTime as string) : undefined;
+        const history = await db.getCheckHistory(nodeId as string, start, end);
+        
+        // Get node info
+        const airports = db.getAirports();
+        const node = airports.flatMap(a => a.nodes).find(n => n.id === nodeId);
+        
+        historyData = history.map(h => ({
+          nodeId: h.nodeId,
+          nodeName: node?.name || 'Unknown',
+          airportName: airports.find(a => a.id === node?.airportId)?.name || 'Unknown',
+          timestamp: h.timestamp.toISOString(),
+          available: h.available,
+          responseTime: h.responseTime,
+          error: h.error
+        }));
+      } else if (airportId) {
+        // Export history for all nodes in an airport
+        const nodes = db.getNodesByAirport(airportId as string);
+        const airport = db.getAirports().find(a => a.id === airportId);
+        
+        for (const node of nodes) {
+          const start = startTime ? new Date(startTime as string) : undefined;
+          const end = endTime ? new Date(endTime as string) : undefined;
+          const history = await db.getCheckHistory(node.id, start, end);
+          
+          historyData.push(...history.map(h => ({
+            nodeId: h.nodeId,
+            nodeName: node.name,
+            airportName: airport?.name || 'Unknown',
+            timestamp: h.timestamp.toISOString(),
+            available: h.available,
+            responseTime: h.responseTime,
+            error: h.error
+          })));
+        }
+      } else {
+        // Export history for all nodes
+        const airports = db.getAirports();
+        
+        for (const airport of airports) {
+          for (const node of airport.nodes) {
+            const start = startTime ? new Date(startTime as string) : undefined;
+            const end = endTime ? new Date(endTime as string) : undefined;
+            const history = await db.getCheckHistory(node.id, start, end);
+            
+            historyData.push(...history.map(h => ({
+              nodeId: h.nodeId,
+              nodeName: node.name,
+              airportName: airport.name,
+              timestamp: h.timestamp.toISOString(),
+              available: h.available,
+              responseTime: h.responseTime,
+              error: h.error
+            })));
+          }
+        }
+      }
+      
+      // Export based on format
+      if (exportFormat === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="history-${Date.now()}.json"`);
+        res.json(historyData);
+      } else {
+        // CSV format
+        const csv = serializeHistoryToCSV(historyData);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="history-${Date.now()}.csv"`);
+        res.send(csv);
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ========== CSV SERIALIZATION HELPERS ==========
+
+  /**
+   * Serialize report data to CSV format
+   */
+  function serializeReportToCSV(report: any): string {
+    const lines: string[] = [];
+    
+    // CSV Header
+    lines.push('Airport Name,Node Name,Node ID,Total Checks,Available Checks,Availability Rate (%),Avg Response Time (ms),Last Check Time,Last Status');
+    
+    // Data rows
+    for (const airport of report.airports) {
+      for (const node of airport.nodes) {
+        const row = [
+          escapeCSV(airport.airportName),
+          escapeCSV(node.nodeName),
+          escapeCSV(node.nodeId),
+          node.totalChecks.toString(),
+          node.availableChecks.toString(),
+          node.availabilityRate.toFixed(2),
+          node.avgResponseTime.toString(),
+          node.lastCheckTime.toISOString(),
+          node.lastStatus ? 'Available' : 'Unavailable'
+        ];
+        lines.push(row.join(','));
+      }
+    }
+    
+    return lines.join('\n');
+  }
+
+  /**
+   * Serialize check history data to CSV format
+   */
+  function serializeHistoryToCSV(historyData: any[]): string {
+    const lines: string[] = [];
+    
+    // CSV Header
+    lines.push('Airport Name,Node Name,Node ID,Timestamp,Available,Response Time (ms),Error');
+    
+    // Data rows
+    for (const record of historyData) {
+      const row = [
+        escapeCSV(record.airportName),
+        escapeCSV(record.nodeName),
+        escapeCSV(record.nodeId),
+        record.timestamp,
+        record.available ? 'Yes' : 'No',
+        record.responseTime?.toString() || '',
+        escapeCSV(record.error || '')
+      ];
+      lines.push(row.join(','));
+    }
+    
+    return lines.join('\n');
+  }
+
+  /**
+   * Escape CSV field values
+   */
+  function escapeCSV(value: string): string {
+    if (!value) return '';
+    
+    // If value contains comma, quote, or newline, wrap in quotes and escape quotes
+    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    
+    return value;
+  }
+
+  // ========== SUBSCRIPTION UPDATE API ==========
+
+  // 17. Get subscription update history
+  app.get('/api/subscriptions/updates', (req, res) => {
+    try {
+      const { airportId } = req.query;
+      
+      const updates = db.getSubscriptionUpdates(airportId as string | undefined);
+      
+      res.json(updates);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 18. Manual refresh subscription
+  app.post('/api/subscriptions/:id/refresh', async (req, res) => {
+    try {
+      const airportId = req.params.id;
+      
+      // Get airport from database
+      const airports = db.getAirports();
+      const airport = airports.find(a => a.id === airportId);
+      
+      if (!airport) {
+        return res.status(404).json({ error: 'Airport not found' });
+      }
+      
+      if (!airport.subscriptionUrl) {
+        return res.status(400).json({ error: 'Airport has no subscription URL' });
+      }
+      
+      // Trigger immediate subscription update
+      const parser = (configManager as any).subscriptionParser;
+      const content = await parser.fetchSubscription(airport.subscriptionUrl);
+      const newNodes = parser.parseSubscription(content);
+      
+      // Assign airport ID to all new nodes
+      newNodes.forEach((node: any) => {
+        node.airportId = airport.id;
+      });
+      
+      // Get existing nodes for this airport
+      const existingNodes = db.getNodesByAirport(airport.id);
+      
+      // Compare nodes to identify changes
+      const existingMap = new Map();
+      existingNodes.forEach(node => {
+        const key = `${node.address}:${node.port}:${node.protocol}`;
+        existingMap.set(key, node);
+      });
+      
+      const newMap = new Map();
+      newNodes.forEach((node: any) => {
+        const key = `${node.address}:${node.port}:${node.protocol}`;
+        newMap.set(key, node);
+      });
+      
+      // Find added and removed nodes
+      const addedNodes: any[] = [];
+      for (const [key, node] of newMap) {
+        if (!existingMap.has(key)) {
+          addedNodes.push(node);
+        }
+      }
+      
+      const removedNodes: any[] = [];
+      for (const [key, node] of existingMap) {
+        if (!newMap.has(key)) {
+          removedNodes.push(node);
+        }
+      }
+      
+      // Save new nodes to database
+      for (const node of addedNodes) {
+        db.saveNode(node);
+      }
+      
+      // Record update history
+      const updateRecord = {
+        airportId: airport.id,
+        timestamp: new Date(),
+        addedCount: addedNodes.length,
+        removedCount: removedNodes.length,
+        success: true
+      };
+      
+      db.saveSubscriptionUpdate(updateRecord);
+      
+      res.json({
+        success: true,
+        addedCount: addedNodes.length,
+        removedCount: removedNodes.length,
+        totalNodes: newNodes.length
+      });
+    } catch (err: any) {
+      // Record failed update
+      const airportId = req.params.id;
+      const updateRecord = {
+        airportId,
+        timestamp: new Date(),
+        addedCount: 0,
+        removedCount: 0,
+        success: false,
+        error: err.message
+      };
+      
+      db.saveSubscriptionUpdate(updateRecord);
+      
       res.status(500).json({ error: err.message });
     }
   });

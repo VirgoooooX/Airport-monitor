@@ -249,14 +249,14 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 1.4, 14.2_
 
 - [~] 14. Refactor SubscriptionParser to support multiple formats
-  - [-] 14.1 Update EnhancedSubscriptionParser
+  - [x] 14.1 Update EnhancedSubscriptionParser
     - Refactor `src/parser/subscription-parser.ts`
     - Initialize format parser array (Base64, Clash)
     - Implement format detection logic in `parseSubscription()`
     - Try each parser until one succeeds
     - _Requirements: 1.2, 1.3_
   
-  - [~] 14.2 Initialize protocol parser map
+  - [x] 14.2 Initialize protocol parser map
     - Create protocol parser instances
     - Map protocol prefixes to parsers
     - Use parsers in format parsers
@@ -269,26 +269,26 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 1.2, 1.3, 1.4_
 
 - [~] 15. Implement subscription auto-update scheduler
-  - [~] 15.1 Add subscription update data models
+  - [x] 15.1 Add subscription update data models
     - Add `SubscriptionUpdateConfig` interface to `src/types/models.ts`
     - Add `SubscriptionUpdate` interface for update history
     - Update `Airport` interface to include `updateInterval` field
     - _Requirements: 2.1, 2.6_
   
-  - [~] 15.2 Extend database schema for subscription updates
+  - [x] 15.2 Extend database schema for subscription updates
     - Add `subscription_updates` table in `src/storage/database.ts`
     - Add methods: `saveSubscriptionUpdate()`, `getSubscriptionUpdates()`
     - Update `airports` table to include `update_interval` column
     - _Requirements: 2.6, 5.2_
   
-  - [~] 15.3 Create SubscriptionUpdateScheduler class
+  - [x] 15.3 Create SubscriptionUpdateScheduler class
     - Create `src/scheduler/subscription-update-scheduler.ts`
     - Implement `start()` and `stop()` methods
     - Use setInterval for periodic updates
     - Implement `updateAllSubscriptions()` method
     - _Requirements: 2.1, 2.2_
   
-  - [~] 15.4 Implement subscription diff logic
+  - [x] 15.4 Implement subscription diff logic
     - Implement `updateSubscription()` method
     - Fetch new subscription content
     - Compare with existing nodes (identify added/removed)
@@ -304,18 +304,18 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 2.2, 2.3, 2.4, 2.5_
 
 - [~] 16. Integrate subscription update scheduler
-  - [~] 16.1 Wire scheduler into MonitorController
+  - [x] 16.1 Wire scheduler into MonitorController
     - Initialize SubscriptionUpdateScheduler in `src/controller/monitor-controller.ts`
     - Start scheduler when monitoring starts
     - Stop scheduler when monitoring stops
     - _Requirements: 2.1_
   
-  - [~] 16.2 Update configuration to include update settings
+  - [x] 16.2 Update configuration to include update settings
     - Add `subscriptionUpdate` to `MonitorConfig`
     - Load update interval from configuration
     - _Requirements: 2.1, 11.5_
   
-  - [~] 16.3 Add manual refresh API endpoint
+  - [x] 16.3 Add manual refresh API endpoint
     - Add `POST /api/subscriptions/:id/refresh` endpoint
     - Trigger immediate subscription update
     - _Requirements: 1.7_
@@ -325,23 +325,23 @@ This implementation plan converts the feature design into actionable coding task
     - Test manual refresh trigger
     - _Requirements: 2.1, 2.2_
 
-- [~] 17. Checkpoint - Validate subscription enhancements
+- [x] 17. Checkpoint - Validate subscription enhancements
   - Ensure all tests pass, ask the user if questions arise.
 
 ### Phase 3: Statistics and Export (Medium Priority)
 
 - [~] 18. Add node metadata support
-  - [~] 18.1 Add metadata data models
+  - [x] 18.1 Add metadata data models
     - Add `NodeMetadata` interface to `src/types/models.ts`
     - Include region, country, city, protocolType fields
     - _Requirements: 5.3, 6.6, 6.7_
   
-  - [~] 18.2 Extend database schema for metadata
+  - [x] 18.2 Extend database schema for metadata
     - Add `node_metadata` table in `src/storage/database.ts`
     - Add methods: `saveNodeMetadata()`, `getNodeMetadata()`
     - _Requirements: 5.3_
   
-  - [~] 18.3 Implement metadata extraction logic
+  - [x] 18.3 Implement metadata extraction logic
     - Extract region/country from node name or config
     - Use heuristics or mapping tables
     - Save metadata when parsing subscriptions
@@ -353,19 +353,19 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 5.3_
 
 - [~] 19. Implement regional and protocol statistics
-  - [~] 19.1 Add statistics interfaces
+  - [x] 19.1 Add statistics interfaces
     - Add `RegionalStatistics` interface to `src/types/models.ts`
     - Add `ProtocolStatistics` interface
     - _Requirements: 6.6, 6.7_
   
-  - [~] 19.2 Implement regional statistics in ReportGenerator
+  - [x] 19.2 Implement regional statistics in ReportGenerator
     - Add `generateRegionalReport()` method in `src/report/report-generator.ts`
     - Group nodes by region
     - Calculate aggregate statistics per region
     - Include country-level breakdown
     - _Requirements: 6.6, 6.8_
   
-  - [~] 19.3 Implement protocol statistics in ReportGenerator
+  - [x] 19.3 Implement protocol statistics in ReportGenerator
     - Add `generateProtocolReport()` method
     - Group nodes by protocol type
     - Calculate aggregate statistics per protocol
@@ -377,16 +377,16 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 6.6, 6.7_
 
 - [~] 20. Implement stability score calculation
-  - [~] 20.1 Add stability score data models
+  - [x] 20.1 Add stability score data models
     - Add `StabilityScore` interface to `src/types/models.ts`
     - _Requirements: 6.5_
   
-  - [~] 20.2 Extend database schema for stability scores
+  - [x] 20.2 Extend database schema for stability scores
     - Add `node_stability_scores` table in `src/storage/database.ts`
     - Add methods: `saveStabilityScore()`, `getStabilityScore()`
     - _Requirements: 6.5_
   
-  - [~] 20.3 Implement stability score algorithm
+  - [x] 20.3 Implement stability score algorithm
     - Create `src/report/stability-calculator.ts`
     - Calculate score based on availability rate variance
     - Factor in consecutive failure count
@@ -400,14 +400,14 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 6.5_
 
 - [~] 21. Add statistics and export API endpoints
-  - [~] 21.1 Implement statistics API endpoints
+  - [x] 21.1 Implement statistics API endpoints
     - Add `GET /api/reports/by-region` endpoint in `src/api/server.ts`
     - Add `GET /api/reports/by-protocol` endpoint
     - Add `GET /api/nodes/:id/stability` endpoint
     - Support time range query parameters
     - _Requirements: 6.6, 6.7, 6.8, 13.6_
   
-  - [~] 21.2 Implement data export API endpoints
+  - [x] 21.2 Implement data export API endpoints
     - Add `GET /api/export/report` endpoint
     - Add `GET /api/export/history` endpoint
     - Support format parameter: csv or json
@@ -423,7 +423,7 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 13.6, 13.12_
 
 - [~] 22. Implement frontend statistics visualization
-  - [~] 22.1 Create NodeFilter component
+  - [x] 22.1 Create NodeFilter component
     - Create `frontend/src/components/NodeFilter.tsx`
     - Add region dropdown filter
     - Add protocol dropdown filter
@@ -431,47 +431,47 @@ This implementation plan converts the feature design into actionable coding task
     - Emit filter change events
     - _Requirements: 8.11_
   
-  - [~] 22.2 Create RegionalStatsPanel component
+  - [x] 22.2 Create RegionalStatsPanel component
     - Create `frontend/src/components/RegionalStatsPanel.tsx`
     - Fetch regional statistics from API
     - Display region-wise availability and latency
     - Use charts (bar chart or pie chart)
     - _Requirements: 9.5_
   
-  - [~] 22.3 Create ProtocolStatsPanel component
+  - [x] 22.3 Create ProtocolStatsPanel component
     - Create `frontend/src/components/ProtocolStatsPanel.tsx`
     - Fetch protocol statistics from API
     - Display protocol-wise availability and latency
     - Use charts
     - _Requirements: 9.6_
   
-  - [~] 22.4 Add stability score display to NodeCard
+  - [x] 22.4 Add stability score display to NodeCard
     - Update `frontend/src/components/NodeCard.tsx`
     - Fetch and display stability score (0-100)
     - Use color-coded badge or progress bar
     - _Requirements: 9.7_
   
-  - [~] 22.5 Create ExportButton component
+  - [x] 22.5 Create ExportButton component
     - Create `frontend/src/components/ExportButton.tsx`
     - Add CSV export button
     - Add JSON export button
     - Trigger download on click
     - _Requirements: 10.5_
   
-  - [~] 22.6 Integrate statistics components into App
+  - [x] 22.6 Integrate statistics components into App
     - Add NodeFilter to dashboard header
     - Add RegionalStatsPanel and ProtocolStatsPanel to reports view
     - Add ExportButton to reports view
     - Wire filter events to node list
     - _Requirements: 8.11, 9.5, 9.6, 10.5_
 
-- [~] 23. Checkpoint - Validate statistics and export features
+- [x] 23. Checkpoint - Validate statistics and export features
   - Ensure all tests pass, ask the user if questions arise.
 
 ### Phase 4: Deployment Optimization (Low Priority)
 
 - [~] 24. Implement bandwidth check strategy (optional)
-  - [~] 24.1 Implement BandwidthCheckStrategy
+  - [x] 24.1 Implement BandwidthCheckStrategy
     - Create `BandwidthCheckStrategy` class in `src/checker/strategies/bandwidth-check.ts`
     - Download test file through proxy
     - Measure download speed (KB/s)
@@ -479,12 +479,12 @@ This implementation plan converts the feature design into actionable coding task
     - Handle timeouts
     - _Requirements: 3.5, 4.4, 4.5, 4.6_
   
-  - [~] 24.2 Integrate bandwidth check into EnhancedAvailabilityChecker
+  - [x] 24.2 Integrate bandwidth check into EnhancedAvailabilityChecker
     - Add bandwidth strategy to strategy map
     - Execute only if `bandwidthEnabled` is true
     - _Requirements: 3.5, 4.5_
   
-  - [~] 24.3 Update CheckConfig to include bandwidth settings
+  - [x] 24.3 Update CheckConfig to include bandwidth settings
     - Add `bandwidthEnabled`, `bandwidthTimeout`, `bandwidthTestSize` fields
     - Update configuration loading
     - _Requirements: 4.5, 4.6_
@@ -495,7 +495,7 @@ This implementation plan converts the feature design into actionable coding task
     - _Requirements: 3.5_
 
 - [~] 25. Enhance Docker deployment configuration
-  - [~] 25.1 Create multi-stage Dockerfile
+  - [x] 25.1 Create multi-stage Dockerfile
     - Create `Dockerfile` in project root
     - Stage 1: Build frontend (Node.js Alpine)
     - Stage 2: Build backend (TypeScript compilation)
@@ -503,7 +503,7 @@ This implementation plan converts the feature design into actionable coding task
     - Copy built artifacts
     - _Requirements: 12.1, 12.6_
   
-  - [~] 25.2 Create docker-compose.yml
+  - [x] 25.2 Create docker-compose.yml
     - Create `docker-compose.yml` in project root
     - Define airport-monitor service
     - Map port 3000
@@ -512,25 +512,25 @@ This implementation plan converts the feature design into actionable coding task
     - Add healthcheck
     - _Requirements: 12.2, 12.4, 12.5_
   
-  - [~] 25.3 Add Docker healthcheck
+  - [x] 25.3 Add Docker healthcheck
     - Implement health check endpoint: `GET /api/health`
     - Return 200 if system is operational
     - Add healthcheck to Dockerfile
     - _Requirements: 12.3_
   
-  - [~] 25.4 Create .dockerignore file
+  - [x] 25.4 Create .dockerignore file
     - Exclude node_modules, dist, data directories
     - Exclude test files and development configs
     - _Requirements: 12.1_
 
 - [~] 26. Add configuration management enhancements
-  - [~] 26.1 Implement check config API endpoints
+  - [x] 26.1 Implement check config API endpoints
     - Add `GET /api/config/check` endpoint in `src/api/server.ts`
     - Add `PUT /api/config/check` endpoint
     - Return and update CheckConfig
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 13.8_
   
-  - [~] 26.2 Create CheckConfigPanel frontend component
+  - [x] 26.2 Create CheckConfigPanel frontend component
     - Create `frontend/src/components/CheckConfigPanel.tsx`
     - Display TCP, HTTP, latency, bandwidth timeout inputs
     - Display HTTP test URL input
@@ -538,40 +538,40 @@ This implementation plan converts the feature design into actionable coding task
     - Add save button
     - _Requirements: 8.6_
   
-  - [~] 26.3 Integrate CheckConfigPanel into SettingsPanel
+  - [x] 26.3 Integrate CheckConfigPanel into SettingsPanel
     - Add CheckConfigPanel to `frontend/src/components/SettingsPanel.tsx`
     - Fetch config on mount
     - Update config on save
     - _Requirements: 8.6, 11.6_
 
 - [~] 27. Enhance error handling and logging
-  - [~] 27.1 Improve subscription error handling
+  - [x] 27.1 Improve subscription error handling
     - Add try-catch blocks in subscription parsing
     - Return detailed error messages
     - Log errors with stack traces
     - _Requirements: 14.1, 14.2, 14.7_
   
-  - [~] 27.2 Improve database error handling
+  - [x] 27.2 Improve database error handling
     - Add retry logic for database operations
     - Log database errors with context
     - _Requirements: 14.3, 14.7_
   
-  - [~] 27.3 Improve check error handling
+  - [x] 27.3 Improve check error handling
     - Capture and log detailed error information in check strategies
     - Store error details in check results
     - _Requirements: 14.4, 14.7_
   
-  - [~] 27.4 Add API input validation
+  - [x] 27.4 Add API input validation
     - Validate request parameters in API endpoints
     - Return 400 with error descriptions for invalid input
     - _Requirements: 14.5_
   
-  - [~] 27.5 Display errors in frontend
+  - [x] 27.5 Display errors in frontend
     - Add error toast notifications
     - Display error messages in UI components
     - _Requirements: 14.6_
 
-- [~] 28. Final checkpoint - Complete system validation
+- [x] 28. Final checkpoint - Complete system validation
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

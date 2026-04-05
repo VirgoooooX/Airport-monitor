@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { DefaultConfigurationManager } from '../config/configuration-manager.js';
 import { EnhancedAvailabilityChecker } from '../checker/availability-checker.js';
 import { NodeCheckScheduler } from '../scheduler/check-scheduler.js';
+import { SubscriptionUpdateScheduler } from '../scheduler/subscription-update-scheduler.js';
 import { DatabaseManager } from '../storage/database.js';
 import { ReportGeneratorImpl } from '../report/report-generator.js';
 import { Logger } from '../logger/logger.js';
@@ -11,6 +12,7 @@ import { LogLevel } from '../types/index.js';
 import { startApiServer } from '../api/server.js';
 import { Server } from 'http';
 import { AlertManager } from '../alert/alert-manager.js';
+import { DefaultSubscriptionParser } from '../parser/subscription-parser.js';
 
 export interface MonitorStatus {
   running: boolean;
@@ -27,6 +29,7 @@ export class MonitorController {
   private configManager: DefaultConfigurationManager;
   private checker: EnhancedAvailabilityChecker;
   private scheduler: NodeCheckScheduler | null = null;
+  private subscriptionScheduler: SubscriptionUpdateScheduler | null = null;
   private db: DatabaseManager | null = null;
   private reporter: ReportGeneratorImpl | null = null;
   private logger: Logger;
@@ -52,6 +55,28 @@ export class MonitorController {
     };
     
     this.checker = new EnhancedAvailabilityChecker(this.checkConfig);
+  }
+
+  /**
+   * Update check configuration and reinitialize checker
+   */
+  private updateCheckConfig(config: MonitorConfig): void {
+    // Merge config.checkConfig with defaults if provided
+    if (config.checkConfig) {
+      this.checkConfig = {
+        tcpTimeout: config.checkConfig.tcpTimeout ?? this.checkConfig.tcpTimeout,
+        httpTimeout: config.checkConfig.httpTimeout ?? this.checkConfig.httpTimeout,
+        httpTestUrl: config.checkConfig.httpTestUrl ?? this.checkConfig.httpTestUrl,
+        latencyTimeout: config.checkConfig.latencyTimeout ?? this.checkConfig.latencyTimeout,
+        bandwidthEnabled: config.checkConfig.bandwidthEnabled ?? this.checkConfig.bandwidthEnabled,
+        bandwidthTimeout: config.checkConfig.bandwidthTimeout ?? this.checkConfig.bandwidthTimeout,
+        bandwidthTestSize: config.checkConfig.bandwidthTestSize ?? this.checkConfig.bandwidthTestSize
+      };
+      
+      // Reinitialize checker with new config
+      this.checker = new EnhancedAvailabilityChecker(this.checkConfig);
+      this.logger.info('Check configuration updated');
+    }
   }
 
   /**
@@ -142,7 +167,10 @@ export class MonitorController {
     // Initialize AlertManager
     this.initializeAlertManager();
     
-    // Set checker options
+    // Update check configuration from loaded config
+    this.updateCheckConfig(this.config!);
+    
+    // Set checker options (for backward compatibility)
     this.checker.setTimeout(this.config!.checkTimeout);
 
     // Boot API server unconditionally
@@ -172,6 +200,19 @@ export class MonitorController {
     
     this.scheduler.start(this.config.checkInterval);
     this.logger.logOperation('Engine.started', `interval=${this.config.checkInterval}s, nodes=${allNodes.length}`);
+    
+    // Start subscription update scheduler if configured
+    if (this.config.subscriptionUpdate && this.config.subscriptionUpdate.enabled) {
+      const parser = new DefaultSubscriptionParser();
+      this.subscriptionScheduler = new SubscriptionUpdateScheduler(
+        parser,
+        this.db!,
+        this.logger,
+        this.config.subscriptionUpdate
+      );
+      this.subscriptionScheduler.start();
+      this.logger.info('Subscription update scheduler started');
+    }
   }
 
   /**
@@ -183,6 +224,13 @@ export class MonitorController {
       await this.scheduler.stop();
       this.scheduler = null;
       this.logger.info('Engine stopped operations');
+    }
+    
+    // Stop subscription update scheduler
+    if (this.subscriptionScheduler) {
+      this.subscriptionScheduler.stop();
+      this.subscriptionScheduler = null;
+      this.logger.info('Subscription update scheduler stopped');
     }
   }
 
@@ -222,7 +270,10 @@ export class MonitorController {
       // Initialize AlertManager
       this.initializeAlertManager();
 
-      // Configure checker timeout
+      // Update check configuration from loaded config
+      this.updateCheckConfig(this.config);
+
+      // Configure checker timeout (for backward compatibility)
       this.checker.setTimeout(this.config.checkTimeout);
 
       // Collect all nodes across airports
@@ -251,6 +302,19 @@ export class MonitorController {
         this.logger.info(`API Server created on port ${apiPort}`);
       }
 
+      // Start subscription update scheduler if configured
+      if (this.config.subscriptionUpdate && this.config.subscriptionUpdate.enabled) {
+        const parser = new DefaultSubscriptionParser();
+        this.subscriptionScheduler = new SubscriptionUpdateScheduler(
+          parser,
+          this.db,
+          this.logger,
+          this.config.subscriptionUpdate
+        );
+        this.subscriptionScheduler.start();
+        this.logger.info('Subscription update scheduler started');
+      }
+
       this.logger.logOperation('Monitor.started', `interval=${interval}s, nodes=${allNodes.length}, apiPort=${apiPort}`);
     } catch (error) {
       this.logger.error('Failed to start monitor', error as Error);
@@ -275,6 +339,13 @@ export class MonitorController {
         await this.scheduler.stop();
         this.scheduler = null;
         this.logger.info('Scheduler stopped');
+      }
+
+      // Stop subscription update scheduler
+      if (this.subscriptionScheduler) {
+        this.subscriptionScheduler.stop();
+        this.subscriptionScheduler = null;
+        this.logger.info('Subscription update scheduler stopped');
       }
 
       if (this.db) {

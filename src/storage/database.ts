@@ -1,5 +1,5 @@
 import initSqlJs, { Database } from 'sql.js';
-import { Airport, Node, CheckResult, EnhancedCheckResult, CheckDimensionResult, AlertRule, Alert } from '../types/index.js';
+import { Airport, Node, CheckResult, EnhancedCheckResult, CheckDimensionResult, AlertRule, Alert, SubscriptionUpdate, NodeMetadata, StabilityScore } from '../types/index.js';
 import { DataStorage } from '../interfaces/DataStorage.js';
 import * as fs from 'fs';
 
@@ -47,9 +47,13 @@ export class DatabaseManager implements DataStorage {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         subscription_url TEXT,
-        created_at DATETIME NOT NULL
+        created_at DATETIME NOT NULL,
+        update_interval INTEGER
       )
     `);
+
+    // Migrate existing airports table if needed
+    this.migrateAirportsTable();
 
     // Create nodes table
     this.db.run(`
@@ -120,6 +124,42 @@ export class DatabaseManager implements DataStorage {
       )
     `);
 
+    // Create subscription_updates table
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS subscription_updates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        airport_id TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        added_count INTEGER NOT NULL,
+        removed_count INTEGER NOT NULL,
+        success INTEGER NOT NULL DEFAULT 1,
+        error TEXT,
+        FOREIGN KEY (airport_id) REFERENCES airports(id)
+      )
+    `);
+
+    // Create node_metadata table
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS node_metadata (
+        node_id TEXT PRIMARY KEY,
+        region TEXT,
+        country TEXT,
+        city TEXT,
+        protocol_type TEXT,
+        FOREIGN KEY (node_id) REFERENCES nodes(id)
+      )
+    `);
+
+    // Create node_stability_scores table
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS node_stability_scores (
+        node_id TEXT PRIMARY KEY,
+        score REAL NOT NULL,
+        calculated_at TEXT NOT NULL,
+        FOREIGN KEY (node_id) REFERENCES nodes(id)
+      )
+    `);
+
     // Create indexes
     this.createIndexes();
   }
@@ -169,6 +209,42 @@ export class DatabaseManager implements DataStorage {
       CREATE INDEX IF NOT EXISTS idx_alerts_airport 
       ON alerts(airport_id)
     `);
+
+    // Index for querying subscription updates by airport
+    this.db.run(`
+      CREATE INDEX IF NOT EXISTS idx_subscription_updates_airport 
+      ON subscription_updates(airport_id)
+    `);
+
+    // Index for querying subscription updates by timestamp
+    this.db.run(`
+      CREATE INDEX IF NOT EXISTS idx_subscription_updates_timestamp 
+      ON subscription_updates(timestamp)
+    `);
+  }
+
+  /**
+   * Migrate airports table to add update_interval column if it doesn't exist
+   */
+  private migrateAirportsTable(): void {
+    try {
+      // Check if update_interval column exists
+      const result = this.db.exec(`PRAGMA table_info(airports)`);
+      
+      if (result.length > 0) {
+        const columns = result[0].values;
+        const hasUpdateInterval = columns.some(col => col[1] === 'update_interval');
+        
+        if (!hasUpdateInterval) {
+          // Add the column if it doesn't exist
+          this.db.run(`ALTER TABLE airports ADD COLUMN update_interval INTEGER`);
+          this.save();
+        }
+      }
+    } catch (error) {
+      // If migration fails, log but don't throw - table might not exist yet
+      console.warn('Airport table migration warning:', error);
+    }
   }
 
   /**
@@ -182,16 +258,28 @@ export class DatabaseManager implements DataStorage {
    * Save database to file
    */
   save(): void {
-    const data = this.db.export();
-    fs.writeFileSync(this.dbPath, data);
+    try {
+      const data = this.db.export();
+      fs.writeFileSync(this.dbPath, data);
+    } catch (error) {
+      const errorMsg = `Failed to save database to ${this.dbPath}`;
+      console.error(`[DatabaseManager] ${errorMsg}:`, error);
+      throw new Error(`${errorMsg}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**
    * Close the database connection
    */
   close(): void {
-    this.save();
-    this.db.close();
+    try {
+      this.save();
+      this.db.close();
+      console.log(`[DatabaseManager] Database closed successfully`);
+    } catch (error) {
+      console.error(`[DatabaseManager] Error closing database:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -199,6 +287,8 @@ export class DatabaseManager implements DataStorage {
    */
   deleteAirport(airportId: string): void {
     try {
+      console.log(`[DatabaseManager] Deleting airport: ${airportId}`);
+      
       // 1. Delete check results for all nodes belonging to this airport
       this.db.run(
         `DELETE FROM check_results 
@@ -219,8 +309,11 @@ export class DatabaseManager implements DataStorage {
       );
       
       this.save();
+      console.log(`[DatabaseManager] Successfully deleted airport: ${airportId}`);
     } catch (error) {
-      throw new Error(`Failed to delete airport ${airportId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMsg = `Failed to delete airport ${airportId}`;
+      console.error(`[DatabaseManager] ${errorMsg}:`, error);
+      throw new Error(`${errorMsg}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -229,13 +322,14 @@ export class DatabaseManager implements DataStorage {
    */
   saveAirport(airport: Airport): void {
     this.db.run(
-      `INSERT OR REPLACE INTO airports (id, name, subscription_url, created_at)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT OR REPLACE INTO airports (id, name, subscription_url, created_at, update_interval)
+       VALUES (?, ?, ?, ?, ?)`,
       [
         airport.id,
         airport.name,
         airport.subscriptionUrl || null,
-        airport.createdAt.toISOString()
+        airport.createdAt.toISOString(),
+        airport.updateInterval ?? null
       ]
     );
     this.save();
@@ -266,7 +360,7 @@ export class DatabaseManager implements DataStorage {
    */
   getAirports(): Airport[] {
     const result = this.db.exec(`
-      SELECT id, name, subscription_url, created_at
+      SELECT id, name, subscription_url, created_at, update_interval
       FROM airports
     `);
 
@@ -284,7 +378,8 @@ export class DatabaseManager implements DataStorage {
         name: row[1] as string,
         subscriptionUrl: row[2] ? (row[2] as string) : undefined,
         nodes: this.getNodesByAirport(row[0] as string),
-        createdAt: new Date(row[3] as string)
+        createdAt: new Date(row[3] as string),
+        updateInterval: row[4] ? (row[4] as number) : undefined
       });
     }
 
@@ -815,5 +910,153 @@ export class DatabaseManager implements DataStorage {
       [ruleId]
     );
     this.save();
+  }
+
+  /**
+   * Save a subscription update record to the database
+   */
+  saveSubscriptionUpdate(update: SubscriptionUpdate): void {
+    this.db.run(
+      `INSERT INTO subscription_updates (airport_id, timestamp, added_count, removed_count, success, error)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        update.airportId,
+        update.timestamp.toISOString(),
+        update.addedCount,
+        update.removedCount,
+        update.success ? 1 : 0,
+        update.error ?? null
+      ]
+    );
+    this.save();
+  }
+
+  /**
+   * Get subscription update history for an airport
+   */
+  getSubscriptionUpdates(airportId?: string, limit?: number): SubscriptionUpdate[] {
+    let query = `
+      SELECT id, airport_id, timestamp, added_count, removed_count, success, error
+      FROM subscription_updates
+    `;
+    const params: any[] = [];
+
+    if (airportId) {
+      query += ` WHERE airport_id = ?`;
+      params.push(airportId);
+    }
+
+    query += ` ORDER BY timestamp DESC`;
+
+    if (limit) {
+      query += ` LIMIT ?`;
+      params.push(limit);
+    }
+
+    const result = this.db.exec(query, params);
+
+    if (result.length === 0) {
+      return [];
+    }
+
+    const rows = result[0];
+    const updates: SubscriptionUpdate[] = [];
+
+    for (let i = 0; i < rows.values.length; i++) {
+      const row = rows.values[i];
+      updates.push({
+        id: row[0] as number,
+        airportId: row[1] as string,
+        timestamp: new Date(row[2] as string),
+        addedCount: row[3] as number,
+        removedCount: row[4] as number,
+        success: row[5] === 1,
+        error: row[6] ? (row[6] as string) : undefined
+      });
+    }
+
+    return updates;
+  }
+
+  /**
+   * Save node metadata to the database
+   */
+  saveNodeMetadata(metadata: NodeMetadata): void {
+    this.db.run(
+      `INSERT OR REPLACE INTO node_metadata (node_id, region, country, city, protocol_type)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        metadata.nodeId,
+        metadata.region ?? null,
+        metadata.country ?? null,
+        metadata.city ?? null,
+        metadata.protocolType ?? null
+      ]
+    );
+    this.save();
+  }
+
+  /**
+   * Get node metadata from the database
+   */
+  getNodeMetadata(nodeId: string): NodeMetadata | undefined {
+    const result = this.db.exec(
+      `SELECT node_id, region, country, city, protocol_type
+       FROM node_metadata
+       WHERE node_id = ?`,
+      [nodeId]
+    );
+
+    if (result.length === 0 || result[0].values.length === 0) {
+      return undefined;
+    }
+
+    const row = result[0].values[0];
+    return {
+      nodeId: row[0] as string,
+      region: row[1] ? (row[1] as string) : undefined,
+      country: row[2] ? (row[2] as string) : undefined,
+      city: row[3] ? (row[3] as string) : undefined,
+      protocolType: row[4] ? (row[4] as string) : undefined
+    };
+  }
+
+  /**
+   * Save stability score to the database
+   */
+  saveStabilityScore(score: StabilityScore): void {
+    this.db.run(
+      `INSERT OR REPLACE INTO node_stability_scores (node_id, score, calculated_at)
+       VALUES (?, ?, ?)`,
+      [
+        score.nodeId,
+        score.score,
+        score.calculatedAt.toISOString()
+      ]
+    );
+    this.save();
+  }
+
+  /**
+   * Get stability score from the database
+   */
+  getStabilityScore(nodeId: string): StabilityScore | undefined {
+    const result = this.db.exec(
+      `SELECT node_id, score, calculated_at
+       FROM node_stability_scores
+       WHERE node_id = ?`,
+      [nodeId]
+    );
+
+    if (result.length === 0 || result[0].values.length === 0) {
+      return undefined;
+    }
+
+    const row = result[0].values[0];
+    return {
+      nodeId: row[0] as string,
+      score: row[1] as number,
+      calculatedAt: new Date(row[2] as string)
+    };
   }
 }

@@ -18,7 +18,7 @@ describe('VLESS Protocol Parser Integration', () => {
       expect(result.name).toBe('My VLESS Server');
       expect(result.address).toBe('example.com');
       expect(result.port).toBe(443);
-      expect(result.config?.uuid).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+      expect(result.config?.id).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
       expect(result.config?.encryption).toBe('none');
       expect(result.config?.security).toBe('tls');
       expect(result.config?.sni).toBe('example.com');
@@ -34,7 +34,7 @@ describe('VLESS Protocol Parser Integration', () => {
       expect(result.name).toBe('XTLS Node');
       expect(result.address).toBe('server.example.com');
       expect(result.port).toBe(8443);
-      expect(result.config?.uuid).toBe('uuid-test');
+      expect(result.config?.id).toBe('uuid-test');
       expect(result.config?.flow).toBe('xtls-rprx-vision');
       expect(result.config?.security).toBe('xtls');
     });
@@ -75,7 +75,7 @@ describe('VLESS Protocol Parser Integration', () => {
       expect(result.name).toBe('simple.example.com:1080');
       expect(result.address).toBe('simple.example.com');
       expect(result.port).toBe(1080);
-      expect(result.config?.uuid).toBe('simple-uuid');
+      expect(result.config?.id).toBe('simple-uuid');
       expect(result.config?.encryption).toBe('none');
       expect(result.config?.flow).toBe('');
       expect(result.config?.security).toBe('none');

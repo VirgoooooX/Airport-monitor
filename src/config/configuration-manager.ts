@@ -3,6 +3,7 @@ import { MonitorConfig, Airport, ValidationResult, LogLevel } from '../types/ind
 import { SubscriptionParser } from '../interfaces/SubscriptionParser.js';
 import { DefaultSubscriptionParser } from '../parser/subscription-parser.js';
 import { DatabaseManager } from '../storage/database.js';
+import { MetadataExtractor } from '../parser/metadata-extractor.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -85,6 +86,9 @@ export class DefaultConfigurationManager implements ConfigurationManager {
         this.database.saveAirport(airport);
         for (const node of airport.nodes) {
           this.database.saveNode(node);
+          // Extract and save node metadata
+          const metadata = MetadataExtractor.extractMetadata(node);
+          this.database.saveNodeMetadata(metadata);
         }
       }
     }
@@ -125,6 +129,9 @@ export class DefaultConfigurationManager implements ConfigurationManager {
       this.database.saveAirport(airport);
       for (const node of airport.nodes) {
         this.database.saveNode(node);
+        // Extract and save node metadata
+        const metadata = MetadataExtractor.extractMetadata(node);
+        this.database.saveNodeMetadata(metadata);
       }
     }
 
@@ -162,6 +169,9 @@ export class DefaultConfigurationManager implements ConfigurationManager {
       this.database.saveAirport(airport);
       for (const node of airport.nodes) {
         this.database.saveNode(node);
+        // Extract and save node metadata
+        const metadata = MetadataExtractor.extractMetadata(node);
+        this.database.saveNodeMetadata(metadata);
       }
     }
 
@@ -324,6 +334,9 @@ export class DefaultConfigurationManager implements ConfigurationManager {
       this.database.saveAirport(airport);
       for (const node of airport.nodes) {
         this.database.saveNode(node);
+        // Extract and save node metadata
+        const metadata = MetadataExtractor.extractMetadata(node);
+        this.database.saveNodeMetadata(metadata);
       }
     }
   }
@@ -370,13 +383,32 @@ export class DefaultConfigurationManager implements ConfigurationManager {
     // Parse alert rules (optional, defaults to empty array)
     const alertRules = raw.alertRules && Array.isArray(raw.alertRules) ? raw.alertRules : [];
 
+    // Parse subscription update config (optional)
+    const subscriptionUpdate = raw.subscriptionUpdate ? {
+      updateInterval: raw.subscriptionUpdate.updateInterval || 24,
+      enabled: raw.subscriptionUpdate.enabled !== undefined ? raw.subscriptionUpdate.enabled : true
+    } : undefined;
+
+    // Parse check config (optional, with defaults)
+    const checkConfig = raw.checkConfig ? {
+      tcpTimeout: raw.checkConfig.tcpTimeout !== undefined ? raw.checkConfig.tcpTimeout : 30,
+      httpTimeout: raw.checkConfig.httpTimeout !== undefined ? raw.checkConfig.httpTimeout : 30,
+      httpTestUrl: raw.checkConfig.httpTestUrl || 'https://www.google.com/generate_204',
+      latencyTimeout: raw.checkConfig.latencyTimeout !== undefined ? raw.checkConfig.latencyTimeout : 30,
+      bandwidthEnabled: raw.checkConfig.bandwidthEnabled !== undefined ? raw.checkConfig.bandwidthEnabled : false,
+      bandwidthTimeout: raw.checkConfig.bandwidthTimeout !== undefined ? raw.checkConfig.bandwidthTimeout : 60,
+      bandwidthTestSize: raw.checkConfig.bandwidthTestSize !== undefined ? raw.checkConfig.bandwidthTestSize : 1024
+    } : undefined;
+
     return {
       airports,
       checkInterval: raw.checkInterval,
       checkTimeout: raw.checkTimeout !== undefined ? raw.checkTimeout : 30,
       logLevel: raw.logLevel,
       storagePath: raw.storagePath,
-      alertRules
+      subscriptionUpdate,
+      alertRules,
+      checkConfig
     };
   }
 

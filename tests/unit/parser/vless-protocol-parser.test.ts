@@ -52,7 +52,7 @@ describe('VLESSProtocolParser', () => {
       expect(result.port).toBe(443);
       expect(result.name).toBe('example.com:443');
       expect(result.config).toMatchObject({
-        uuid: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         encryption: 'none',
         flow: '',
         security: 'none',
@@ -70,7 +70,7 @@ describe('VLESSProtocolParser', () => {
       expect(result.address).toBe('server.com');
       expect(result.port).toBe(8443);
       expect(result.config).toMatchObject({
-        uuid: 'uuid-123',
+        id: 'uuid-123',
         encryption: 'none',
         flow: 'xtls-rprx-direct',
         security: 'tls',
@@ -98,7 +98,7 @@ describe('VLESSProtocolParser', () => {
       expect(result.address).toBe('192.168.1.1');
       expect(result.port).toBe(1080);
       expect(result.config).toMatchObject({
-        uuid: 'uuid-test',
+        id: 'uuid-test',
         security: 'tls',
         sni: 'test.com',
         flow: 'xtls-rprx-vision'
@@ -152,7 +152,7 @@ describe('VLESSProtocolParser', () => {
 
       const result = parser.parseUri(uri);
 
-      expect(result.config?.uuid).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+      expect(result.config?.id).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
       expect(result.address).toBe('example.com');
     });
 
@@ -173,7 +173,7 @@ describe('VLESSProtocolParser', () => {
       const result = parser.parseUri(uri);
 
       expect(result.config).toMatchObject({
-        uuid: 'uuid',
+        id: 'uuid',
         encryption: 'none',
         security: 'tls',
         type: 'ws',

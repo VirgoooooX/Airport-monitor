@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, Cpu } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import type { NodeInfo } from '../hooks/useDashboardData.ts';
 
 interface NodeCardProps {
@@ -11,7 +12,26 @@ interface NodeCardProps {
 export default function NodeCard({ node, onClick, index }: NodeCardProps) {
   // A pseudo health simulation since the node API doesn't push live health info yet (unless we augment it later)
   // We mock a baseline healthy look, but real impl can use node health stats.
-  const isHealthy = true; 
+  const isHealthy = true;
+  const [stabilityScore, setStabilityScore] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Fetch stability score for this node
+    const fetchStabilityScore = async () => {
+      try {
+        const response = await fetch(`/api/nodes/${node.id}/stability`);
+        if (response.ok) {
+          const data = await response.json();
+          setStabilityScore(data.score);
+        }
+      } catch (err) {
+        // Silently fail - stability score is optional
+        console.error('Failed to fetch stability score:', err);
+      }
+    };
+
+    fetchStabilityScore();
+  }, [node.id]); 
 
   return (
     <motion.div
@@ -40,11 +60,22 @@ export default function NodeCard({ node, onClick, index }: NodeCardProps) {
         </div>
       </div>
       
-      <div className="relative z-10 shrink-0 ml-auto">
-        <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center bg-zinc-900 shadow-inner">
-          <Cpu className="w-4 h-4 text-zinc-500" />
+      {/* Stability Score Badge */}
+      {stabilityScore !== null && (
+        <div className="relative z-10 shrink-0 ml-auto">
+          <div 
+            className={`px-3 py-1.5 rounded-full border flex items-center gap-1.5 ${
+              stabilityScore >= 90 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+              stabilityScore >= 70 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
+              stabilityScore >= 50 ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' :
+              'bg-rose-500/10 border-rose-500/30 text-rose-400'
+            }`}
+          >
+            <Star className="w-3 h-3" />
+            <span className="text-xs font-semibold">{stabilityScore.toFixed(0)}</span>
+          </div>
         </div>
-      </div>
+      )}
     </motion.div>
   );
 }

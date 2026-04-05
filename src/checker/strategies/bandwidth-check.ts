@@ -3,47 +3,49 @@ import { CheckStrategy } from './check-strategy.js';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
 /**
- * HTTP Check Strategy
- * Checks node availability by sending HTTP requests through the proxy
- * to verify that the proxy can actually route HTTP traffic
+ * Bandwidth Check Strategy
+ * Measures download speed by downloading a test file through the proxy
+ * This is an optional check that can be enabled/disabled via configuration
  */
-export class HTTPCheckStrategy implements CheckStrategy {
-  readonly name = 'http';
+export class BandwidthCheckStrategy implements CheckStrategy {
+  readonly name = 'bandwidth';
+
+  // Default test file URL (10MB file from a reliable CDN)
+  private readonly DEFAULT_TEST_URL = 'https://speed.cloudflare.com/__down?bytes=';
 
   /**
-   * Execute HTTP check on a node
+   * Execute bandwidth check on a node
    * @param node Node to check
    * @param config Check configuration
-   * @returns Check dimension result with HTTP request status and response time
+   * @returns Check dimension result with bandwidth measurement in KB/s
    */
   async check(node: Node, config: CheckConfig): Promise<CheckDimensionResult> {
     const startTime = Date.now();
 
     try {
-      console.log(`[HTTPCheck] Checking node ${node.id} (${node.name}) via ${config.httpTestUrl}`);
-      
-      // Create proxy URL based on node protocol
+      // Build proxy URL
       const proxyUrl = this.buildProxyUrl(node);
       
-      // Send HTTP request through proxy
-      await this.sendHttpRequest(proxyUrl, config.httpTestUrl, config.httpTimeout);
-
-      const responseTime = Date.now() - startTime;
-      console.log(`[HTTPCheck] Node ${node.id} check succeeded in ${responseTime}ms`);
+      // Calculate test file size in bytes
+      const testSizeBytes = config.bandwidthTestSize * 1024;
+      
+      // Download test file and measure speed
+      const bandwidth = await this.measureBandwidth(
+        proxyUrl,
+        testSizeBytes,
+        config.bandwidthTimeout
+      );
 
       return {
-        dimension: 'http',
+        dimension: 'bandwidth',
         success: true,
-        value: responseTime
+        value: bandwidth // KB/s
       };
     } catch (error) {
-      const errorMsg = this.formatError(error);
-      console.error(`[HTTPCheck] Node ${node.id} check failed:`, errorMsg, error);
-      
       return {
-        dimension: 'http',
+        dimension: 'bandwidth',
         success: false,
-        error: errorMsg
+        error: this.formatError(error)
       };
     }
   }
@@ -71,27 +73,33 @@ export class HTTPCheckStrategy implements CheckStrategy {
   }
 
   /**
-   * Send HTTP request through proxy
+   * Measure download bandwidth through proxy
    * @param proxyUrl Proxy URL
-   * @param testUrl Test URL to request
+   * @param testSizeBytes Size of test file in bytes
    * @param timeoutSeconds Timeout in seconds
-   * @throws Error if request fails
+   * @returns Bandwidth in KB/s
+   * @throws Error if download fails or times out
    */
-  private async sendHttpRequest(
+  private async measureBandwidth(
     proxyUrl: string,
-    testUrl: string,
+    testSizeBytes: number,
     timeoutSeconds: number
-  ): Promise<void> {
+  ): Promise<number> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutSeconds * 1000);
 
     try {
+      // Construct test URL with size parameter
+      const testUrl = `${this.DEFAULT_TEST_URL}${testSizeBytes}`;
+      
       // Create proxy agent for SOCKS5 proxies
       let agent: any = undefined;
       if (proxyUrl.startsWith('socks')) {
         agent = new SocksProxyAgent(proxyUrl);
       }
 
+      const downloadStartTime = Date.now();
+      
       const response = await fetch(testUrl, {
         method: 'GET',
         signal: controller.signal,
@@ -102,36 +110,38 @@ export class HTTPCheckStrategy implements CheckStrategy {
         }
       });
 
-      // Check if response is successful (2xx or 3xx status codes)
-      if (!response.ok && response.status >= 400) {
+      if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+
+      // Read the response body to measure actual download
+      const buffer = await response.arrayBuffer();
+      const downloadEndTime = Date.now();
+      
+      // Calculate bandwidth
+      const downloadTimeMs = downloadEndTime - downloadStartTime;
+      const downloadTimeSec = downloadTimeMs / 1000;
+      const downloadedBytes = buffer.byteLength;
+      const bandwidthKBps = (downloadedBytes / 1024) / downloadTimeSec;
+
+      return Math.round(bandwidthKBps * 100) / 100; // Round to 2 decimal places
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        const errorMsg = `HTTP request timeout after ${timeoutSeconds} seconds`;
-        console.error(`[HTTPCheck] ${errorMsg}`);
-        throw new Error(errorMsg);
+        throw new Error(`Bandwidth test timeout after ${timeoutSeconds} seconds`);
       }
       
       if (error.code === 'ECONNREFUSED') {
-        const errorMsg = 'Proxy connection refused';
-        console.error(`[HTTPCheck] ${errorMsg} (${proxyUrl})`);
-        throw new Error(errorMsg);
+        throw new Error('Proxy connection refused');
       }
       
       if (error.code === 'ENOTFOUND') {
-        const errorMsg = 'Proxy host not found';
-        console.error(`[HTTPCheck] ${errorMsg} (${proxyUrl})`);
-        throw new Error(errorMsg);
+        throw new Error('Proxy host not found');
       }
       
       if (error.code === 'ETIMEDOUT') {
-        const errorMsg = 'Proxy connection timeout';
-        console.error(`[HTTPCheck] ${errorMsg} (${proxyUrl})`);
-        throw new Error(errorMsg);
+        throw new Error('Proxy connection timeout');
       }
       
-      console.error(`[HTTPCheck] Request failed:`, error);
       throw error;
     } finally {
       clearTimeout(timeoutId);

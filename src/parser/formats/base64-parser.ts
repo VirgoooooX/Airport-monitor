@@ -1,5 +1,9 @@
 import { Node, SubscriptionFormat, NodeProtocol } from '../../types/index.js';
 import { SubscriptionFormatParser } from './format-parser.js';
+import { ProtocolParser } from '../protocols/protocol-parser.js';
+import { VMessProtocolParser } from '../protocols/vmess-protocol-parser.js';
+import { TrojanProtocolParser } from '../protocols/trojan-protocol-parser.js';
+import { VLESSProtocolParser } from '../protocols/vless-protocol-parser.js';
 import { HysteriaProtocolParser } from '../protocols/hysteria-protocol-parser.js';
 
 /**
@@ -7,10 +11,17 @@ import { HysteriaProtocolParser } from '../protocols/hysteria-protocol-parser.js
  * Handles Base64-encoded subscription content with VMess and mixed protocols
  */
 export class Base64SubscriptionParser implements SubscriptionFormatParser {
-  private hysteriaParser: HysteriaProtocolParser;
+  private protocolParsers: Map<string, ProtocolParser>;
+  private nodeIdCounter: number = 0;
 
   constructor() {
-    this.hysteriaParser = new HysteriaProtocolParser();
+    // Initialize protocol parser map
+    this.protocolParsers = new Map<string, ProtocolParser>([
+      ['vmess://', new VMessProtocolParser()],
+      ['trojan://', new TrojanProtocolParser()],
+      ['vless://', new VLESSProtocolParser()],
+      ['hysteria://', new HysteriaProtocolParser()]
+    ]);
   }
   /**
    * Check if content is Base64 encoded
@@ -85,20 +96,31 @@ export class Base64SubscriptionParser implements SubscriptionFormatParser {
     const lines = decoded.split('\n').filter(line => line.trim().length > 0);
     const nodes: Node[] = [];
 
+    // Reset counter for each parse operation
+    this.nodeIdCounter = 0;
+
     for (const line of lines) {
       const trimmedLine = line.trim();
       
       try {
-        if (trimmedLine.startsWith('vmess://')) {
-          nodes.push(this.parseVmessNode(trimmedLine));
-        } else if (trimmedLine.startsWith('trojan://')) {
-          nodes.push(this.parseTrojanNode(trimmedLine));
-        } else if (trimmedLine.startsWith('ss://')) {
-          nodes.push(this.parseShadowsocksNode(trimmedLine));
-        } else if (trimmedLine.startsWith('vless://')) {
-          nodes.push(this.parseVlessNode(trimmedLine));
-        } else if (trimmedLine.startsWith('hysteria://')) {
-          nodes.push(this.parseHysteriaNode(trimmedLine));
+        // Try to find a matching protocol parser
+        let parsed = false;
+        for (const [prefix, parser] of this.protocolParsers.entries()) {
+          if (trimmedLine.startsWith(prefix)) {
+            const partialNode = parser.parseUri(trimmedLine);
+            // Override the node ID to ensure uniqueness within this parse operation
+            partialNode.id = `${partialNode.id}_${this.nodeIdCounter++}`;
+            nodes.push(partialNode as Node);
+            parsed = true;
+            break;
+          }
+        }
+
+        // Handle Shadowsocks separately (not yet implemented as a protocol parser)
+        if (!parsed && trimmedLine.startsWith('ss://')) {
+          const node = this.parseShadowsocksNode(trimmedLine);
+          node.id = `${node.id}_${this.nodeIdCounter++}`;
+          nodes.push(node);
         }
         // Silently skip unsupported protocols
       } catch (error) {
@@ -112,61 +134,6 @@ export class Base64SubscriptionParser implements SubscriptionFormatParser {
     }
 
     return nodes;
-  }
-
-  /**
-   * Parse VMess protocol node
-   */
-  private parseVmessNode(uri: string): Node {
-    const base64Part = uri.substring('vmess://'.length);
-    const decoded = Buffer.from(base64Part, 'base64').toString('utf-8');
-    const config = JSON.parse(decoded);
-
-    return {
-      id: this.generateNodeId(config.ps || config.add, config.port),
-      airportId: '', // Will be set by ConfigurationManager
-      name: config.ps || `${config.add}:${config.port}`,
-      protocol: NodeProtocol.VMESS,
-      address: config.add,
-      port: parseInt(config.port, 10),
-      config: {
-        id: config.id,
-        alterId: config.aid || 0,
-        security: config.scy || 'auto',
-        network: config.net || 'tcp',
-        type: config.type || 'none',
-        host: config.host || '',
-        path: config.path || '',
-        tls: config.tls || '',
-        sni: config.sni || ''
-      }
-    };
-  }
-
-  /**
-   * Parse Trojan protocol node
-   */
-  private parseTrojanNode(uri: string): Node {
-    // Format: trojan://password@host:port?params#name
-    const url = new URL(uri);
-    const password = url.username;
-    const host = url.hostname;
-    const port = parseInt(url.port, 10);
-    const name = decodeURIComponent(url.hash.substring(1)) || `${host}:${port}`;
-
-    return {
-      id: this.generateNodeId(host, port),
-      airportId: '',
-      name,
-      protocol: NodeProtocol.TROJAN,
-      address: host,
-      port,
-      config: {
-        password,
-        sni: url.searchParams.get('sni') || host,
-        allowInsecure: url.searchParams.get('allowInsecure') === '1'
-      }
-    };
   }
 
   /**
@@ -199,44 +166,6 @@ export class Base64SubscriptionParser implements SubscriptionFormatParser {
         password
       }
     };
-  }
-
-  /**
-   * Parse VLESS protocol node
-   */
-  private parseVlessNode(uri: string): Node {
-    // Format: vless://uuid@host:port?params#name
-    const url = new URL(uri);
-    const uuid = url.username;
-    const host = url.hostname;
-    const port = parseInt(url.port, 10);
-    const name = decodeURIComponent(url.hash.substring(1)) || `${host}:${port}`;
-
-    return {
-      id: this.generateNodeId(host, port),
-      airportId: '',
-      name,
-      protocol: NodeProtocol.VLESS,
-      address: host,
-      port,
-      config: {
-        id: uuid,
-        encryption: url.searchParams.get('encryption') || 'none',
-        flow: url.searchParams.get('flow') || '',
-        network: url.searchParams.get('type') || 'tcp',
-        security: url.searchParams.get('security') || 'none',
-        sni: url.searchParams.get('sni') || host
-      }
-    };
-  }
-
-  /**
-   * Parse Hysteria protocol node
-   */
-  private parseHysteriaNode(uri: string): Node {
-    // Use the dedicated HysteriaProtocolParser for proper validation
-    const parsed = this.hysteriaParser.parseUri(uri);
-    return parsed as Node;
   }
 
   /**

@@ -140,7 +140,7 @@ describe('DefaultSubscriptionParser', () => {
       const emptyContent = '';
       const base64Content = Buffer.from(emptyContent).toString('base64');
 
-      expect(() => parser.parseSubscription(base64Content)).toThrow('Unsupported subscription format');
+      expect(() => parser.parseSubscription(base64Content)).toThrow('Cannot parse empty subscription content');
     });
 
     it('should throw error when no valid nodes found', () => {
@@ -166,7 +166,7 @@ describe('DefaultSubscriptionParser', () => {
 
   describe('fetchSubscription', () => {
     it('should throw error for invalid URL', async () => {
-      await expect(parser.fetchSubscription('not-a-url')).rejects.toThrow('Invalid URL');
+      await expect(parser.fetchSubscription('not-a-url')).rejects.toThrow('Invalid subscription URL format');
     });
 
     it('should throw error for unsupported protocol', async () => {

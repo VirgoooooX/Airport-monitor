@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, CloudDownload, Settings } from 'lucide-react';
 import { fetchConfig, updateConfig, importSubscription } from '../hooks/useControls.ts';
+import CheckConfigPanel from './CheckConfigPanel.tsx';
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void; // Trigger refresh
   onOpenAlertRules?: () => void; // Open alert rules panel
+  onError?: (message: string) => void; // Error callback for toast
+  onSuccessMessage?: (message: string) => void; // Success callback for toast
 }
 
-export default function SettingsPanel({ isOpen, onClose, onSuccess, onOpenAlertRules }: SettingsPanelProps) {
+export default function SettingsPanel({ isOpen, onClose, onSuccess, onOpenAlertRules, onError, onSuccessMessage }: SettingsPanelProps) {
   const [interval, setIntervalVal] = useState(300);
   const [timeout, setTimeoutVal] = useState(30);
   
@@ -178,6 +181,15 @@ export default function SettingsPanel({ isOpen, onClose, onSuccess, onOpenAlertR
                   </button>
                 </div>
               )}
+
+              {/* Check Configuration */}
+              <div className="space-y-4 mb-8 pt-6 border-t border-zinc-800/50">
+                <CheckConfigPanel 
+                  onSuccess={onSuccess} 
+                  onError={onError}
+                  onSuccessMessage={onSuccessMessage}
+                />
+              </div>
 
               {/* Imports */}
               <div className="space-y-4 pt-6 border-t border-zinc-800/50">

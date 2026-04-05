@@ -9,6 +9,9 @@ import {
   Airport,
   Node,
   CheckResult,
+  RegionalStatistics,
+  CountryStatistics,
+  ProtocolStatistics,
 } from '../types/index.js';
 import { ReportGenerator } from '../interfaces/ReportGenerator.js';
 import { DatabaseManager } from '../storage/database.js';
@@ -145,6 +148,183 @@ export class ReportGeneratorImpl implements ReportGenerator {
     }
 
     return { nodeId, dataPoints };
+  }
+
+  /**
+   * Generate regional statistics report
+   * Groups nodes by region and calculates aggregate statistics
+   */
+  async generateRegionalReport(options: ReportOptions = {}): Promise<RegionalStatistics[]> {
+    // Validate time range
+    if (options.startTime && options.endTime && options.startTime > options.endTime) {
+      throw new Error(
+        `Invalid time range: start time (${options.startTime.toISOString()}) is after end time (${options.endTime.toISOString()})`
+      );
+    }
+
+    const airports = this.db.getAirports();
+    const allNodes = airports.flatMap(a => a.nodes);
+
+    // Group nodes by region using metadata
+    const regionMap = new Map<string, Node[]>();
+
+    for (const node of allNodes) {
+      const metadata = this.db.getNodeMetadata(node.id);
+      const region = metadata?.region || 'unknown';
+
+      if (!regionMap.has(region)) {
+        regionMap.set(region, []);
+      }
+      regionMap.get(region)!.push(node);
+    }
+
+    // Calculate statistics for each region
+    const regionalStats: RegionalStatistics[] = [];
+
+    for (const [region, nodes] of regionMap.entries()) {
+      const countryMap = new Map<string, Node[]>();
+
+      // Group nodes by country within the region
+      for (const node of nodes) {
+        const metadata = this.db.getNodeMetadata(node.id);
+        const country = metadata?.country || 'unknown';
+
+        if (!countryMap.has(country)) {
+          countryMap.set(country, []);
+        }
+        countryMap.get(country)!.push(node);
+      }
+
+      // Calculate country-level statistics
+      const countryStats: CountryStatistics[] = [];
+
+      for (const [country, countryNodes] of countryMap.entries()) {
+        const nodeStats = await Promise.all(
+          countryNodes.map(node => this.buildNodeStatistics(node, options))
+        );
+
+        const nodeCount = nodeStats.length;
+        const avgAvailabilityRate =
+          nodeCount > 0
+            ? Math.round(
+                (nodeStats.reduce((sum, n) => sum + n.availabilityRate, 0) / nodeCount) * 100
+              ) / 100
+            : 0;
+
+        const validResponseTimes = nodeStats.filter(n => n.avgResponseTime > 0);
+        const avgResponseTime =
+          validResponseTimes.length > 0
+            ? Math.round(
+                validResponseTimes.reduce((sum, n) => sum + n.avgResponseTime, 0) /
+                  validResponseTimes.length
+              )
+            : undefined;
+
+        countryStats.push({
+          country,
+          nodeCount,
+          avgAvailabilityRate,
+          avgResponseTime,
+        });
+      }
+
+      // Calculate region-level statistics
+      const allNodeStats = await Promise.all(
+        nodes.map(node => this.buildNodeStatistics(node, options))
+      );
+
+      const nodeCount = allNodeStats.length;
+      const avgAvailabilityRate =
+        nodeCount > 0
+          ? Math.round(
+              (allNodeStats.reduce((sum, n) => sum + n.availabilityRate, 0) / nodeCount) * 100
+            ) / 100
+          : 0;
+
+      const validResponseTimes = allNodeStats.filter(n => n.avgResponseTime > 0);
+      const avgResponseTime =
+        validResponseTimes.length > 0
+          ? Math.round(
+              validResponseTimes.reduce((sum, n) => sum + n.avgResponseTime, 0) /
+                validResponseTimes.length
+            )
+          : 0;
+
+      regionalStats.push({
+        region,
+        nodeCount,
+        avgAvailabilityRate,
+        avgResponseTime,
+        countries: countryStats.sort((a, b) => b.avgAvailabilityRate - a.avgAvailabilityRate),
+      });
+    }
+
+    // Sort by region name
+    return regionalStats.sort((a, b) => a.region.localeCompare(b.region));
+  }
+
+  /**
+   * Generate protocol statistics report
+   * Groups nodes by protocol type and calculates aggregate statistics
+   */
+  async generateProtocolReport(options: ReportOptions = {}): Promise<ProtocolStatistics[]> {
+    // Validate time range
+    if (options.startTime && options.endTime && options.startTime > options.endTime) {
+      throw new Error(
+        `Invalid time range: start time (${options.startTime.toISOString()}) is after end time (${options.endTime.toISOString()})`
+      );
+    }
+
+    const airports = this.db.getAirports();
+    const allNodes = airports.flatMap(a => a.nodes);
+
+    // Group nodes by protocol type
+    const protocolMap = new Map<string, Node[]>();
+
+    for (const node of allNodes) {
+      const protocol = node.protocol.toLowerCase();
+
+      if (!protocolMap.has(protocol)) {
+        protocolMap.set(protocol, []);
+      }
+      protocolMap.get(protocol)!.push(node);
+    }
+
+    // Calculate statistics for each protocol
+    const protocolStats: ProtocolStatistics[] = [];
+
+    for (const [protocol, nodes] of protocolMap.entries()) {
+      const nodeStats = await Promise.all(
+        nodes.map(node => this.buildNodeStatistics(node, options))
+      );
+
+      const nodeCount = nodeStats.length;
+      const avgAvailabilityRate =
+        nodeCount > 0
+          ? Math.round(
+              (nodeStats.reduce((sum, n) => sum + n.availabilityRate, 0) / nodeCount) * 100
+            ) / 100
+          : 0;
+
+      const validResponseTimes = nodeStats.filter(n => n.avgResponseTime > 0);
+      const avgResponseTime =
+        validResponseTimes.length > 0
+          ? Math.round(
+              validResponseTimes.reduce((sum, n) => sum + n.avgResponseTime, 0) /
+                validResponseTimes.length
+            )
+          : 0;
+
+      protocolStats.push({
+        protocol,
+        nodeCount,
+        avgAvailabilityRate,
+        avgResponseTime,
+      });
+    }
+
+    // Sort by protocol name
+    return protocolStats.sort((a, b) => a.protocol.localeCompare(b.protocol));
   }
 
   /**

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useDashboardData, type NodeInfo } from './hooks/useDashboardData.ts';
 import { startEngine, stopEngine, deleteAirport } from './hooks/useControls.ts';
@@ -9,6 +9,12 @@ import NodeDetailDrawer from './components/NodeDetailDrawer.tsx';
 import SettingsPanel from './components/SettingsPanel.tsx';
 import AlertCenter from './components/AlertCenter.tsx';
 import AlertRulesPanel from './components/AlertRulesPanel.tsx';
+import NodeFilter, { type FilterState } from './components/NodeFilter.tsx';
+import RegionalStatsPanel from './components/RegionalStatsPanel.tsx';
+import ProtocolStatsPanel from './components/ProtocolStatsPanel.tsx';
+import ExportButton from './components/ExportButton.tsx';
+import { ToastContainer } from './components/Toast.tsx';
+import { useToast } from './hooks/useToast.ts';
 
 function App() {
   const { status, airports, loading, error, refetch } = useDashboardData();
@@ -16,18 +22,67 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAlertRulesOpen, setIsAlertRulesOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({ region: '', protocol: '', search: '' });
+  const { toasts, closeToast, success, error: showError } = useToast();
+
+  // Extract unique regions and protocols from all nodes
+  const { regions, protocols } = useMemo(() => {
+    const regionSet = new Set<string>();
+    const protocolSet = new Set<string>();
+    
+    airports.forEach(airport => {
+      airport.nodes.forEach(node => {
+        protocolSet.add(node.protocol);
+        // Extract region from node metadata if available
+        // For now, we'll skip region extraction as it requires metadata
+      });
+    });
+
+    return {
+      regions: Array.from(regionSet),
+      protocols: Array.from(protocolSet)
+    };
+  }, [airports]);
+
+  // Filter airports and nodes based on current filters
+  const filteredAirports = useMemo(() => {
+    return airports.map(airport => ({
+      ...airport,
+      nodes: airport.nodes.filter(node => {
+        // Protocol filter
+        if (filters.protocol && node.protocol !== filters.protocol) {
+          return false;
+        }
+        
+        // Search filter
+        if (filters.search) {
+          const searchLower = filters.search.toLowerCase();
+          const matchesName = node.name.toLowerCase().includes(searchLower);
+          const matchesAddress = node.address.toLowerCase().includes(searchLower);
+          if (!matchesName && !matchesAddress) {
+            return false;
+          }
+        }
+        
+        return true;
+      })
+    })).filter(airport => airport.nodes.length > 0);
+  }, [airports, filters]);
 
   const handleToggleEngine = async (start: boolean) => {
     setIsToggling(true);
     try {
       if (start) {
         await startEngine();
+        success('Engine started successfully');
       } else {
         await stopEngine();
+        success('Engine stopped successfully');
       }
       setTimeout(refetch, 500); // refresh after slightly delay
     } catch (err: any) {
-      alert('Failed to toggle engine: ' + err.message);
+      showError('Failed to toggle engine: ' + err.message);
     } finally {
       setIsToggling(false);
     }
@@ -37,9 +92,10 @@ function App() {
     if (window.confirm(`Are you absolutely sure you want to delete airport "${name}" and permanently erase all its testing logs?`)) {
       try {
         await deleteAirport(id);
+        success(`Airport "${name}" deleted successfully`);
         refetch();
       } catch (err: any) {
-        alert('Failed to delete airport: ' + err.message);
+        showError('Failed to delete airport: ' + err.message);
       }
     }
   };
@@ -101,6 +157,16 @@ function App() {
             animate={{ opacity: 1, scale: 1 }}
             className="flex items-center gap-3"
           >
+            <button
+              onClick={() => setShowStats(!showStats)}
+              className={`p-3 border rounded-xl transition-colors ${
+                showStats 
+                  ? 'bg-indigo-500 border-indigo-500 text-white' 
+                  : 'bg-surface border-border text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <BarChart3 size={20} />
+            </button>
             <AlertCenter />
             <button
               onClick={() => setIsSettingsOpen(true)}
@@ -114,9 +180,37 @@ function App() {
         {/* Global Metrics Panel */}
         <MetricsHeader status={status} onToggleEngine={handleToggleEngine} loadingToggle={isToggling} />
 
+        {/* Statistics Panels (conditionally shown) */}
+        {showStats && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6 mb-12"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-white">Statistics & Reports</h2>
+              <ExportButton />
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RegionalStatsPanel />
+              <ProtocolStatsPanel />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Node Filter */}
+        {protocols.length > 0 && (
+          <NodeFilter
+            onFilterChange={setFilters}
+            regions={regions}
+            protocols={protocols}
+          />
+        )}
+
         {/* Airport Groupings */}
         <div className="space-y-12">
-          {airports.map((airport, airportIdx) => (
+          {filteredAirports.map((airport, airportIdx) => (
             <motion.section 
               key={airport.id}
               initial={{ opacity: 0 }}
@@ -168,9 +262,13 @@ function App() {
             </motion.section>
           ))}
           
-          {airports.length === 0 && (
+          {filteredAirports.length === 0 && (
             <div className="text-center py-20 glass-panel border-dashed">
-              <p className="text-zinc-500">No airports configured in the monitoring engine.</p>
+              <p className="text-zinc-500">
+                {airports.length === 0 
+                  ? 'No airports configured in the monitoring engine.'
+                  : 'No nodes match the current filters.'}
+              </p>
             </div>
           )}
         </div>
@@ -188,6 +286,8 @@ function App() {
         onClose={() => setIsSettingsOpen(false)}
         onSuccess={refetch}
         onOpenAlertRules={() => setIsAlertRulesOpen(true)}
+        onError={showError}
+        onSuccessMessage={success}
       />
 
       {/* Alert Rules Panel */}
@@ -195,6 +295,9 @@ function App() {
         isOpen={isAlertRulesOpen}
         onClose={() => setIsAlertRulesOpen(false)}
       />
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onClose={closeToast} />
     </div>
   );
 }

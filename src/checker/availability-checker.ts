@@ -4,11 +4,12 @@ import { CheckStrategy } from './strategies/check-strategy.js';
 import { TCPCheckStrategy } from './strategies/tcp-check-strategy.js';
 import { HTTPCheckStrategy } from './strategies/http-check.js';
 import { LatencyCheckStrategy } from './strategies/latency-check.js';
+import { BandwidthCheckStrategy } from './strategies/bandwidth-check.js';
 
 /**
  * Enhanced Availability Checker
  * Implements multi-dimensional checking using strategy pattern
- * Supports TCP, HTTP, and Latency checks
+ * Supports TCP, HTTP, Latency, and optional Bandwidth checks
  */
 export class EnhancedAvailabilityChecker implements AvailabilityChecker {
   private strategies: Map<string, CheckStrategy>;
@@ -21,11 +22,12 @@ export class EnhancedAvailabilityChecker implements AvailabilityChecker {
   constructor(config: CheckConfig) {
     this.config = config;
     
-    // Initialize strategy map with TCP, HTTP, and Latency strategies
+    // Initialize strategy map with TCP, HTTP, Latency, and Bandwidth strategies
     this.strategies = new Map<string, CheckStrategy>([
       ['tcp', new TCPCheckStrategy()],
       ['http', new HTTPCheckStrategy()],
-      ['latency', new LatencyCheckStrategy()]
+      ['latency', new LatencyCheckStrategy()],
+      ['bandwidth', new BandwidthCheckStrategy()]
     ]);
   }
 
@@ -46,6 +48,7 @@ export class EnhancedAvailabilityChecker implements AvailabilityChecker {
   /**
    * Check availability of a single node with multi-dimensional checking
    * Executes strategies sequentially: TCP first, then HTTP and Latency if TCP succeeds
+   * Optionally executes Bandwidth check if enabled in configuration
    * @param node Node to check
    * @returns Enhanced check result with all dimension results
    */
@@ -64,6 +67,12 @@ export class EnhancedAvailabilityChecker implements AvailabilityChecker {
       
       dimensions.http = await httpStrategy.check(node, this.config);
       dimensions.latency = await latencyStrategy.check(node, this.config);
+      
+      // Execute bandwidth check only if enabled
+      if (this.config.bandwidthEnabled) {
+        const bandwidthStrategy = this.strategies.get('bandwidth')!;
+        dimensions.bandwidth = await bandwidthStrategy.check(node, this.config);
+      }
     }
 
     // Determine overall availability: TCP and HTTP must both succeed

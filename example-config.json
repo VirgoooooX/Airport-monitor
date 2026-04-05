@@ -75,6 +75,19 @@
   "checkTimeout": 30,
   "logLevel": "info",
   "storagePath": "./data/monitor.db",
+  "checkConfig": {
+    "tcpTimeout": 30,
+    "httpTimeout": 30,
+    "httpTestUrl": "https://www.google.com/generate_204",
+    "latencyTimeout": 30,
+    "bandwidthEnabled": false,
+    "bandwidthTimeout": 60,
+    "bandwidthTestSize": 1024
+  },
+  "subscriptionUpdate": {
+    "updateInterval": 24,
+    "enabled": true
+  },
   "alertRules": [
     {
       "id": "rule_node_failure",
