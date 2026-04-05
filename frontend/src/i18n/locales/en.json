@@ -334,6 +334,12 @@
       "queryTime": "Query Time",
       "dataPoints": "Data Points"
     },
+    "summary": {
+      "totalNodes": "Total Nodes",
+      "availability": "Availability",
+      "latency": "Avg Latency",
+      "qualityScore": "Quality Score"
+    },
     "detailsPlaceholder": {
       "title": "Detailed Metrics Coming Soon",
       "description": "Charts, tables, and detailed analysis will be displayed here"
@@ -345,7 +351,30 @@
     },
     "collapse": "Collapse",
     "expand": "Expand",
+    "charts": {
+      "nodeCount": "Node Count",
+      "avgLatency": "Avg Latency",
+      "avgLatencyMs": "Avg Latency (ms)",
+      "avgAvailability": "Avg Availability",
+      "avgAvailabilityPercent": "Avg Availability (%)",
+      "p95Latency": "P95 Latency",
+      "availability": "Availability",
+      "availabilityPercent": "Availability (%)",
+      "latencyMs": "Latency (ms)",
+      "status": "Status",
+      "checks": "Checks",
+      "hour": "Hour",
+      "date": "Date",
+      "samplingCategories": "Displaying {{displayed}} of {{total}} categories (sampled for performance)",
+      "samplingDataPoints": "Displaying {{displayed}} of {{total}} data points (sampled for performance)",
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "pageOf": "Page {{current}} of {{total}}"
+      }
+    },
     "timeDimension": {
+      "title": "Time Dimension Analysis",
       "hourlyTrend": "24-Hour Trend",
       "hourlyTrendDesc": "Hourly performance over the last 24 hours",
       "dailyTrend": "7-Day Trend",
@@ -367,6 +396,7 @@
       }
     },
     "regionalDimension": {
+      "title": "Regional Dimension Analysis",
       "distribution": "Regional Distribution",
       "distributionDesc": "Percentage of nodes in each region",
       "comparison": "Regional Performance Comparison",
@@ -379,6 +409,7 @@
       "healthDistribution": "Health Distribution"
     },
     "protocolDimension": {
+      "title": "Protocol Dimension Analysis",
       "distribution": "Protocol Distribution",
       "distributionDesc": "Percentage of nodes using each protocol",
       "comparison": "Protocol Performance Comparison",

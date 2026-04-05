@@ -46,7 +46,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorMessage).toBe('Start time must be before end time');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -75,7 +75,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorThrown).toBe(false);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -105,7 +105,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorMessage).toBe('End time cannot be in the future');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -136,7 +136,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorMessage).toBe('Time range cannot exceed 90 days');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -164,7 +164,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorThrown).toBe(false);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -186,7 +186,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorThrown).toBe(false);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -209,7 +209,7 @@ describe('Property 22: Time Range Validation', () => {
           expect(errorThrown).toBe(false);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 

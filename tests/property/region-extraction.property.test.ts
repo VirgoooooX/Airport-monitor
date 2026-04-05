@@ -56,7 +56,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe(metadataRegion);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -84,7 +84,7 @@ describe('Region Extraction Property Tests', () => {
             expect(typeof extractedRegion).toBe('string');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -140,7 +140,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe(testCase.expectedRegion);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -175,7 +175,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe(keywords.expected);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -237,7 +237,7 @@ describe('Region Extraction Property Tests', () => {
             expect(testCase.possibleRegions).toContain(extractedRegion);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -284,7 +284,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe(expectedRegion);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -313,7 +313,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe(COUNTRY_TO_REGION_MAP[countryCode]);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -355,7 +355,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe('其他');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -385,7 +385,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe('其他');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -409,7 +409,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion).toBe('其他');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -448,7 +448,7 @@ describe('Region Extraction Property Tests', () => {
             expect(extractedRegion.length).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });

@@ -13,10 +13,10 @@
  */
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { ChartContainer } from './ChartContainer';
 import {
-  getHealthColor,
   getChartColor,
   formatLatency,
   formatAvailability,
@@ -67,12 +67,13 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
   loading = false,
   error,
   orientation = 'vertical',
-  useHealthColors = false,
   showNodeCount = true,
   showLatency = true,
   showAvailability = true,
   className = ''
 }) => {
+  const { t } = useTranslation();
+
   // Performance optimization: Sample data if >100 points
   const sampledData = React.useMemo(() => {
     return data.length > 100 ? sampleChartData(data, 100) : data;
@@ -93,11 +94,11 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
     
     switch (name) {
       case 'nodeCount':
-        return [numValue, 'Node Count'];
+        return [numValue, t('reports.charts.nodeCount')];
       case 'avgLatency':
-        return [formatLatency(numValue), 'Avg Latency'];
+        return [formatLatency(numValue), t('reports.charts.avgLatency')];
       case 'avgAvailability':
-        return [formatAvailability(numValue), 'Avg Availability'];
+        return [formatAvailability(numValue), t('reports.charts.avgAvailability')];
       default:
         return [numValue, name];
     }
@@ -125,19 +126,11 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
         })}
         {dataPoint?.healthStatus && (
           <p style={tooltipConfig.itemStyle}>
-            Status: {dataPoint.healthStatus}
+            {t('reports.charts.status')}: {dataPoint.healthStatus}
           </p>
         )}
       </div>
     );
-  };
-
-  // Get bar color based on health status or default colors
-  const getBarColor = (dataPoint: any, metricIndex: number): string => {
-    if (useHealthColors && dataPoint.healthStatus) {
-      return getHealthColor(dataPoint.healthStatus);
-    }
-    return getChartColor(metricIndex);
   };
 
   // Determine layout based on orientation
@@ -155,7 +148,7 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
     >
       {data.length > 100 && (
         <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-          Displaying {chartData.length} of {data.length} categories (sampled for performance)
+          {t('reports.charts.samplingCategories', { displayed: chartData.length, total: data.length })}
         </div>
       )}
       <BarChart
@@ -185,7 +178,19 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
               dataKey="category"
               {...getAxisConfig()}
             />
-            <YAxis type="number" {...getAxisConfig()} />
+            <YAxis 
+              yAxisId="left"
+              orientation="left"
+              label={{ value: t('reports.charts.count'), angle: -90, position: 'insideLeft' }}
+              {...getAxisConfig()} 
+            />
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              domain={[0, 100]}
+              label={{ value: t('reports.charts.percent'), angle: 90, position: 'insideRight' }}
+              {...getAxisConfig()} 
+            />
           </>
         )}
 
@@ -193,57 +198,44 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
         <Tooltip content={<CustomTooltip />} />
 
         {/* Legend */}
-        <Legend />
+        <Legend 
+          iconType="circle"
+          iconSize={9}
+          wrapperStyle={{
+            paddingTop: '1rem',
+            fontSize: '0.875rem',
+            lineHeight: '1.25rem'
+          }}
+        />
 
         {/* Node Count Bar */}
         {showNodeCount && (
           <Bar
+            yAxisId="left"
             dataKey="nodeCount"
-            name="Node Count"
+            name={t('reports.charts.nodeCount')}
             fill={getChartColor(0)}
-          >
-            {!useHealthColors && chartData.map((_entry, index) => (
-              <Cell key={`cell-count-${index}`} fill={getChartColor(0)} />
-            ))}
-          </Bar>
+          />
         )}
 
         {/* Average Latency Bar */}
         {showLatency && (
           <Bar
+            yAxisId="left"
             dataKey="avgLatency"
-            name="Avg Latency (ms)"
+            name={t('reports.charts.avgLatencyMs')}
             fill={getChartColor(1)}
-          >
-            {useHealthColors ? (
-              chartData.map((entry, index) => (
-                <Cell key={`cell-latency-${index}`} fill={getBarColor(entry, 1)} />
-              ))
-            ) : (
-              chartData.map((_entry, index) => (
-                <Cell key={`cell-latency-${index}`} fill={getChartColor(1)} />
-              ))
-            )}
-          </Bar>
+          />
         )}
 
         {/* Average Availability Bar */}
         {showAvailability && (
           <Bar
+            yAxisId="right"
             dataKey="avgAvailability"
-            name="Avg Availability (%)"
+            name={t('reports.charts.avgAvailabilityPercent')}
             fill={getChartColor(2)}
-          >
-            {useHealthColors ? (
-              chartData.map((entry, index) => (
-                <Cell key={`cell-availability-${index}`} fill={getBarColor(entry, 2)} />
-              ))
-            ) : (
-              chartData.map((_entry, index) => (
-                <Cell key={`cell-availability-${index}`} fill={getChartColor(2)} />
-              ))
-            )}
-          </Bar>
+          />
         )}
       </BarChart>
     </ChartContainer>

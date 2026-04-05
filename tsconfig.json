@@ -15,6 +15,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "tests/unit/report/ranking.test.ts", "tests/property/regional-grouping.property.test.ts", "tests/database-optimizations.test.ts"],
+  "include": ["src/**/*", "tests/unit/report/ranking.test.ts", "tests/property/regional-grouping.property.test.ts", "tests/database-optimizations.test.ts", "tests/unit/config-endpoint.test.ts"],
   "exclude": ["node_modules", "dist", "tests"]
 }

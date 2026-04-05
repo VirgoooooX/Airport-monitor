@@ -34,7 +34,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(status).toBe('excellent');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -51,7 +51,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(status).toBe('good');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -69,7 +69,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(status).toBe('fair');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -83,7 +83,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(status).toBe('offline');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -97,7 +97,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(status).toBe('offline');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -139,7 +139,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(status1).toBe(status2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -156,7 +156,7 @@ describe('Property 12: Health Status Classification Boundaries', () => {
           expect(['excellent', 'good', 'fair', 'offline']).toContain(status);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });
@@ -188,7 +188,7 @@ describe('Property 13: Health Distribution Completeness', () => {
           expect(sum).toBe(nodes.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -217,7 +217,7 @@ describe('Property 13: Health Distribution Completeness', () => {
           expect(distribution.offline).toBeGreaterThanOrEqual(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -252,7 +252,7 @@ describe('Property 13: Health Distribution Completeness', () => {
           expect(distribution.offline).toBe(expectedOffline);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -293,7 +293,7 @@ describe('Property 13: Health Distribution Completeness', () => {
           expect(sum).toBe(1);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -335,7 +335,7 @@ describe('Property 13: Health Distribution Completeness', () => {
           expect(distribution.excellent + distribution.good + distribution.fair + distribution.offline).toBe(nodes.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });

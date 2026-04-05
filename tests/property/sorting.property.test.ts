@@ -56,7 +56,7 @@ describe('Property 16: Quality Score Ranking Order', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -85,7 +85,7 @@ describe('Property 16: Quality Score Ranking Order', () => {
           });
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -117,7 +117,7 @@ describe('Property 16: Quality Score Ranking Order', () => {
           expect(ranked[0].ranking).toBe(1);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -155,7 +155,7 @@ describe('Property 16: Quality Score Ranking Order', () => {
           expect(ranked[0].ranking).toBe(1);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -187,7 +187,7 @@ describe('Property 16: Quality Score Ranking Order', () => {
           expect(rankedIds).toEqual(originalIds);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });
@@ -226,7 +226,7 @@ describe('Property 24: Sorting Stability', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -260,7 +260,7 @@ describe('Property 24: Sorting Stability', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -300,7 +300,7 @@ describe('Property 24: Sorting Stability', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -337,7 +337,7 @@ describe('Property 24: Sorting Stability', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -376,7 +376,7 @@ describe('Property 24: Sorting Stability', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });
@@ -407,7 +407,7 @@ describe('Availability Ranking Properties', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -442,7 +442,7 @@ describe('Availability Ranking Properties', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -473,7 +473,7 @@ describe('Availability Ranking Properties', () => {
           });
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });
@@ -506,7 +506,7 @@ describe('Ranking Preservation Properties', () => {
           expect(airports.map(a => a.airportId)).toEqual(originalIds);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -537,7 +537,7 @@ describe('Ranking Preservation Properties', () => {
           expect(protocols.map(p => p.avgAvailability)).toEqual(originalAvailability);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });

@@ -72,6 +72,22 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
     );
   }
 
+  // Check if data is empty or invalid
+  if (!data || !data.regions || data.regions.length === 0) {
+    console.log('[RegionalDimensionView] No data or empty regions:', data);
+    return (
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 text-yellow-600 dark:text-yellow-400">
+        {t('reports.regionalDimension.noData', 'No regional data available')}
+      </div>
+    );
+  }
+
+  console.log('[RegionalDimensionView] Rendering with data:', {
+    regionsCount: data.regions.length,
+    regions: data.regions,
+    distribution: data.distribution
+  });
+
   // Sort regions
   const sortedRegions = [...data.regions].sort((a, b) => {
     let aVal: number | string = a[sortField];

@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { ChartContainer } from './ChartContainer';
 import {
   getChartColor,
@@ -80,6 +81,8 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
   showP95 = false,
   className = ''
 }) => {
+  const { t } = useTranslation();
+
   // Performance optimization: Sample data if >100 points
   const sampledData = React.useMemo(() => {
     return data.length > 100 ? sampleChartData(data, 100) : data;
@@ -114,11 +117,11 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
     
     switch (name) {
       case 'avgLatency':
-        return [formatLatency(numValue), 'Avg Latency'];
+        return [formatLatency(numValue), t('reports.charts.avgLatency')];
       case 'p95Latency':
-        return [formatLatency(numValue), 'P95 Latency'];
+        return [formatLatency(numValue), t('reports.charts.p95Latency')];
       case 'availabilityRate':
-        return [formatAvailability(numValue), 'Availability'];
+        return [formatAvailability(numValue), t('reports.charts.availability')];
       default:
         return [numValue, name];
     }
@@ -145,7 +148,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
         })}
         {payload[0]?.payload?.checkCount && (
           <p style={tooltipConfig.itemStyle}>
-            Checks: {payload[0].payload.checkCount}
+            {t('reports.charts.checks')}: {payload[0].payload.checkCount}
           </p>
         )}
       </div>
@@ -163,7 +166,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
     >
       {data.length > 100 && (
         <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-          Displaying {chartData.length} of {data.length} data points (sampled for performance)
+          {t('reports.charts.samplingDataPoints', { displayed: chartData.length, total: data.length })}
         </div>
       )}
       <LineChart data={chartData} margin={CHART_MARGINS.withLegend}>
@@ -173,10 +176,12 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
         <XAxis
           dataKey="label"
           label={{
-            value: type === 'hourly' ? 'Hour' : 'Date',
+            value: type === 'hourly' ? t('reports.charts.hour') : t('reports.charts.date'),
             position: 'insideBottom',
-            offset: -5
+            offset: -5,
+            style: { fontSize: '0.875rem' }
           }}
+          height={50}
           {...getAxisConfig()}
         />
 
@@ -184,7 +189,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
         <YAxis
           yAxisId="left"
           label={{
-            value: 'Latency (ms)',
+            value: t('reports.charts.latencyMs'),
             angle: -90,
             position: 'insideLeft'
           }}
@@ -197,7 +202,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
           orientation="right"
           domain={[0, 100]}
           label={{
-            value: 'Availability (%)',
+            value: t('reports.charts.availabilityPercent'),
             angle: 90,
             position: 'insideRight'
           }}
@@ -208,7 +213,15 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
         <Tooltip content={<CustomTooltip />} />
 
         {/* Legend */}
-        <Legend />
+        <Legend 
+          iconType="circle"
+          iconSize={9}
+          wrapperStyle={{
+            paddingTop: '1rem',
+            fontSize: '0.875rem',
+            lineHeight: '1.25rem'
+          }}
+        />
 
         {/* Average Latency Line */}
         <Line
@@ -219,7 +232,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
           strokeWidth={2}
           dot={{ fill: getChartColor(0), r: 3 }}
           activeDot={{ r: 5 }}
-          name="Avg Latency"
+          name={t('reports.charts.avgLatency')}
         />
 
         {/* P95 Latency Line (optional) */}
@@ -233,7 +246,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
             strokeDasharray="5 5"
             dot={{ fill: getChartColor(1), r: 3 }}
             activeDot={{ r: 5 }}
-            name="P95 Latency"
+            name={t('reports.charts.p95Latency')}
           />
         )}
 
@@ -246,7 +259,7 @@ export const TrendLineChart: React.FC<TrendLineChartProps> = ({
           strokeWidth={2}
           dot={{ fill: getChartColor(showP95 ? 2 : 1), r: 3 }}
           activeDot={{ r: 5 }}
-          name="Availability"
+          name={t('reports.charts.availability')}
         />
       </LineChart>
     </ChartContainer>

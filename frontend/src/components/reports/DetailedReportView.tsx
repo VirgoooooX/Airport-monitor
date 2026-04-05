@@ -68,6 +68,7 @@ interface DetailedReportViewProps {
   airportId: string;
   initialStartTime?: Date;
   initialEndTime?: Date;
+  preloadedData?: DetailedReportData;
 }
 
 /**
@@ -75,17 +76,58 @@ interface DetailedReportViewProps {
  */
 function ReportSkeleton() {
   return (
-    <div className="space-y-4">
-      {/* Summary skeleton */}
+    <div className="space-y-6">
+      {/* Summary skeleton - matches ReportSummary */}
       <LoadingSkeleton variant="card" />
 
-      {/* Content skeletons */}
-      <LoadingSkeleton variant="chart" height={300} />
-      <LoadingSkeleton variant="chart" height={300} />
-      <LoadingSkeleton variant="table" count={5} />
+      {/* Time Range Info skeleton */}
+      <div className="flex items-center justify-between">
+        <SkeletonBase height="1rem" className="w-1/3" />
+        <div className="flex gap-4">
+          <SkeletonBase height="1rem" className="w-32" />
+          <SkeletonBase height="1rem" className="w-32" />
+        </div>
+      </div>
+
+      {/* Time Dimension Analysis skeleton */}
+      <div className="space-y-4">
+        <SkeletonBase height="1.75rem" className="w-64" />
+        <LoadingSkeleton variant="chart" height={300} />
+      </div>
+
+      {/* Regional Dimension Analysis skeleton */}
+      <div className="space-y-4">
+        <SkeletonBase height="1.75rem" className="w-64" />
+        <LoadingSkeleton variant="chart" height={300} />
+      </div>
+
+      {/* Protocol Dimension Analysis skeleton */}
+      <div className="space-y-4">
+        <SkeletonBase height="1.75rem" className="w-64" />
+        <LoadingSkeleton variant="chart" height={300} />
+      </div>
+
+      {/* Node Details Table skeleton */}
+      <div className="space-y-4">
+        <SkeletonBase height="1.75rem" className="w-48" />
+        <LoadingSkeleton variant="table" count={5} />
+      </div>
     </div>
   );
 }
+
+/**
+ * Simple skeleton base component for inline use
+ */
+const SkeletonBase: React.FC<{ height?: string; className?: string }> = ({
+  height = '1rem',
+  className = ''
+}) => (
+  <div
+    className={`bg-gray-200 dark:bg-gray-700 rounded animate-pulse ${className}`}
+    style={{ height }}
+  />
+);
 
 /**
  * Error display component
@@ -125,7 +167,8 @@ function ErrorDisplay({
 export default function DetailedReportView({
   airportId,
   initialStartTime,
-  initialEndTime
+  initialEndTime,
+  preloadedData
 }: DetailedReportViewProps) {
   const { t } = useTranslation();
   
@@ -136,8 +179,8 @@ export default function DetailedReportView({
     return { start, end };
   });
 
-  const [reportData, setReportData] = useState<DetailedReportData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [reportData, setReportData] = useState<DetailedReportData | null>(preloadedData || null);
+  const [loading, setLoading] = useState(!preloadedData);
   const [error, setError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
   const [queryMeta, setQueryMeta] = useState<{ queryTime: number; dataPoints: number } | null>(null);
@@ -146,6 +189,11 @@ export default function DetailedReportView({
    * Fetch report data from API
    */
   const fetchReport = async () => {
+    // Skip fetch if we already have preloaded data for the current time range
+    if (preloadedData && reportData === preloadedData) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -182,9 +230,13 @@ export default function DetailedReportView({
   };
 
   /**
-   * Fetch report when time range changes
+   * Fetch report when time range changes (but not on initial mount if preloaded data exists)
    */
   useEffect(() => {
+    // If we have preloaded data on initial mount, skip the fetch
+    if (preloadedData && !reportData) {
+      return;
+    }
     fetchReport();
   }, [airportId, timeRange]);
 
@@ -312,7 +364,7 @@ export default function DetailedReportView({
                 {/* Time Range Info */}
                 <div className="flex items-center justify-between text-sm text-gray-600 dark:text-zinc-400">
                   <div>
-                    <span className="font-medium">{t('reports.timeRange', 'Time Range')}:</span>{' '}
+                    <span className="font-medium">{t('reports.timeRange.title', 'Time Range')}:</span>{' '}
                     {new Date(reportData.timeRange.start).toLocaleString()} -{' '}
                     {new Date(reportData.timeRange.end).toLocaleString()}
                   </div>

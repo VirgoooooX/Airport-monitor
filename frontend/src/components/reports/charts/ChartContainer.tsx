@@ -46,13 +46,13 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
       )}
 
       {/* Chart Content */}
-      <div style={{ height: `${height}px` }}>
+      <div style={{ height: `${height}px`, minHeight: `${height}px`, width: '100%', minWidth: '300px' }}>
         {error ? (
           <ChartError message={error} />
         ) : loading ? (
           <ChartSkeleton height={height} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={height}>
             {children}
           </ResponsiveContainer>
         )}

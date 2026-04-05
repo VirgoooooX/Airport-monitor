@@ -38,6 +38,7 @@ export type StandardRegion =
   | '台湾'
   | '美东'
   | '美西'
+  | '美国'
   | '欧洲'
   | '南美'
   | '东南亚'

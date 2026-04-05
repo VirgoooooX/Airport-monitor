@@ -17,6 +17,12 @@ export function startApiServer(
   const app = express();
   app.use(cors());
   app.use(express.json());
+  
+  // Set default charset for all responses
+  app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    next();
+  });
 
   // Helper: Reporter instance
   const reporter = new ReportGeneratorImpl(db);
@@ -133,6 +139,24 @@ export function startApiServer(
 
   // ========== CONTROLS AND CONFIG ==========
 
+  // 5. Get current configuration
+  app.get('/api/config', async (req, res) => {
+    try {
+      const cpath = controller.getStatus().configPath;
+      if (!cpath) {
+        return res.status(400).json({ error: 'No configuration loaded' });
+      }
+      
+      const config = await configManager.loadConfig(cpath);
+      res.json({
+        checkInterval: config.checkInterval,
+        checkTimeout: config.checkTimeout
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // 6. Start Engine
   app.post('/api/control/start', async (req, res) => {
     try {
@@ -229,18 +253,50 @@ export function startApiServer(
         return res.status(400).json({ error: 'No configuration loaded or created yet.' });
       }
       
+      // Get current status before making changes
+      const statusBefore = controller.getStatus();
+      const wasRunning = statusBefore.running;
+      
       const config = await configManager.loadConfig(cpath);
+      const oldCheckInterval = config.checkInterval;
+      
+      // Update config values
       if (checkInterval !== undefined) config.checkInterval = checkInterval;
       if (checkTimeout !== undefined) config.checkTimeout = checkTimeout;
 
-      // In a real impl configManager should have saveConfig, for MVP we rely on fs or manual writing
-      // However the controller API currently does not fully expose config writing cleanly.
-      // Easiest is to save it directly:
-      import('fs').then(fs => {
-        fs.writeFileSync(cpath, JSON.stringify(config, null, 2));
-      });
+      // Save configuration file
+      const fs = await import('fs');
+      fs.writeFileSync(cpath, JSON.stringify(config, null, 2));
 
-      res.json({ success: true });
+      // Check if checkInterval changed and scheduler is running
+      const checkIntervalChanged = checkInterval !== undefined && checkInterval !== oldCheckInterval;
+      let schedulerRestarted = false;
+      
+      if (checkIntervalChanged && wasRunning) {
+        try {
+          // Stop the scheduler
+          await controller.stopEngine();
+          
+          // Restart with new interval
+          await controller.startEngine();
+          
+          schedulerRestarted = true;
+          console.log(`[API] Scheduler restarted with new checkInterval: ${checkInterval}s`);
+        } catch (restartErr: any) {
+          console.error('[API] Failed to restart scheduler:', restartErr);
+          return res.status(500).json({ 
+            error: 'Configuration saved but failed to restart scheduler: ' + restartErr.message,
+            schedulerRestarted: false
+          });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        schedulerRestarted,
+        wasRunning,
+        checkIntervalChanged
+      });
     } catch (err: any) {
       console.error('[API] Update config failed:', err);
       res.status(500).json({ error: err.message });

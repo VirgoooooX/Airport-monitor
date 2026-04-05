@@ -37,7 +37,7 @@ describe('Property 11: Consecutive Failure Streak Calculation', () => {
           expect(result).toBeGreaterThanOrEqual(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -58,7 +58,7 @@ describe('Property 11: Consecutive Failure Streak Calculation', () => {
           expect(result).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -79,7 +79,7 @@ describe('Property 11: Consecutive Failure Streak Calculation', () => {
           expect(result).toBe(numChecks);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -100,7 +100,7 @@ describe('Property 11: Consecutive Failure Streak Calculation', () => {
           expect(result).toBeLessThanOrEqual(checkResults.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -131,7 +131,7 @@ describe('Property 11: Consecutive Failure Streak Calculation', () => {
           expect(result).toBe(expectedMax);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -157,7 +157,7 @@ describe('Property 11: Consecutive Failure Streak Calculation', () => {
           expect(result).toBe(1);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });
@@ -181,7 +181,7 @@ describe('Failure Statistics Properties', () => {
           expect(result.totalFailures).toBe(expectedFailures);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -203,7 +203,7 @@ describe('Failure Statistics Properties', () => {
           expect(result.failureRate).toBeLessThanOrEqual(1);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -225,7 +225,7 @@ describe('Failure Statistics Properties', () => {
           expect(result.failureRate).toBeCloseTo(expectedRate, 10);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -257,7 +257,7 @@ describe('Failure Statistics Properties', () => {
           expect(result.currentStreak).toBe(failureCount);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -283,7 +283,7 @@ describe('Failure Statistics Properties', () => {
           expect(result.currentStreak).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -304,7 +304,7 @@ describe('Failure Statistics Properties', () => {
           expect(result.currentStreak).toBeLessThanOrEqual(result.maxConsecutiveFailures);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });

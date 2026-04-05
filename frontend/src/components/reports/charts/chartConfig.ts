@@ -110,10 +110,11 @@ export const TOOLTIP_CONFIG_DARK = {
  */
 export const LEGEND_CONFIG = {
   iconType: 'circle' as const,
-  iconSize: 8,
+  iconSize: 9,
   wrapperStyle: {
     paddingTop: '1rem',
-    fontSize: '0.875rem'
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem'
   }
 } as const;
 

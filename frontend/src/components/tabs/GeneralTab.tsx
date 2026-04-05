@@ -22,6 +22,7 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
   const [interval, setCheckInterval] = useState(300);
   const [timeout, setCheckTimeout] = useState(30);
   const [loading, setLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [initialData, setInitialData] = useState<GeneralTabData>({ interval: 300, timeout: 30 });
@@ -65,10 +66,23 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
   const handleSave = async () => {
     try {
       setLoading(true);
+      setLoadingMsg('正在保存配置...');
       setError('');
       setSuccessMsg('');
-      await updateConfig({ checkInterval: interval, checkTimeout: timeout });
-      setSuccessMsg(t('settings.success.configSaved'));
+      
+      const response = await updateConfig({ checkInterval: interval, checkTimeout: timeout });
+      
+      // Display detailed success message based on backend response
+      if (response.schedulerRestarted) {
+        // Scheduler was restarted - config applied immediately
+        setSuccessMsg('配置已保存并应用');
+      } else if (response.wasRunning === false) {
+        // Engine not running - config will apply on next start
+        setSuccessMsg('配置已保存，将在下次启动时生效');
+      } else {
+        // Engine running but no restart needed (checkInterval unchanged)
+        setSuccessMsg('配置已保存并应用');
+      }
       
       // Update initial data after successful save
       setInitialData({ interval, timeout });
@@ -78,6 +92,7 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
       setError(err.message);
     } finally {
       setLoading(false);
+      setLoadingMsg('');
     }
   };
 
@@ -92,6 +107,16 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
       {successMsg && (
         <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm">
           {successMsg}
+        </div>
+      )}
+
+      {loadingMsg && (
+        <div className="p-4 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-xl text-sm flex items-center gap-2">
+          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {loadingMsg}
         </div>
       )}
 

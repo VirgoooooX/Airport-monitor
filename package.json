@@ -12,7 +12,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "start": "node dist/cli.js",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsx src/cli.ts",
+    "refresh-regions": "tsx scripts/refresh-region-data.ts",
+    "clear-refresh-regions": "tsx scripts/clear-and-refresh-regions.ts"
   },
   "keywords": [
     "airport",

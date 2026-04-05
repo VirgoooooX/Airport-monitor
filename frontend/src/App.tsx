@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, BarChart3, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useDashboardData, type NodeInfo } from './hooks/useDashboardData.ts';
 import { startEngine, stopEngine, deleteAirport } from './hooks/useControls.ts';
@@ -17,6 +17,15 @@ import LanguageSwitcher from './components/LanguageSwitcher.tsx';
 import ThemeSwitcher from './components/ThemeSwitcher.tsx';
 import { ToastContainer } from './components/Toast.tsx';
 import { useToast } from './hooks/useToast.ts';
+import DetailedReportView from './components/reports/DetailedReportView.tsx';
+
+// Report data cache for preloading
+interface ReportCache {
+  [airportId: string]: {
+    data: any;
+    timestamp: number;
+  };
+}
 
 function App() {
   const { t } = useTranslation();
@@ -28,7 +37,46 @@ function App() {
   const [showStats, setShowStats] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ region: '', protocol: '', search: '' });
   const [collapsedAirports, setCollapsedAirports] = useState<Set<string>>(new Set());
+  const [selectedAirportForReport, setSelectedAirportForReport] = useState<string | null>(null);
+  const [reportCache, setReportCache] = useState<ReportCache>({});
   const { toasts, closeToast, success, error: showError } = useToast();
+
+  // Preload report data when hovering over report button
+  const preloadReportData = async (airportId: string) => {
+    // Check if already cached and fresh (less than 5 minutes old)
+    const cached = reportCache[airportId];
+    if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+      return; // Already cached and fresh
+    }
+
+    try {
+      const end = new Date();
+      const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
+      
+      const params = new URLSearchParams();
+      params.append('startTime', start.toISOString());
+      params.append('endTime', end.toISOString());
+
+      const url = `/api/reports/detailed/${airportId}?${params.toString()}`;
+      const response = await fetch(url);
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setReportCache(prev => ({
+            ...prev,
+            [airportId]: {
+              data: result.data,
+              timestamp: Date.now()
+            }
+          }));
+        }
+      }
+    } catch (err) {
+      // Silently fail preload - user will see loading state if they click
+      console.debug('[App] Preload failed for airport:', airportId);
+    }
+  };
 
   // Extract unique regions and protocols from all nodes
   const { regions, protocols } = useMemo(() => {
@@ -246,6 +294,16 @@ function App() {
                   {airport.name}
                 </h2>
 
+                <button
+                  onClick={() => setSelectedAirportForReport(airport.id)}
+                  onMouseEnter={() => preloadReportData(airport.id)}
+                  className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium"
+                  title="查看详细报告"
+                >
+                  <FileText size={16} />
+                  <span>查看详细报告</span>
+                </button>
+
                 {/* Inline Dashboard Metrics */}
                 <div className="flex items-center gap-6 ml-4">
                   {/* Total Nodes */}
@@ -337,6 +395,53 @@ function App() {
           )}
         </div>
       </main>
+
+      {/* Detailed Report View */}
+      <AnimatePresence>
+        {selectedAirportForReport && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setSelectedAirportForReport(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header with close button */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-zinc-800">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-indigo-500" />
+                  {t('stats.title')}
+                </h2>
+                <button
+                  onClick={() => setSelectedAirportForReport(null)}
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                  aria-label={t('common.actions.close')}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Report content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <DetailedReportView 
+                  airportId={selectedAirportForReport} 
+                  preloadedData={reportCache[selectedAirportForReport]?.data}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Side Detail Overlay */}
       <NodeDetailDrawer 

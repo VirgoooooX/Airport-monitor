@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BREAKPOINTS, getResponsiveHeight } from './chartConfig';
 
 export interface ResponsiveChartConfig {
@@ -124,6 +125,8 @@ export function PaginationControls({
   onPageChange,
   className = ''
 }: PaginationControlsProps) {
+  const { t } = useTranslation();
+  
   if (totalPages <= 1) return null;
 
   const handlePrevious = () => {
@@ -145,11 +148,11 @@ export function PaginationControls({
         disabled={currentPage === 1}
         className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Previous
+        {t('reports.charts.pagination.previous')}
       </button>
       
       <span className="text-sm text-gray-600 dark:text-gray-400">
-        Page {currentPage} of {totalPages}
+        {t('reports.charts.pagination.pageOf', { current: currentPage, total: totalPages })}
       </span>
       
       <button
@@ -157,7 +160,7 @@ export function PaginationControls({
         disabled={currentPage === totalPages}
         className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Next
+        {t('reports.charts.pagination.next')}
       </button>
     </div>
   );

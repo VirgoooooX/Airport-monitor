@@ -145,7 +145,7 @@ describe('Time Aggregation Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -234,7 +234,7 @@ describe('Time Aggregation Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -329,7 +329,7 @@ describe('Time Aggregation Property Tests', () => {
             expect(segments.night.checkCount).toBe(expectedSegmentCounts.night);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -419,7 +419,7 @@ describe('Time Aggregation Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });

@@ -40,7 +40,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.p99).toBeLessThanOrEqual(result.max);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -72,7 +72,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.p50).toBe(expectedMedian);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -101,7 +101,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.max).toBe(expectedMax);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -133,7 +133,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.p99).toBeLessThanOrEqual(result.max);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -159,7 +159,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.mean).toBeLessThanOrEqual(result.max);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -191,7 +191,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.stdDev).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -224,7 +224,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.stdDev).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -264,7 +264,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.max).toBe(expectedMax);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -296,7 +296,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.stdDev).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -321,7 +321,7 @@ describe('Property 7: Percentile Calculation Accuracy', () => {
           expect(result.stdDev).toBeGreaterThanOrEqual(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });

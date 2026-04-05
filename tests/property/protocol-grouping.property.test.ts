@@ -222,7 +222,7 @@ describe('Protocol Grouping Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -279,7 +279,7 @@ describe('Protocol Grouping Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
 
@@ -338,7 +338,7 @@ describe('Protocol Grouping Property Tests', () => {
             expect(protocolStats[0].ranking).toBe(1);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });

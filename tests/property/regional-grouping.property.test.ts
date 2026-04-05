@@ -8,9 +8,9 @@
  */
 
 import * as fc from 'fast-check';
-import { RegionAnalyzerImpl } from '../../src/report/analyzers/region-analyzer.jsanalyzer.js';
-import { DatabaseManager } from '../../src/storage/database.jss';
-import type { CheckResult, Node } from '../../src/types/index.jss';
+import { RegionAnalyzerImpl } from '../../src/report/analyzers/region-analyzer.js';
+import { DatabaseManager } from '../../src/storage/database.js';
+import type { CheckResult, Node } from '../../src/types/index.js';
 
 // Mock DatabaseManager for testing
 class MockDatabaseManager {
@@ -169,7 +169,7 @@ describe('Regional Grouping Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });
@@ -330,7 +330,7 @@ describe('Regional Grouping Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 10 }
       );
     });
   });

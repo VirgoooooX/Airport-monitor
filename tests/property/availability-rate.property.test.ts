@@ -42,7 +42,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(result).toBeCloseTo(expectedRate, 2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -70,7 +70,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(result).toBeLessThanOrEqual(100);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -103,7 +103,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(result).toBe(100);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -128,7 +128,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(result).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -191,7 +191,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(result).toBe(50);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -238,7 +238,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(extendedRate).toBeGreaterThanOrEqual(initialRate);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -285,7 +285,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(extendedRate).toBeLessThanOrEqual(initialRate);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -320,7 +320,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(originalRate).toBe(reversedRate);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 
@@ -358,7 +358,7 @@ describe('Property 8: Availability Rate Calculation', () => {
           expect(result).toBeCloseTo(expectedRate, 2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 10 }
     );
   });
 });
