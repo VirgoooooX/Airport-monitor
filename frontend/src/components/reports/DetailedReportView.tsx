@@ -223,15 +223,12 @@ export default function DetailedReportView({
   };
 
   /**
-   * Fetch report when time range changes (but not on initial mount if preloaded data exists)
+   * Fetch report when time range changes
    */
   useEffect(() => {
-    // If we have preloaded data on initial mount, skip the fetch
-    if (preloadedData && !reportData) {
-      return;
-    }
     fetchReport();
-  }, [airportId, timeRange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [airportId, timeRange.start.getTime(), timeRange.end.getTime()]);
 
   /**
    * Handle retry button click
