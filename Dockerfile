@@ -8,8 +8,8 @@ WORKDIR /app/frontend
 # Copy package files for dependency installation
 COPY frontend/package*.json ./
 
-# Install dependencies with clean install
-RUN npm ci --only=production=false
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci
 
 # Copy frontend source code
 COPY frontend/ ./
@@ -27,8 +27,8 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package*.json ./
 
-# Install dependencies with clean install
-RUN npm ci --only=production=false
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci
 
 # Copy backend source code and config
 COPY src/ ./src/
