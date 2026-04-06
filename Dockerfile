@@ -45,6 +45,9 @@ RUN npm run build
 # ============================================
 FROM node:20-alpine
 
+# Install su-exec for user switching
+RUN apk add --no-cache su-exec
+
 # Set working directory
 WORKDIR /app
 
@@ -59,12 +62,16 @@ COPY --from=backend-builder /app/dist ./dist
 # Copy compiled frontend from builder
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Create data directory for persistence
 RUN mkdir -p /app/data && \
     chown -R node:node /app
 
-# Switch to non-root user for security
-USER node
+# Declare volume for data persistence
+VOLUME ["/app/data"]
 
 # Expose API port
 EXPOSE 3000
@@ -72,6 +79,9 @@ EXPOSE 3000
 # Health check endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Use entrypoint script to handle permissions
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Start the server in Web-First mode (no arguments = Web mode)
 CMD ["node", "dist/cli.js"]

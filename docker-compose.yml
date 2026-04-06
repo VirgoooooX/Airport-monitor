@@ -2,8 +2,7 @@ version: '3.8'
 
 services:
   airport-monitor:
-    build: .
-    image: airport-monitor:latest
+    image: ghcr.io/virgoooox/airport-monitor:latest
     container_name: airport-monitor
     ports:
       - "3000:3000"

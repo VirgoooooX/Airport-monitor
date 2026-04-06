@@ -1,6 +1,6 @@
 {
   "name": "airport-node-monitor",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Airport proxy node monitoring tool with availability tracking and reporting",
   "main": "dist/index.js",
   "type": "module",
