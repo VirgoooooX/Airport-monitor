@@ -1030,13 +1030,26 @@ export function startApiServer(
   // 5. Serve frontend static files
   // Use process.cwd() for compatibility with test environment
   const frontendPath = path.resolve(process.cwd(), 'frontend/dist');
-  app.use(express.static(frontendPath));
+  app.use(express.static(frontendPath, {
+    setHeaders: (res, filePath) => {
+      // Ensure correct MIME types for static files
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      } else if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      }
+    }
+  }));
 
   // SPA fallback
   app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
       return next();
     }
+    // Explicitly set Content-Type for HTML
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
 
