@@ -4,10 +4,22 @@ import { X, Clock, Zap, CheckCircle, XCircle, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import { fetchNodeTrend, fetchNodeLogs, type NodeInfo } from '../hooks/useDashboardData.ts';
+import { QualityBadge, type QualityGrade } from './QualityBadge.tsx';
 
 interface DrawerProps {
   node: NodeInfo | null;
   onClose: () => void;
+}
+
+interface NodeQualityData {
+  qualityScore: number;
+  qualityGrade: QualityGrade;
+  dimensions: {
+    availability: number;
+    latency: number;
+    stability: number;
+  };
+  region?: string;
 }
 
 export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
@@ -15,6 +27,8 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
   const [trendData, setTrendData] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [qualityData, setQualityData] = useState<NodeQualityData | null>(null);
+  const [qualityLoading, setQualityLoading] = useState(false);
 
   useEffect(() => {
     if (node) {
@@ -36,9 +50,37 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
       fetchNodeLogs(node.id)
         .then(res => setLogs(res))
         .catch(() => {});
+
+      // Fetch quality score data from detailed report
+      setQualityLoading(true);
+      fetch(`/api/reports/detailed/${node.airportId}`)
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.json();
+            // Find this specific node in the detailed report
+            const nodeData = data.nodes?.find((n: any) => n.nodeId === node.id);
+            if (nodeData && nodeData.qualityScore) {
+              setQualityData({
+                qualityScore: nodeData.qualityScore.overall,
+                qualityGrade: nodeData.qualityGrade as QualityGrade,
+                dimensions: {
+                  availability: nodeData.qualityScore.availability,
+                  latency: nodeData.qualityScore.latency,
+                  stability: nodeData.qualityScore.stability,
+                },
+                region: nodeData.region
+              });
+            }
+          }
+        })
+        .catch(() => {
+          // Silently fail - quality data is optional
+        })
+        .finally(() => setQualityLoading(false));
     } else {
       setTrendData([]);
       setLogs([]);
+      setQualityData(null);
     }
   }, [node]);
 
@@ -82,6 +124,83 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
 
             {/* Content */}
             <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+              {/* Quality Score Section - Requirement 11.4 */}
+              {qualityData && (
+                <div className="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-800">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                    {t('reports.quality.score')}
+                  </h3>
+                  
+                  {/* Quality Badge */}
+                  <div className="mb-4">
+                    <QualityBadge
+                      score={qualityData.qualityScore}
+                      grade={qualityData.qualityGrade}
+                      size="md"
+                      showScore={true}
+                      showDescription={true}
+                    />
+                  </div>
+
+                  {/* Dimension Breakdown */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-gray-600 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                      {t('reports.quality.dimensions.availability')} / {t('reports.quality.dimensions.latency')} / {t('reports.quality.dimensions.stability')}
+                    </h4>
+                    
+                    {/* Availability Dimension */}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-zinc-400">
+                        {t('reports.quality.dimensions.availability')}
+                      </span>
+                      <span className="font-mono font-medium text-gray-900 dark:text-white">
+                        {qualityData.dimensions.availability.toFixed(1)}
+                      </span>
+                    </div>
+
+                    {/* Latency Dimension */}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-zinc-400">
+                        {t('reports.quality.dimensions.latency')}
+                      </span>
+                      <span className="font-mono font-medium text-gray-900 dark:text-white">
+                        {qualityData.dimensions.latency.toFixed(1)}
+                      </span>
+                    </div>
+
+                    {/* Stability Dimension */}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-zinc-400">
+                        {t('reports.quality.dimensions.stability')}
+                      </span>
+                      <span className="font-mono font-medium text-gray-900 dark:text-white">
+                        {qualityData.dimensions.stability.toFixed(1)}
+                      </span>
+                    </div>
+
+                    {/* Region Weight Impact */}
+                    {qualityData.region && (
+                      <div className="flex items-center justify-between text-sm pt-2 mt-2 border-t border-gray-100 dark:border-zinc-800">
+                        <span className="text-gray-600 dark:text-zinc-400">
+                          {t('reports.quality.dimensions.region')}
+                        </span>
+                        <span className="font-mono font-medium text-indigo-600 dark:text-indigo-400">
+                          {qualityData.region}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {qualityLoading && !qualityData && (
+                <div className="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-800">
+                  <div className="h-24 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                </div>
+              )}
+
               {/* 24H Chart */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">

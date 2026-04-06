@@ -173,6 +173,24 @@ export class DatabaseManager implements DataStorage {
       )
     `);
 
+    // Create daily_stats table for aggregated historical data
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS daily_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        node_id TEXT NOT NULL,
+        date TEXT NOT NULL,
+        total_checks INTEGER NOT NULL,
+        successful_checks INTEGER NOT NULL,
+        failed_checks INTEGER NOT NULL,
+        availability_rate REAL NOT NULL,
+        avg_response_time INTEGER,
+        min_response_time INTEGER,
+        max_response_time INTEGER,
+        FOREIGN KEY (node_id) REFERENCES nodes(id),
+        UNIQUE(node_id, date)
+      )
+    `);
+
     // Create indexes
     this.createIndexes();
   }
@@ -240,6 +258,18 @@ export class DatabaseManager implements DataStorage {
     this.db.run(`
       CREATE INDEX IF NOT EXISTS idx_subscription_updates_timestamp 
       ON subscription_updates(timestamp)
+    `);
+
+    // Index for querying daily stats by node and date
+    this.db.run(`
+      CREATE INDEX IF NOT EXISTS idx_daily_stats_node_date 
+      ON daily_stats(node_id, date)
+    `);
+
+    // Index for querying daily stats by date
+    this.db.run(`
+      CREATE INDEX IF NOT EXISTS idx_daily_stats_date 
+      ON daily_stats(date)
     `);
   }
 
@@ -1282,4 +1312,165 @@ export class DatabaseManager implements DataStorage {
       calculatedAt: new Date(row[2] as string)
     };
   }
+
+  /**
+   * Archive old check results into daily stats and delete raw data
+   * This reduces database size by aggregating detailed check results older than retentionDays
+   * 
+   * @param retentionDays Number of days to keep detailed check results (default: 30)
+   */
+  archiveOldCheckResults(retentionDays: number = 30): void {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+      const cutoffDateStr = cutoffDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      console.log(`[DatabaseManager] Archiving check results older than ${cutoffDateStr}...`);
+
+      // Get all nodes
+      const nodesResult = this.db.exec(`SELECT id FROM nodes`);
+      if (nodesResult.length === 0 || nodesResult[0].values.length === 0) {
+        console.log(`[DatabaseManager] No nodes found, skipping archive`);
+        return;
+      }
+
+      const nodes = nodesResult[0].values.map(row => row[0] as string);
+      let archivedDays = 0;
+      let deletedRecords = 0;
+
+      // For each node, aggregate data by day
+      for (const nodeId of nodes) {
+        // Get distinct dates that need archiving
+        const datesResult = this.db.exec(
+          `SELECT DISTINCT DATE(timestamp) as date
+           FROM check_results
+           WHERE node_id = ? AND DATE(timestamp) < ?
+           ORDER BY date`,
+          [nodeId, cutoffDateStr]
+        );
+
+        if (datesResult.length === 0 || datesResult[0].values.length === 0) {
+          continue;
+        }
+
+        const dates = datesResult[0].values.map(row => row[0] as string);
+
+        for (const date of dates) {
+          // Calculate daily statistics
+          const statsResult = this.db.exec(
+            `SELECT 
+               COUNT(*) as total_checks,
+               SUM(CASE WHEN available = 1 THEN 1 ELSE 0 END) as successful_checks,
+               SUM(CASE WHEN available = 0 THEN 1 ELSE 0 END) as failed_checks,
+               AVG(CASE WHEN available = 1 THEN response_time ELSE NULL END) as avg_response_time,
+               MIN(CASE WHEN available = 1 THEN response_time ELSE NULL END) as min_response_time,
+               MAX(CASE WHEN available = 1 THEN response_time ELSE NULL END) as max_response_time
+             FROM check_results
+             WHERE node_id = ? AND DATE(timestamp) = ?`,
+            [nodeId, date]
+          );
+
+          if (statsResult.length === 0 || statsResult[0].values.length === 0) {
+            continue;
+          }
+
+          const stats = statsResult[0].values[0];
+          const totalChecks = stats[0] as number;
+          const successfulChecks = stats[1] as number;
+          const failedChecks = stats[2] as number;
+          const availabilityRate = totalChecks > 0 ? (successfulChecks / totalChecks) * 100 : 0;
+          const avgResponseTime = stats[3] as number | null;
+          const minResponseTime = stats[4] as number | null;
+          const maxResponseTime = stats[5] as number | null;
+
+          // Insert or update daily stats
+          this.db.run(
+            `INSERT OR REPLACE INTO daily_stats 
+             (node_id, date, total_checks, successful_checks, failed_checks, 
+              availability_rate, avg_response_time, min_response_time, max_response_time)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              nodeId,
+              date,
+              totalChecks,
+              successfulChecks,
+              failedChecks,
+              availabilityRate,
+              avgResponseTime,
+              minResponseTime,
+              maxResponseTime
+            ]
+          );
+
+          archivedDays++;
+        }
+
+        // Delete old check results for this node
+        const deleteResult = this.db.exec(
+          `DELETE FROM check_results
+           WHERE node_id = ? AND DATE(timestamp) < ?
+           RETURNING id`,
+          [nodeId, cutoffDateStr]
+        );
+
+        if (deleteResult.length > 0 && deleteResult[0].values.length > 0) {
+          deletedRecords += deleteResult[0].values.length;
+        }
+      }
+
+      // Also delete orphaned check_dimensions
+      this.db.run(
+        `DELETE FROM check_dimensions
+         WHERE check_result_id NOT IN (SELECT id FROM check_results)`
+      );
+
+      this.save();
+      console.log(`[DatabaseManager] Archive complete: ${archivedDays} days archived, ${deletedRecords} records deleted`);
+    } catch (error) {
+      console.error(`[DatabaseManager] Error archiving old check results:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get daily stats for a node within a date range
+   */
+  getDailyStats(nodeId: string, startDate: Date, endDate: Date): Array<{
+    date: string;
+    totalChecks: number;
+    successfulChecks: number;
+    failedChecks: number;
+    availabilityRate: number;
+    avgResponseTime: number | null;
+    minResponseTime: number | null;
+    maxResponseTime: number | null;
+  }> {
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    const result = this.db.exec(
+      `SELECT date, total_checks, successful_checks, failed_checks,
+              availability_rate, avg_response_time, min_response_time, max_response_time
+       FROM daily_stats
+       WHERE node_id = ? AND date >= ? AND date <= ?
+       ORDER BY date`,
+      [nodeId, startDateStr, endDateStr]
+    );
+
+    if (result.length === 0 || result[0].values.length === 0) {
+      return [];
+    }
+
+    return result[0].values.map(row => ({
+      date: row[0] as string,
+      totalChecks: row[1] as number,
+      successfulChecks: row[2] as number,
+      failedChecks: row[3] as number,
+      availabilityRate: row[4] as number,
+      avgResponseTime: row[5] as number | null,
+      minResponseTime: row[6] as number | null,
+      maxResponseTime: row[7] as number | null
+    }));
+  }
 }
+

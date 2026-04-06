@@ -14,11 +14,12 @@
  * Requirements: 1.1, 1.2, 1.3
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Server, Activity, Globe2, TrendingUp, ArrowUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDashboardData } from '../hooks/useDashboardData.ts';
+import { QualityBadge, type QualityGrade } from './QualityBadge.tsx';
 
 /**
  * Basic statistics for a single airport
@@ -31,6 +32,8 @@ export interface AirportBasicStats {
   offlineNodes: number;
   availabilityRate: number;
   avgLatency: number;
+  qualityScore?: number;
+  qualityGrade?: QualityGrade;
 }
 
 /**
@@ -74,59 +77,85 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05 }}
-      className="glass-card p-4"
+      className="glass-card p-4 relative overflow-hidden"
       role="article"
       aria-label={`${airport.name} ${t('stats.airport.statsLabel')}`}
     >
+      {/* Background quality indicator for high-quality airports */}
+      {airport.qualityGrade && (airport.qualityGrade === 'S' || airport.qualityGrade === 'A') && (
+        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 dark:bg-emerald-500/10 blur-2xl -mr-8 -mt-8 pointer-events-none" />
+      )}
+
       {/* Airport Header */}
-      <div className="flex items-center justify-between mb-3 gap-2">
+      <div className="flex items-start justify-between mb-4 gap-3 relative z-10">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <Server className="w-5 h-5 text-indigo-400 flex-shrink-0" aria-hidden="true" />
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={airport.name}>
-            {airport.name}
-          </h4>
+          <div className="p-1.5 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg">
+            <Server className="w-5 h-5 text-indigo-500 flex-shrink-0" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-base font-bold text-gray-900 dark:text-white truncate" title={airport.name}>
+              {airport.name}
+            </h4>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-zinc-500">
+                {airport.totalNodes} {t('common.units.nodes')}
+              </span>
+            </div>
+          </div>
         </div>
-        <span className="text-xs font-medium text-gray-600 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800/50 px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap">
-          {airport.totalNodes} {t('common.units.nodes')}
-        </span>
+
+        {/* Quality Badge - Top Right Corner Placement */}
+        {airport.qualityScore !== undefined && airport.qualityGrade && (
+          <div className="flex-shrink-0 -mt-1 -mr-1">
+            <QualityBadge
+              score={airport.qualityScore}
+              grade={airport.qualityGrade}
+              size="md"
+              showScore={true}
+              showDescription={false}
+            />
+          </div>
+        )}
       </div>
 
       {/* Basic Metrics */}
-      <dl className="space-y-2">
-        {/* Online/Offline Nodes */}
-        <div className="flex items-center justify-between">
-          <dt className="text-sm text-gray-600 dark:text-zinc-400 flex items-center gap-1">
-            <Globe2 className="w-3.5 h-3.5" aria-hidden="true" />
-            {t('stats.airport.onlineNodes')}
-          </dt>
-          <dd className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-            {airport.onlineNodes}
-          </dd>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <dt className="text-sm text-gray-600 dark:text-zinc-400 flex items-center gap-1">
-            <Activity className="w-3.5 h-3.5" aria-hidden="true" />
-            {t('stats.airport.offlineNodes')}
-          </dt>
-          <dd className="text-sm font-bold text-rose-600 dark:text-rose-400">
-            {airport.offlineNodes}
-          </dd>
-        </div>
-
-        {/* Availability Rate */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-zinc-800">
+      <dl className="space-y-2.5 relative z-10">
+        {/* Availability Rate (Highlighted) */}
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-zinc-800/50">
           <dt className="text-sm text-gray-600 dark:text-zinc-400">
             {t('stats.airport.availability')}
           </dt>
-          <dd className={`text-sm font-bold ${availabilityColor}`} aria-label={`${t('stats.airport.availability')}: ${airport.availabilityRate.toFixed(1)}%`}>
+          <dd className={`text-base font-black ${availabilityColor}`} aria-label={`${t('stats.airport.availability')}: ${airport.availabilityRate.toFixed(1)}%`}>
             {airport.availabilityRate.toFixed(1)}%
           </dd>
         </div>
 
-        {/* Average Latency */}
-        <div className="flex items-center justify-between">
-          <dt className="text-sm text-gray-600 dark:text-zinc-400 flex items-center gap-1">
+        {/* Online/Offline Nodes */}
+        <div className="grid grid-cols-2 gap-2 py-1">
+          <div className="flex flex-col">
+            <dt className="text-[10px] uppercase font-bold tracking-tight text-gray-400 dark:text-zinc-500 flex items-center gap-1 mb-0.5">
+              <Globe2 className="w-3 h-3" aria-hidden="true" />
+              {t('stats.airport.onlineNodes')}
+            </dt>
+            <dd className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+              {airport.onlineNodes}
+            </dd>
+          </div>
+
+          <div className="flex flex-col items-end">
+            <dt className="text-[10px] uppercase font-bold tracking-tight text-gray-400 dark:text-zinc-500 flex items-center gap-1 mb-0.5">
+              <Activity className="w-3 h-3" aria-hidden="true" />
+              {t('stats.airport.offlineNodes')}
+            </dt>
+            <dd className="text-sm font-bold text-rose-600 dark:text-rose-400">
+              {airport.offlineNodes}
+            </dd>
+          </div>
+        </div>
+
+        {/* Average Latency (Footer-style) */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-zinc-800/50">
+          <dt className="text-xs text-gray-500 dark:text-zinc-500 flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
             {t('stats.airport.avgLatency')}
           </dt>
@@ -145,7 +174,7 @@ AirportCard.displayName = 'AirportCard';
 /**
  * Sorting options for airport list
  */
-type SortOption = 'availability' | 'name';
+type SortOption = 'availability' | 'name' | 'quality';
 
 /**
  * Main SimplifiedAirportPanel component
@@ -153,7 +182,59 @@ type SortOption = 'availability' | 'name';
 export default function SimplifiedAirportPanel() {
   const { t } = useTranslation();
   const { airports, loading, error, refetch } = useDashboardData();
-  const [sortBy, setSortBy] = useState<SortOption>('availability');
+  const [sortBy, setSortBy] = useState<SortOption>('quality');
+  const [qualityScores, setQualityScores] = useState<Map<string, { score: number; grade: QualityGrade }>>(new Map());
+
+  // Fetch quality scores for all airports
+  useEffect(() => {
+    const fetchQualityScores = async () => {
+      if (airports.length === 0) return;
+
+      const scores = new Map<string, { score: number; grade: QualityGrade }>(qualityScores);
+      let changed = false;
+      
+      // Fetch quality scores for each airport in parallel
+      await Promise.all(
+        airports.map(async (airport) => {
+          // Skip if we already have a score for this airport (simple cache)
+          if (scores.has(airport.id)) return;
+
+          try {
+            const response = await fetch(`/api/reports/detailed/${airport.id}`);
+            if (response.ok) {
+              const result = await response.json();
+              // Access data property because of SuccessResponse wrapper
+              const reportData = result.data;
+              
+              if (reportData?.summary?.qualityScore !== undefined && reportData?.summary?.qualityGrade) {
+                console.log(`[SimplifiedAirportPanel] Fetched quality for ${airport.name}:`, reportData.summary.qualityScore, reportData.summary.qualityGrade);
+                scores.set(airport.id, {
+                  score: reportData.summary.qualityScore,
+                  grade: reportData.summary.qualityGrade as QualityGrade
+                });
+                changed = true;
+              } else {
+                console.warn(`[SimplifiedAirportPanel] No quality data in response for ${airport.name}`, result);
+              }
+            } else {
+              console.error(`[SimplifiedAirportPanel] Failed to fetch report for ${airport.name}: ${response.status}`);
+            }
+          } catch (err) {
+            // Silently fail - quality scores are optional
+            console.debug(`Failed to fetch quality score for airport ${airport.id}:`, err);
+          }
+        })
+      );
+
+      if (changed) {
+        setQualityScores(scores);
+      }
+    };
+
+    fetchQualityScores();
+    // Only re-run when the airport IDs change, not on every dashboard poll
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [airports.map(a => a.id).join(',')]);
 
   // Calculate basic statistics for each airport
   const airportStats = useMemo<AirportBasicStats[]>(() => {
@@ -171,6 +252,9 @@ export default function SimplifiedAirportPanel() {
         ? Math.round(latencies.reduce((sum, l) => sum + l, 0) / latencies.length)
         : 0;
 
+      // Get quality score if available
+      const qualityData = qualityScores.get(airport.id);
+
       return {
         id: airport.id,
         name: airport.name,
@@ -178,16 +262,20 @@ export default function SimplifiedAirportPanel() {
         onlineNodes,
         offlineNodes,
         availabilityRate,
-        avgLatency
+        avgLatency,
+        qualityScore: qualityData?.score,
+        qualityGrade: qualityData?.grade
       };
     });
-  }, [airports]);
+  }, [airports, qualityScores]);
 
-  // Sort by availability rate (descending) or name (ascending)
+  // Sort by availability rate (descending), name (ascending), or quality score (descending)
   const sortedAirports = useMemo(() => {
     const sorted = [...airportStats];
     if (sortBy === 'availability') {
       return sorted.sort((a, b) => b.availabilityRate - a.availabilityRate);
+    } else if (sortBy === 'quality') {
+      return sorted.sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
     } else {
       return sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -292,6 +380,7 @@ export default function SimplifiedAirportPanel() {
             className="text-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:border-indigo-500 dark:focus:border-indigo-500 rounded-lg px-3 py-1.5 text-gray-900 dark:text-white transition-colors duration-200 focus-visible-ring"
             aria-label={t('stats.airport.sortBy')}
           >
+            <option value="quality">{t('stats.airport.fields.quality')}</option>
             <option value="availability">{t('stats.airport.fields.availability')}</option>
             <option value="name">{t('stats.airport.fields.name')}</option>
           </select>

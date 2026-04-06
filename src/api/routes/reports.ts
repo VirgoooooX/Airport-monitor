@@ -17,6 +17,7 @@ import { calculateMaxConsecutiveFailures } from '../../report/calculators/failur
 import { calculateAvailabilityRate } from '../../report/calculators/availability-calculator.js';
 import { classifyHealthStatus } from '../../report/utils/health-classifier.js';
 import { validateTimeRange } from '../../report/utils/validators.js';
+import { getQualityGrade } from '../../report/utils/quality-score.js';
 import { ErrorCodes } from '../../report/models/api-responses.js';
 import { DetailedAirportReport, DetailedNodeMetrics } from '../../report/models/report-types.js';
 import { StabilityCalculator } from '../../report/stability-calculator.js';
@@ -228,7 +229,8 @@ export function createReportRoutes(db: DatabaseManager): Router {
             },
             jitter: jitterMetrics,
             healthStatus,
-            qualityScore: nodeQualityScore
+            qualityScore: nodeQualityScore,
+            qualityGrade: getQualityGrade(nodeQualityScore.overall)  // **Validates: Requirement 10.4**
           });
 
           // Accumulate for summary
@@ -355,7 +357,8 @@ export function createReportRoutes(db: DatabaseManager): Router {
           totalNodes: detailedNodes.length,
           avgAvailability: Math.round(avgAvailability * 100) / 100,
           avgLatency: Math.round(avgLatency * 100) / 100,
-          qualityScore: overallQualityScore.overall
+          qualityScore: overallQualityScore.overall,
+          qualityGrade: getQualityGrade(overallQualityScore.overall)  // **Validates: Requirement 10.2**
         },
         timeDimension: {
           hourlyTrend,

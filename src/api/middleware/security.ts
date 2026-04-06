@@ -18,7 +18,7 @@ import { DatabaseManager } from '../../storage/database.js';
  */
 export const reportRateLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 10, // 10 requests per minute
+  max: 100, // Increased to 100 requests per minute to support dashboard polling
   message: {
     success: false,
     error: {
@@ -56,9 +56,9 @@ export function isValidAirportId(airportId: string): boolean {
     return false;
   }
   
-  // Airport IDs should be alphanumeric with underscores, hyphens, and dots
+  // Airport IDs should be alphanumeric with underscores, hyphens, dots, and spaces
   // Length between 1 and 100 characters
-  const airportIdRegex = /^[a-zA-Z0-9_\-\.]{1,100}$/;
+  const airportIdRegex = /^[a-zA-Z0-9_\-\.\s]{1,100}$/;
   return airportIdRegex.test(airportId);
 }
 

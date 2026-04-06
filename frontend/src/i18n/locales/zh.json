@@ -255,7 +255,6 @@
     "searchPlaceholder": "按名称或地址搜索……"
   },
   "stats": {
-    "title": "统计与报告",
     "airport": {
       "title": "机场质量评估",
       "subtitle": "按机场汇总的性能和稳定性指标",
@@ -357,6 +356,26 @@
     "details": "错误详情"
   },
   "reports": {
+    "quality": {
+      "score": "质量分数",
+      "grade": "质量等级",
+      "overview": "质量分数概览",
+      "overallScore": "整体质量",
+      "grades": {
+        "S": "优秀",
+        "A": "良好",
+        "B": "中等",
+        "C": "及格",
+        "D": "较差",
+        "F": "很差"
+      },
+      "dimensions": {
+        "availability": "可用性",
+        "latency": "延迟",
+        "stability": "稳定性",
+        "region": "区域加成"
+      }
+    },
     "charts": {
       "nodeCount": "节点数",
       "avgLatency": "平均延迟",

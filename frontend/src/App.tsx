@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Activity, Settings as SettingsIcon, Server, Globe2, SignalHigh, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,6 @@ import AlertCenter from './components/AlertCenter.tsx';
 import AlertRulesPanel from './components/AlertRulesPanel.tsx';
 import NodeFilter, { type FilterState } from './components/NodeFilter.tsx';
 import SimplifiedAirportPanel from './components/SimplifiedAirportPanel.tsx';
-import ExportButton from './components/ExportButton.tsx';
 import LanguageSwitcher from './components/LanguageSwitcher.tsx';
 import ThemeSwitcher from './components/ThemeSwitcher.tsx';
 import { ToastContainer } from './components/Toast.tsx';
@@ -38,6 +37,7 @@ function App() {
   const [collapsedAirports, setCollapsedAirports] = useState<Set<string>>(new Set());
   const [selectedAirportForReport, setSelectedAirportForReport] = useState<string | null>(null);
   const [reportCache, setReportCache] = useState<ReportCache>({});
+  const preloadingRef = useRef<Set<string>>(new Set());
   const { toasts, closeToast, success, error: showError } = useToast();
 
   // Helper function to extract region from node
@@ -87,6 +87,13 @@ function App() {
       return; // Already cached and fresh
     }
 
+    // Prevent duplicate preload requests
+    if (preloadingRef.current.has(airportId)) {
+      return;
+    }
+
+    preloadingRef.current.add(airportId);
+
     try {
       const end = new Date();
       const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
@@ -113,6 +120,8 @@ function App() {
     } catch (err) {
       // Silently fail preload - user will see loading state if they click
       console.debug('[App] Preload failed for airport:', airportId);
+    } finally {
+      preloadingRef.current.delete(airportId);
     }
   };
 
@@ -358,11 +367,6 @@ function App() {
 
         {/* Regional Statistics Panel (Always shown) */}
         <div className="space-y-6 mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('stats.title')}</h2>
-            <ExportButton />
-          </div>
-          
           <SimplifiedAirportPanel />
         </div>
 

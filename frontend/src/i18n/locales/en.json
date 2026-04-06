@@ -255,7 +255,6 @@
     "searchPlaceholder": "Search by name or address..."
   },
   "stats": {
-    "title": "Statistics & Reports",
     "airport": {
       "title": "Airport Quality Assessment",
       "subtitle": "Performance and stability metrics aggregated by airport",
@@ -357,6 +356,26 @@
     "details": "Error Details"
   },
   "reports": {
+    "quality": {
+      "score": "Quality Score",
+      "grade": "Quality Grade",
+      "overview": "Quality Score Overview",
+      "overallScore": "Overall Quality",
+      "grades": {
+        "S": "Excellent",
+        "A": "Good",
+        "B": "Fair",
+        "C": "Acceptable",
+        "D": "Poor",
+        "F": "Very Poor"
+      },
+      "dimensions": {
+        "availability": "Availability",
+        "latency": "Latency",
+        "stability": "Stability",
+        "region": "Region Bonus"
+      }
+    },
     "error": {
       "title": "Failed to Load Report",
       "retry": "Retry"

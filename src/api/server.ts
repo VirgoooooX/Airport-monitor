@@ -61,25 +61,38 @@ export function startApiServer(
       // Get latest status for all nodes
       const latestStatus = await db.getLatestStatus();
       
-      console.log(`[API] /api/airports - Found ${latestStatus.size} nodes with latest status`);
+      // Import quality calculators
+      const { QualityCalculatorImpl } = await import('../report/calculators/quality-calculator.js');
+      const { getQualityGrade } = await import('../report/utils/quality-score.js');
+      const qualityCalculator = new QualityCalculatorImpl(db);
+      
+      const endTime = new Date();
+      const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
       
       const airportsMap = new Map();
       for (const airport of airports) {
         // Fetch nodes specific to this airport
         const nodes = db.getNodesByAirport(airport.id);
         
-        console.log(`[API] Airport ${airport.name} has ${nodes.length} nodes`);
-        
-        // Enrich nodes with latest check result
-        const enrichedNodes = nodes.map(node => {
+        // Enrich nodes with latest check result and quality info
+        const enrichedNodes = await Promise.all(nodes.map(async (node) => {
           const latestCheck = latestStatus.get(node.id);
-          if (latestCheck) {
-            console.log(`[API] Node ${node.name} - Latest check: available=${latestCheck.available}, responseTime=${latestCheck.responseTime}ms`);
-          } else {
-            console.log(`[API] Node ${node.name} - No check data found`);
+          
+          // Calculate node quality score
+          let qualityData = null;
+          try {
+            const score = await qualityCalculator.calculateQualityScore(node.id, startTime, endTime);
+            qualityData = {
+              score: score.overall,
+              grade: getQualityGrade(score.overall)
+            };
+          } catch (e) {
+            // Silently fail quality calculation
           }
+
           return {
             ...node,
+            quality: qualityData,
             lastCheck: latestCheck ? {
               timestamp: latestCheck.timestamp,
               available: latestCheck.available,
@@ -87,7 +100,7 @@ export function startApiServer(
               error: latestCheck.error
             } : null
           };
-        });
+        }));
         
         airportsMap.set(airport.id, {
           ...airport,

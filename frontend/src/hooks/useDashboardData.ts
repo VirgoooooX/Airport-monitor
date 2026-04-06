@@ -31,6 +31,10 @@ export interface NodeInfo {
     responseTime?: number;
     error?: string;
   } | null;
+  quality?: {
+    score: number;
+    grade: string;
+  } | null;
 }
 
 export interface AirportInfo {

@@ -103,6 +103,9 @@ export interface NodeStatistics {
   avgResponseTime: number; // milliseconds
   lastCheckTime: Date;
   lastStatus: boolean;
+  qualityScore?: number; // 0-100, optional for backward compatibility
+  qualityGrade?: 'S' | 'A' | 'B' | 'C' | 'D' | 'F'; // optional for backward compatibility
+  region?: string; // optional for backward compatibility
 }
 
 /**
@@ -132,6 +135,8 @@ export interface AirportReport {
   avgAvailabilityRate: number;
   avgResponseTime: number;
   nodes: NodeStatistics[];
+  qualityScore?: number; // 0-100, optional for backward compatibility
+  qualityGrade?: 'S' | 'A' | 'B' | 'C' | 'D' | 'F'; // optional for backward compatibility
 }
 
 /**

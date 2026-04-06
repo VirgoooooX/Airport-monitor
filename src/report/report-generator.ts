@@ -15,6 +15,7 @@ import {
 } from '../types/index.js';
 import { ReportGenerator } from '../interfaces/ReportGenerator.js';
 import { DatabaseManager } from '../storage/database.js';
+import { getQualityGrade, calculateAirportQualityScore } from './utils/quality-score.js';
 
 /**
  * ReportGeneratorImpl
@@ -368,6 +369,11 @@ export class ReportGeneratorImpl implements ReportGenerator {
           )
         : 0;
 
+    // Calculate airport quality score using nodes with region information
+    // Each node already has region, qualityScore, and other required fields from buildNodeStatistics
+    const qualityScore = calculateAirportQualityScore(sortedNodes);
+    const qualityGrade = getQualityGrade(qualityScore);
+
     return {
       airportId: airport.id,
       airportName: airport.name,
@@ -375,6 +381,8 @@ export class ReportGeneratorImpl implements ReportGenerator {
       avgAvailabilityRate,
       avgResponseTime,
       nodes: sortedNodes,
+      qualityScore,
+      qualityGrade,
     };
   }
 
@@ -397,6 +405,14 @@ export class ReportGeneratorImpl implements ReportGenerator {
 
     const lastCheck = history.length > 0 ? history[history.length - 1] : null;
 
+    // Extract region information from node metadata
+    const metadata = this.db.getNodeMetadata(node.id);
+    const region = metadata?.region;
+
+    // Calculate node quality score (node quality score = availability rate)
+    const qualityScore = availabilityRate;
+    const qualityGrade = getQualityGrade(qualityScore);
+
     return {
       nodeId: node.id,
       nodeName: node.name,
@@ -406,6 +422,9 @@ export class ReportGeneratorImpl implements ReportGenerator {
       avgResponseTime,
       lastCheckTime: lastCheck ? lastCheck.timestamp : new Date(0),
       lastStatus: lastCheck ? lastCheck.available : false,
+      qualityScore,
+      qualityGrade,
+      region,
     };
   }
 

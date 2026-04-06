@@ -52,9 +52,13 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
         ) : loading ? (
           <ChartSkeleton height={height} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={height}>
-            {children}
-          </ResponsiveContainer>
+          <div className="w-full h-full">
+            {height > 0 && (
+              <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={height}>
+                {children}
+              </ResponsiveContainer>
+            )}
+          </div>
         )}
       </div>
     </div>

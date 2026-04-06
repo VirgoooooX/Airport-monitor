@@ -33,6 +33,7 @@ export interface DetailedAirportReport {
     avgAvailability: number;
     avgLatency: number;
     qualityScore: number;
+    qualityGrade?: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';  // Added for requirement 10.2
   };
 
   // Time dimension analysis
@@ -105,6 +106,9 @@ export interface DetailedNodeMetrics {
 
   // Quality score
   qualityScore: QualityScore;
+  
+  // Quality grade (S/A/B/C/D/F) - Added for requirement 10.4
+  qualityGrade?: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
 }
 
 /**

@@ -19,6 +19,8 @@ import type { TimeRange } from './TimeRangeSelector';
 import { TimeRangeSelector } from './TimeRangeSelector';
 import { LazyChart } from './LazyChart';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import QualityBadge from '../QualityBadge';
+import type { QualityGrade } from '../QualityBadge';
 
 /**
  * Type definitions for report data
@@ -42,7 +44,23 @@ interface DetailedReportData {
   regionalDimension: any;
   protocolDimension: any;
   nodes: any[];
-  qualityScoring: any;
+  qualityScoring: {
+    overall: {
+      overall: number;
+      availability: number;
+      latency: number;
+      stability: number;
+      weights: {
+        availability: number;
+        latency: number;
+        stability: number;
+        region: number;
+      };
+    };
+    grade?: QualityGrade;
+    algorithm: string;
+    rankings: any[];
+  };
 }
 
 interface DetailedReportResponse {
@@ -68,6 +86,18 @@ interface DetailedReportViewProps {
   initialStartTime?: Date;
   initialEndTime?: Date;
   preloadedData?: DetailedReportData;
+}
+
+/**
+ * Get quality grade from score
+ */
+function getQualityGrade(score: number): QualityGrade {
+  if (score >= 90) return 'S';
+  if (score >= 80) return 'A';
+  if (score >= 70) return 'B';
+  if (score >= 60) return 'C';
+  if (score >= 50) return 'D';
+  return 'F';
 }
 
 /**
@@ -338,6 +368,53 @@ export default function DetailedReportView({
 
           {/* Summary Metrics */}
           <ReportSummary summary={reportData.summary} />
+
+          {/* Quality Score Overview Card */}
+          {reportData.qualityScoring && (
+            <div className="glass-panel p-6 mt-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {t('reports.quality.overview', 'Quality Score Overview')}
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-600 dark:text-zinc-400">
+                    {t('reports.quality.overallScore', 'Overall Quality')}:
+                  </div>
+                  <QualityBadge
+                    score={reportData.qualityScoring.overall.overall}
+                    grade={reportData.qualityScoring.grade || getQualityGrade(reportData.qualityScoring.overall.overall)}
+                    size="lg"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-6 text-sm">
+                  <div className="text-center">
+                    <div className="text-gray-600 dark:text-zinc-400 mb-1">
+                      {t('reports.quality.dimensions.availability', 'Availability')}
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {reportData.qualityScoring.overall.availability.toFixed(1)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-600 dark:text-zinc-400 mb-1">
+                      {t('reports.quality.dimensions.latency', 'Latency')}
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {reportData.qualityScoring.overall.latency.toFixed(1)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-600 dark:text-zinc-400 mb-1">
+                      {t('reports.quality.dimensions.stability', 'Stability')}
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {reportData.qualityScoring.overall.stability.toFixed(1)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Card Body - Expandable Content */}

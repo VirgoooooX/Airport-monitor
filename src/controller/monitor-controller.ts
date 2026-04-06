@@ -30,6 +30,7 @@ export class MonitorController {
   private checker: EnhancedAvailabilityChecker;
   private scheduler: NodeCheckScheduler | null = null;
   private subscriptionScheduler: SubscriptionUpdateScheduler | null = null;
+  private archiveTimer: NodeJS.Timeout | null = null;
   private db: DatabaseManager | null = null;
   private reporter: ReportGeneratorImpl | null = null;
   private logger: Logger;
@@ -219,6 +220,56 @@ export class MonitorController {
       this.subscriptionScheduler.start();
       this.logger.info('Subscription update scheduler started');
     }
+
+    // Start daily archive scheduler (runs at 3 AM every day)
+    this.startArchiveScheduler();
+  }
+
+  /**
+   * Start the archive scheduler to clean up old data daily
+   */
+  private startArchiveScheduler(): void {
+    // Calculate time until next 3 AM
+    const now = new Date();
+    const next3AM = new Date();
+    next3AM.setHours(3, 0, 0, 0);
+    
+    // If it's already past 3 AM today, schedule for tomorrow
+    if (now >= next3AM) {
+      next3AM.setDate(next3AM.getDate() + 1);
+    }
+    
+    const msUntil3AM = next3AM.getTime() - now.getTime();
+    
+    // Schedule first run
+    setTimeout(() => {
+      this.runArchive();
+      
+      // Then run every 24 hours
+      this.archiveTimer = setInterval(() => {
+        this.runArchive();
+      }, 24 * 60 * 60 * 1000); // 24 hours
+    }, msUntil3AM);
+    
+    this.logger.info(`Archive scheduler started, next run at ${next3AM.toISOString()}`);
+  }
+
+  /**
+   * Run the archive process
+   */
+  private runArchive(): void {
+    if (!this.db) {
+      this.logger.warn('Cannot run archive: database not initialized');
+      return;
+    }
+    
+    try {
+      this.logger.info('Starting daily archive process...');
+      this.db.archiveOldCheckResults(30); // Keep 30 days of detailed data
+      this.logger.info('Daily archive process completed successfully');
+    } catch (error) {
+      this.logger.error('Failed to run archive process', error as Error);
+    }
   }
 
   /**
@@ -237,6 +288,13 @@ export class MonitorController {
       this.subscriptionScheduler.stop();
       this.subscriptionScheduler = null;
       this.logger.info('Subscription update scheduler stopped');
+    }
+
+    // Stop archive scheduler
+    if (this.archiveTimer) {
+      clearInterval(this.archiveTimer);
+      this.archiveTimer = null;
+      this.logger.info('Archive scheduler stopped');
     }
   }
 
