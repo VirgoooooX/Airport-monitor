@@ -8,10 +8,20 @@ export type BuildInfo = {
 }
 
 export const buildInfo: BuildInfo = {
-  version: '1.0.3',
-  commit: '5207383',
-  builtAt: '2026-04-06T11:07:44.098Z',
+  version: '1.0.4',
+  commit: 'd84b1db',
+  builtAt: '2026-04-06T11:13:11.248Z',
   changelog: JSON.parse(`[
+  {
+    "hash": "d84b1db",
+    "date": "2026-04-06",
+    "message": "build: 为Docker构建添加编译依赖并优化TypeScript配置"
+  },
+  {
+    "hash": "0eb4767",
+    "date": "2026-04-06",
+    "message": "chore: 更新版本号至1.0.3并同步构建信息"
+  },
   {
     "hash": "5207383",
     "date": "2026-04-06",
