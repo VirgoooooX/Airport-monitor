@@ -19,6 +19,12 @@ export interface NodeInfo {
   address: string;
   port: number;
   config: any;
+  metadata?: {
+    region?: string;
+    country?: string;
+    city?: string;
+    isp?: string;
+  };
   lastCheck?: {
     timestamp: Date;
     available: boolean;
