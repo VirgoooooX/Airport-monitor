@@ -144,6 +144,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
   // Get health status badge
   const getHealthBadge = (status: string) => {
     const color = getHealthColor(status);
+    const translatedStatus = t(`reports.healthStatus.${status}`, status);
     return (
       <span
         className="inline-flex items-center px-2 py-1 rounded text-xs font-medium capitalize"
@@ -152,7 +153,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
           color: color
         }}
       >
-        {status}
+        {translatedStatus}
       </span>
     );
   };

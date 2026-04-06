@@ -40,6 +40,45 @@ function App() {
   const [reportCache, setReportCache] = useState<ReportCache>({});
   const { toasts, closeToast, success, error: showError } = useToast();
 
+  // Helper function to extract region from node
+  const extractRegionFromNode = (node: NodeInfo): string | null => {
+    // Priority 1: Use metadata region if available
+    if (node.metadata?.region) {
+      return node.metadata.region;
+    }
+
+    // Priority 2: Extract from node name using pattern matching
+    const name = node.name;
+    
+    // Check for Chinese region names (most common)
+    const chineseRegions = ['香港', '日本', '新加坡', '台湾', '韩国', '印度', '澳大利亚', '加拿大', '美东', '美西', '美国', '欧洲', '南美', '东南亚', '中东', '非洲'];
+    for (const region of chineseRegions) {
+      if (name.includes(region)) {
+        return region;
+      }
+    }
+
+    // Check for English region patterns
+    if (/\bHK\b|Hong\s*Kong/i.test(name)) return '香港';
+    if (/\bJP\b|Japan/i.test(name)) return '日本';
+    if (/\bSG\b|Singapore/i.test(name)) return '新加坡';
+    if (/\bTW\b|Taiwan/i.test(name)) return '台湾';
+    if (/\bKR\b|Korea/i.test(name)) return '韩国';
+    if (/\bIN\b|India/i.test(name)) return '印度';
+    if (/\bAU\b|Australia/i.test(name)) return '澳大利亚';
+    if (/\bCA\b|Canada/i.test(name)) return '加拿大';
+    if (/US\s*East|New\s*York|Washington/i.test(name)) return '美东';
+    if (/US\s*West|Los\s*Angeles|San\s*Francisco/i.test(name)) return '美西';
+    if (/\bUS\b|United\s*States|America/i.test(name)) return '美国';
+    if (/Europe|London|Paris|Frankfurt/i.test(name)) return '欧洲';
+    if (/South\s*America|Brazil/i.test(name)) return '南美';
+    if (/Southeast\s*Asia|Thailand|Vietnam/i.test(name)) return '东南亚';
+    if (/Middle\s*East|Dubai/i.test(name)) return '中东';
+    if (/Africa/i.test(name)) return '非洲';
+
+    return null;
+  };
+
   // Preload report data when hovering over report button
   const preloadReportData = async (airportId: string) => {
     // Check if already cached and fresh (less than 5 minutes old)
@@ -85,13 +124,55 @@ function App() {
     airports.forEach(airport => {
       airport.nodes.forEach(node => {
         protocolSet.add(node.protocol);
-        // Extract region from node metadata if available
-        // For now, we'll skip region extraction as it requires metadata
+        // Extract region from node metadata or name
+        const region = extractRegionFromNode(node);
+        if (region) {
+          regionSet.add(region);
+        }
       });
     });
 
+    // Define preferred region order (most commonly used first)
+    const regionOrder = [
+      '香港',      // Hong Kong - most popular
+      '日本',      // Japan - very popular
+      '新加坡',    // Singapore - popular
+      '台湾',      // Taiwan - popular
+      '韩国',      // Korea - popular
+      '美东',      // US East
+      '美西',      // US West
+      '美国',      // US (general)
+      '澳大利亚',  // Australia
+      '印度',      // India
+      '东南亚',    // Southeast Asia
+      '欧洲',      // Europe
+      '加拿大',    // Canada
+      '中东',      // Middle East
+      '南美',      // South America
+      '非洲',      // Africa
+      '其他'       // Other
+    ];
+
+    // Sort regions by preferred order
+    const sortedRegions = Array.from(regionSet).sort((a, b) => {
+      const indexA = regionOrder.indexOf(a);
+      const indexB = regionOrder.indexOf(b);
+      
+      // If both regions are in the order list, sort by their position
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      
+      // If only one is in the order list, prioritize it
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      
+      // If neither is in the order list, sort alphabetically
+      return a.localeCompare(b, 'zh-CN');
+    });
+
     return {
-      regions: Array.from(regionSet),
+      regions: sortedRegions,
       protocols: Array.from(protocolSet)
     };
   }, [airports]);
@@ -101,6 +182,14 @@ function App() {
     return airports.map(airport => ({
       ...airport,
       nodes: airport.nodes.filter(node => {
+        // Region filter
+        if (filters.region) {
+          const nodeRegion = extractRegionFromNode(node);
+          if (nodeRegion !== filters.region) {
+            return false;
+          }
+        }
+        
         // Protocol filter
         if (filters.protocol && node.protocol !== filters.protocol) {
           return false;
@@ -235,6 +324,49 @@ function App() {
         {/* Global Metrics Panel */}
         <MetricsHeader status={status} onToggleEngine={handleToggleEngine} loadingToggle={isToggling} />
 
+        {/* Engine Status Warning - Show when engine is stopped */}
+        {status && !status.running && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-zinc-900 dark:to-zinc-800 rounded-xl shadow-2xl p-5"
+          >
+            <div className="flex items-start gap-4">
+              {/* Icon */}
+              <div className="flex-shrink-0">
+                <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-2.5 rounded-full shadow-sm">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Text content */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 flex items-center gap-2">
+                  {t('dashboard.engineStopped.title', '监控引擎已停止')}
+                  <span className="px-2 py-0.5 text-xs font-medium bg-amber-200/80 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full">
+                    {t('common.status.offline', '离线')}
+                  </span>
+                </h3>
+                <p className="text-sm text-gray-700 dark:text-zinc-300 leading-relaxed">
+                  {t('dashboard.engineStopped.message', '当前显示的是历史数据。启动引擎以开始实时监控节点状态。')}
+                </p>
+                {status.scheduler.lastCheckTime && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-gray-600 dark:text-zinc-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>
+                      {t('dashboard.engineStopped.lastCheck', '最后检查时间')}: {new Date(status.scheduler.lastCheckTime).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Regional Statistics Panel (Always shown) */}
         <div className="space-y-6 mb-12">
           <div className="flex items-center justify-between mb-4">
@@ -353,7 +485,7 @@ function App() {
 
               {/* Node Cards - Collapsible */}
               {!collapsedAirports.has(airport.id) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${!status?.running ? 'opacity-60' : ''}`}>
                   {airport.nodes.map((node, i) => (
                     <NodeCard 
                       key={node.id} 

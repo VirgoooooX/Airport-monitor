@@ -41,7 +41,8 @@
       "kilobytes": "KB",
       "nodes": "节点",
       "pings": "检测次数"
-    }
+    },
+    "loading": "加载中"
   },
   "dashboard": {
     "title": "机场节点监控",
@@ -49,6 +50,11 @@
     "loading": "正在连接引擎……",
     "noAirports": "监控引擎中未配置任何机场。",
     "noMatchingNodes": "没有符合当前筛选条件的节点。",
+    "engineStopped": {
+      "title": "监控引擎已停止",
+      "message": "当前显示的是历史数据。启动引擎以开始实时监控节点状态。",
+      "lastCheck": "最后检查时间"
+    },
     "metrics": {
       "engine": "监控引擎",
       "online": "在线",
@@ -90,6 +96,7 @@
       "trendTitle": "24 小时响应时间趋势",
       "logsTitle": "最近检查日志（最多 50 条）",
       "noTrendData": "暂无趋势数据",
+      "noTrendDataHint": "启动引擎并等待几次检查后，趋势图将显示数据",
       "noLogs": "尚未收集到历史检查数据。",
       "integrated": "节点已集成并处于活跃状态。",
       "table": {
@@ -231,6 +238,8 @@
       "subtitle": "按机场汇总的性能和稳定性指标",
       "noData": "暂无机场数据",
       "sortBy": "排序",
+      "statsLabel": "统计信息",
+      "airportList": "机场列表",
       "fields": {
         "quality": "质量评分",
         "availability": "可用性",
@@ -331,6 +340,7 @@
       "avgLatencyMs": "平均延迟（毫秒）",
       "avgAvailability": "平均可用性",
       "avgAvailabilityPercent": "平均可用性（%）",
+      "nodeCountAndLatency": "节点数 / 延迟（毫秒）",
       "p95Latency": "P95延迟",
       "availability": "可用性",
       "availabilityPercent": "可用性（%）",
@@ -372,6 +382,12 @@
       "regions": "主要地区",
       "protocols": "协议",
       "health": "节点健康度"
+    },
+    "healthStatus": {
+      "excellent": "优秀",
+      "good": "良好",
+      "fair": "一般",
+      "offline": "离线"
     },
     "collapse": "折叠",
     "expand": "展开",

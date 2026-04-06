@@ -89,6 +89,38 @@ export const DistributionPieChart: React.FC<DistributionPieChartProps> = ({
     return `${entry.percentage.toFixed(1)}%`;
   };
 
+  // Calculate label position to avoid overlap
+  const RADIAN = Math.PI / 180;
+  const renderCustomLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent
+  }: any) => {
+    if (!showPercentageLabels || percent < 0.03) {
+      return null;
+    }
+
+    const radius = outerRadius + 25; // Position label outside the pie
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="currentColor"
+        className="text-xs font-medium fill-gray-700 dark:fill-gray-300"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+      >
+        {`${(percent * 100).toFixed(1)}%`}
+      </text>
+    );
+  };
+
   // Custom tooltip content
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || payload.length === 0) {
@@ -154,9 +186,13 @@ export const DistributionPieChart: React.FC<DistributionPieChartProps> = ({
           data={chartData}
           cx="50%"
           cy="50%"
-          labelLine={false}
-          label={renderLabel}
-          outerRadius={height * 0.35}
+          labelLine={{
+            stroke: 'currentColor',
+            strokeWidth: 1,
+            className: 'stroke-gray-400 dark:stroke-gray-600'
+          }}
+          label={renderCustomLabel}
+          outerRadius={height * 0.3}
           fill="#8884d8"
           dataKey="value"
           onClick={handleSliceClick}

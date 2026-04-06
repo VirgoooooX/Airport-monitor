@@ -41,7 +41,8 @@
       "kilobytes": "KB",
       "nodes": "nodes",
       "pings": "Pings"
-    }
+    },
+    "loading": "Loading"
   },
   "dashboard": {
     "title": "Airport Node Monitor",
@@ -49,6 +50,11 @@
     "loading": "CONNECTING TO ENGINE...",
     "noAirports": "No airports configured in the monitoring engine.",
     "noMatchingNodes": "No nodes match the current filters.",
+    "engineStopped": {
+      "title": "Monitoring Engine Stopped",
+      "message": "Currently displaying historical data. Start the engine to begin real-time node monitoring.",
+      "lastCheck": "Last check time"
+    },
     "metrics": {
       "engine": "Monitor Engine",
       "online": "Online",
@@ -90,6 +96,7 @@
       "trendTitle": "24H Response Time Trend",
       "logsTitle": "Recent Check Logs (max 50)",
       "noTrendData": "No trend data available",
+      "noTrendDataHint": "Start the engine and wait for a few checks, then the trend chart will display data",
       "noLogs": "No historical check data gathered yet.",
       "integrated": "Node is integrated and active.",
       "table": {
@@ -231,6 +238,8 @@
       "subtitle": "Performance and stability metrics aggregated by airport",
       "noData": "No airport data available",
       "sortBy": "Sort by",
+      "statsLabel": "statistics",
+      "airportList": "Airport list",
       "fields": {
         "quality": "Quality Score",
         "availability": "Availability",
@@ -351,6 +360,12 @@
       "protocols": "Protocols",
       "health": "Node Health"
     },
+    "healthStatus": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "offline": "Offline"
+    },
     "collapse": "Collapse",
     "expand": "Expand",
     "charts": {
@@ -359,6 +374,7 @@
       "avgLatencyMs": "Avg Latency (ms)",
       "avgAvailability": "Avg Availability",
       "avgAvailabilityPercent": "Avg Availability (%)",
+      "nodeCountAndLatency": "Node Count / Latency (ms)",
       "p95Latency": "P95 Latency",
       "availability": "Availability",
       "availabilityPercent": "Availability (%)",

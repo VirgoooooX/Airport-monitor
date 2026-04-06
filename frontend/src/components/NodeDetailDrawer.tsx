@@ -22,10 +22,11 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
       fetchNodeTrend(node.id)
         .then(res => {
           // Format trend data for Recharts
-          const formatted = res.hourlyTrend.map((item: any) => ({
-            time: new Date(item.startTime).getHours() + ':00',
-            ping: item.averageResponseTime || 0,
-            availability: (item.availabilityRate * 100).toFixed(1)
+          // API returns { nodeId, dataPoints } where dataPoints has { timestamp, availabilityRate, avgResponseTime, checkCount }
+          const formatted = res.dataPoints.map((item: any) => ({
+            time: new Date(item.timestamp).getHours() + ':00',
+            ping: item.avgResponseTime || 0,
+            availability: item.availabilityRate.toFixed(1)
           }));
           setTrendData(formatted);
         })
@@ -80,23 +81,6 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
 
             {/* Content */}
             <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
-              <div className="bg-gray-50 dark:bg-zinc-950/50 rounded-xl p-4 border border-gray-200 dark:border-zinc-800/50 mb-6">
-                <div className="flex items-center gap-3 mb-4 text-gray-700 dark:text-zinc-300">
-                  <Clock size={16} /> 
-                  <span className="text-sm font-medium">{t('nodes.detail.configuration')}</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-zinc-500">{t('nodes.card.address')}</span>
-                    <span className="text-gray-900 dark:text-zinc-200 font-mono">{node.address}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-zinc-500">{t('nodes.card.port')}</span>
-                    <span className="text-gray-900 dark:text-zinc-200 font-mono">{node.port}</span>
-                  </div>
-                </div>
-              </div>
-
               {/* 24H Chart */}
               <div>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-400 mb-4 flex items-center gap-2">
@@ -109,10 +93,10 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
                     <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : (
-                  <div className="h-48 w-full">
+                  <div className="h-48 w-full flex items-center justify-center">
                     {trendData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={trendData}>
+                        <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                           <defs>
                             <linearGradient id="colorPing" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
@@ -129,9 +113,19 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
                         </AreaChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="h-full flex flex-col items-center justify-center text-gray-500 dark:text-zinc-600">
-                        <XCircle size={24} className="mb-2 opacity-20" />
-                        <span className="text-xs">{t('nodes.detail.noTrendData')}</span>
+                      <div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-zinc-500">
+                        <div className="relative mb-3">
+                          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-xl"></div>
+                          <div className="relative bg-gray-100 dark:bg-zinc-800/50 p-3 rounded-full">
+                            <Zap size={20} className="text-gray-400 dark:text-zinc-500" />
+                          </div>
+                        </div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1">
+                          {t('nodes.detail.noTrendData')}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-zinc-600 text-center max-w-[200px]">
+                          {t('nodes.detail.noTrendDataHint', '启动引擎并等待几次检查后，趋势图将显示数据')}
+                        </p>
                       </div>
                     )}
                   </div>

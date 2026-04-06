@@ -181,14 +181,24 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
             <YAxis 
               yAxisId="left"
               orientation="left"
-              label={{ value: t('reports.charts.count'), angle: -90, position: 'insideLeft' }}
+              label={{ 
+                value: t('reports.charts.nodeCountAndLatency'), 
+                angle: -90, 
+                position: 'insideLeft',
+                style: { textAnchor: 'middle' }
+              }}
               {...getAxisConfig()} 
             />
             <YAxis 
               yAxisId="right"
               orientation="right"
               domain={[0, 100]}
-              label={{ value: t('reports.charts.percent'), angle: 90, position: 'insideRight' }}
+              label={{ 
+                value: t('reports.charts.avgAvailabilityPercent'), 
+                angle: 90, 
+                position: 'insideRight',
+                style: { textAnchor: 'middle' }
+              }}
               {...getAxisConfig()} 
             />
           </>
