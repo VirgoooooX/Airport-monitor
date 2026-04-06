@@ -246,10 +246,10 @@ async function main() {
   console.log(`🏷️  标签: ${tagName}`)
   console.log(`🌿 分支: ${currentBranch}`)
   console.log('\n🐳 GitHub Actions 将自动构建并推送 Docker 镜像到:')
-  console.log(`   ghcr.io/${process.env.GITHUB_REPOSITORY || 'your-username/airport-monitor'}:${targetVersion}`)
-  console.log(`   ghcr.io/${process.env.GITHUB_REPOSITORY || 'your-username/airport-monitor'}:latest`)
+  console.log(`   ghcr.io/virgoooox/airport-monitor:${targetVersion}`)
+  console.log(`   ghcr.io/virgoooox/airport-monitor:latest`)
   console.log('\n📊 查看构建进度:')
-  console.log(`   https://github.com/${process.env.GITHUB_REPOSITORY || 'your-username/airport-monitor'}/actions`)
+  console.log(`   https://github.com/VirgoooooX/Airport-monitor/actions`)
   console.log('='.repeat(70) + '\n')
 }
 

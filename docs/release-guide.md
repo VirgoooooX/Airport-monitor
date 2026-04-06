@@ -96,13 +96,13 @@ git push origin vX.Y.Z
 
 ```bash
 # 拉取最新版本
-docker pull ghcr.io/your-username/airport-monitor:latest
+docker pull ghcr.io/virgoooox/airport-monitor:latest
 
 # 拉取特定版本
-docker pull ghcr.io/your-username/airport-monitor:v1.0.0
+docker pull ghcr.io/virgoooox/airport-monitor:v1.0.0
 
 # 拉取主版本最新
-docker pull ghcr.io/your-username/airport-monitor:v1
+docker pull ghcr.io/virgoooox/airport-monitor:v1
 ```
 
 ### 更新 docker-compose.yml
@@ -110,9 +110,9 @@ docker pull ghcr.io/your-username/airport-monitor:v1
 ```yaml
 services:
   airport-monitor:
-    image: ghcr.io/your-username/airport-monitor:latest
+    image: ghcr.io/virgoooox/airport-monitor:latest
     # 或指定版本
-    # image: ghcr.io/your-username/airport-monitor:v1.0.0
+    # image: ghcr.io/virgoooox/airport-monitor:v1.0.0
 ```
 
 ## 查看构建状态
@@ -120,7 +120,7 @@ services:
 访问 GitHub Actions 页面查看构建进度：
 
 ```
-https://github.com/your-username/airport-monitor/actions
+https://github.com/VirgoooooX/Airport-monitor/actions
 ```
 
 ## 镜像标签策略

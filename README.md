@@ -95,12 +95,46 @@
 
 ### 🐳 方式一：Docker 部署（推荐）
 
+#### 选项 A：使用预构建镜像（最快）
+
+直接使用 GitHub Container Registry 上的官方镜像，无需构建：
+
+```bash
+# 拉取最新官方镜像
+docker pull ghcr.io/virgoooox/airport-monitor:latest
+
+# 创建数据目录
+mkdir -p data
+
+# 🚀 一键启动服务
+docker run -d \
+  --name airport-monitor \
+  -p 3000:3000 \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/virgoooox/airport-monitor:latest
+
+# 或使用 docker-compose（推荐）
+# 1. 下载配置文件
+curl -O https://raw.githubusercontent.com/VirgoooooX/Airport-monitor/main/docker-compose.yml
+
+# 2. 修改 docker-compose.yml，将 build: . 改为:
+#    image: ghcr.io/virgoooox/airport-monitor:latest
+
+# 3. 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+```
+
+#### 选项 B：从源码构建
+
 通过 `Docker Compose` 只需一秒，即可将强悍的扫描引擎与渲染中心跑满整个服：
 
 ```bash
 # 克隆仓库到本地
-git clone <repository-url>
-cd airport-monitor
+git clone https://github.com/VirgoooooX/Airport-monitor.git
+cd Airport-monitor
 
 # ✨ 一键极速启动完整服务 (前后端)
 docker-compose up -d
