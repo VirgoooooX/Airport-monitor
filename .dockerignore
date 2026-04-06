@@ -1,44 +1,77 @@
-# Node modules
-node_modules
-frontend/node_modules
+# Dependencies (will be installed in container)
+node_modules/
+frontend/node_modules/
+**/node_modules/
 
-# Build output
-dist
-frontend/dist
+# Build output (will be built in container)
+dist/
+frontend/dist/
+**/dist/
 
-# Data directories
-data
+# Data directories (mounted as volume)
+data/
 *.db
+*.db-journal
 
-# Test files
-tests
-*.test.ts
-*.test.js
-jest.config.js
-
-# Development configs
-.vscode
-.git
+# Git
+.git/
 .gitignore
+.gitattributes
 
-# Documentation
-docs
-README.md
-*.md
+# IDE and editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Kiro specs
+.kiro/
 
 # Logs
 *.log
-logs
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment files
 .env
-.env.local
+.env.*
+!.env.example
 
-# Spec files
-.kiro
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Example files
-example-config.json
+# Documentation (not needed in runtime)
+*.md
+!README.md
+docs/
 
-# Build artifacts
-frontend/build-error.log
+# Test files (not needed in production)
+tests/
+**/*.test.ts
+**/*.test.tsx
+**/*.test.js
+**/*.spec.ts
+**/*.spec.tsx
+**/*.spec.js
+jest.config.js
+vitest.config.ts
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Docker files (not needed inside container)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
