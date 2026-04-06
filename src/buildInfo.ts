@@ -8,10 +8,20 @@ export type BuildInfo = {
 }
 
 export const buildInfo: BuildInfo = {
-  version: '1.0.2',
-  commit: 'fcf76ee',
-  builtAt: '2026-04-06T10:59:46.615Z',
+  version: '1.0.3',
+  commit: '5207383',
+  builtAt: '2026-04-06T11:07:44.098Z',
   changelog: JSON.parse(`[
+  {
+    "hash": "5207383",
+    "date": "2026-04-06",
+    "message": "ci: 简化Docker构建流程并优化CI触发条件"
+  },
+  {
+    "hash": "5083334",
+    "date": "2026-04-06",
+    "message": "chore: 更新版本号至1.0.2并同步构建信息"
+  },
   {
     "hash": "fcf76ee",
     "date": "2026-04-06",
