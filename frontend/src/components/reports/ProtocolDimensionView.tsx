@@ -50,7 +50,7 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-red-600 dark:text-red-400">
+      <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
         {error}
       </div>
     );
@@ -95,10 +95,10 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
 
   // Get ranking badge color
   const getRankingColor = (ranking: number) => {
-    if (ranking === 1) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-    if (ranking === 2) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-    if (ranking === 3) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
-    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+    if (ranking === 1) return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800';
+    if (ranking === 2) return 'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700';
+    if (ranking === 3) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800';
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800';
   };
 
   return (
@@ -125,18 +125,18 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
       />
 
       {/* Protocol Ranking Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+      <div className="glass-panel p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
           <Network size={20} />
           {t('reports.protocolDimension.ranking', 'Protocol Ranking')}
         </h3>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-200 dark:border-zinc-800">
                 <th
-                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('ranking')}
                 >
                   <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('protocol')}
                 >
                   <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('nodeCount')}
                 >
                   <div className="flex items-center justify-end gap-2">
@@ -163,7 +163,7 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('avgLatency')}
                 >
                   <div className="flex items-center justify-end gap-2">
@@ -172,7 +172,7 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('avgAvailability')}
                 >
                   <div className="flex items-center justify-end gap-2">
@@ -184,23 +184,23 @@ export const ProtocolDimensionView: React.FC<ProtocolDimensionViewProps> = ({
             </thead>
             <tbody>
               {sortedProtocols.map((protocol) => (
-                <tr key={protocol.protocol} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <tr key={protocol.protocol} className="border-b border-gray-100 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200">
                   <td className="py-3 px-4">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${getRankingColor(protocol.ranking)}`}>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold ${getRankingColor(protocol.ranking)}`}>
                       {protocol.ranking === 1 && <Award size={12} />}
                       #{protocol.ranking}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100 uppercase">
+                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-zinc-100 uppercase">
                     {protocol.protocol}
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {protocol.nodeCount}
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {protocol.avgLatency.toFixed(0)}ms
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {protocol.avgAvailability.toFixed(1)}%
                   </td>
                 </tr>

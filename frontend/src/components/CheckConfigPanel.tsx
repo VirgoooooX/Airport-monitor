@@ -123,8 +123,8 @@ export default function CheckConfigPanel({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-xl">
-          <Settings className="w-5 h-5 text-gray-700 dark:text-zinc-300" />
+        <div className="p-2 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-lg">
+          <Settings className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
         </div>
         <h3 className="text-sm font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">
           {t('settings.checkConfig.title')}
@@ -132,86 +132,86 @@ export default function CheckConfigPanel({
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-sm">
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg text-sm">
           {error}
         </div>
       )}
       
       {successMsg && (
-        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm">
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm">
           {successMsg}
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.tcpTimeout')}</label>
+          <label className="form-label">{t('settings.checkConfig.tcpTimeout')}</label>
           <input 
             type="number" 
             min="1"
             max="30"
             value={config.tcpTimeout}
             onChange={e => updateConfig('tcpTimeout', Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="input-text"
           />
         </div>
         
         <div>
-          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.httpTimeout')}</label>
+          <label className="form-label">{t('settings.checkConfig.httpTimeout')}</label>
           <input 
             type="number" 
             min="1"
             max="60"
             value={config.httpTimeout}
             onChange={e => updateConfig('httpTimeout', Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="input-text"
           />
         </div>
         
         <div>
-          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.latencyTimeout')}</label>
+          <label className="form-label">{t('settings.checkConfig.latencyTimeout')}</label>
           <input 
             type="number" 
             min="1"
             max="30"
             value={config.latencyTimeout}
             onChange={e => updateConfig('latencyTimeout', Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="input-text"
           />
         </div>
         
         <div>
-          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.bandwidthTimeout')}</label>
+          <label className="form-label">{t('settings.checkConfig.bandwidthTimeout')}</label>
           <input 
             type="number" 
             min="10"
             max="300"
             value={config.bandwidthTimeout}
             onChange={e => updateConfig('bandwidthTimeout', Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="input-text"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.httpTestUrl')}</label>
+        <label className="form-label">{t('settings.checkConfig.httpTestUrl')}</label>
         <input 
           type="url" 
           value={config.httpTestUrl}
           onChange={e => updateConfig('httpTestUrl', e.target.value)}
-          className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+          className="input-text"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">{t('settings.checkConfig.bandwidthTestSize')}</label>
+          <label className="form-label">{t('settings.checkConfig.bandwidthTestSize')}</label>
           <input 
             type="number" 
             min="1"
             value={config.bandwidthTestSize}
             onChange={e => updateConfig('bandwidthTestSize', Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+            className="input-text"
           />
         </div>
         
@@ -221,7 +221,7 @@ export default function CheckConfigPanel({
               type="checkbox" 
               checked={config.bandwidthEnabled}
               onChange={e => updateConfig('bandwidthEnabled', e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+              className="input-checkbox"
             />
             <span className="text-sm text-gray-600 dark:text-zinc-400">{t('settings.checkConfig.bandwidthEnabled')}</span>
           </label>
@@ -231,7 +231,7 @@ export default function CheckConfigPanel({
       <button 
         onClick={handleSave}
         disabled={loading}
-        className="w-full py-2.5 bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 text-gray-900 dark:text-white rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+        className="btn-secondary w-full"
       >
         <Save size={16} /> {t('settings.checkConfig.saveButton')}
       </button>

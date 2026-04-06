@@ -147,7 +147,7 @@ export const ComparisonBarChart: React.FC<ComparisonBarChartProps> = ({
       className={className}
     >
       {data.length > 100 && (
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+        <div className="text-xs text-gray-500 dark:text-zinc-500 mb-2">
           {t('reports.charts.samplingCategories', { displayed: chartData.length, total: data.length })}
         </div>
       )}

@@ -11,26 +11,28 @@
 /**
  * Health status color scheme
  * Used consistently across all charts for status indicators
+ * Aligned with unified design system: emerald (success), amber (warning), rose (error)
  */
 export const HEALTH_COLORS = {
-  excellent: '#10b981', // green-500
-  good: '#fbbf24',      // yellow-400
-  fair: '#f97316',      // orange-500
-  offline: '#ef4444',   // red-500
-  unknown: '#6b7280'    // gray-500
+  excellent: '#10b981', // emerald-500 - success status
+  good: '#fbbf24',      // amber-400 - warning status
+  fair: '#f59e0b',      // amber-500 - warning status
+  offline: '#f43f5f',   // rose-500 - error status
+  unknown: '#6b7280'    // gray-500 - neutral
 } as const;
 
 /**
  * Chart color palette for data series
  * Used for multi-series charts and categorical data
+ * Aligned with unified design system: indigo (primary), emerald/amber/rose (status)
  */
 export const CHART_COLORS = {
-  primary: '#3b82f6',   // blue-500
-  secondary: '#8b5cf6', // violet-500
-  tertiary: '#ec4899',  // pink-500
-  quaternary: '#14b8a6', // teal-500
-  quinary: '#f59e0b',   // amber-500
-  senary: '#06b6d4'     // cyan-500
+  primary: '#6366f1',   // indigo-500 - primary color
+  secondary: '#818cf8', // indigo-400 - lighter primary
+  tertiary: '#10b981',  // emerald-500 - success/positive
+  quaternary: '#fbbf24', // amber-400 - warning/neutral
+  quinary: '#f43f5f',   // rose-500 - error/negative
+  senary: '#4f46e5'     // indigo-600 - darker primary
 } as const;
 
 /**
@@ -63,45 +65,53 @@ export const CHART_MARGINS = {
 
 /**
  * Tooltip styling configuration
+ * Aligned with unified design system typography and colors
  */
 export const TOOLTIP_CONFIG = {
   contentStyle: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    border: '1px solid #e5e7eb',
-    borderRadius: '0.5rem',
-    padding: '0.75rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    border: '1px solid #e5e7eb',        // gray-200
+    borderRadius: '0.75rem',             // rounded-xl (12px)
+    padding: '0.75rem',                  // p-3
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)', // shadow-md
+    backdropFilter: 'blur(12px)'
   },
   labelStyle: {
-    color: '#111827',
-    fontWeight: 600,
+    color: '#111827',                    // gray-900
+    fontWeight: 600,                     // font-semibold
+    fontSize: '0.875rem',                // text-sm
     marginBottom: '0.25rem'
   },
   itemStyle: {
-    color: '#6b7280',
-    fontSize: '0.875rem'
+    color: '#4b5563',                    // gray-600
+    fontSize: '0.875rem',                // text-sm
+    fontWeight: 400                      // font-normal
   }
 } as const;
 
 /**
  * Dark mode tooltip styling
+ * Aligned with unified design system typography and colors
  */
 export const TOOLTIP_CONFIG_DARK = {
   contentStyle: {
-    backgroundColor: 'rgba(31, 41, 55, 0.95)',
-    border: '1px solid #374151',
-    borderRadius: '0.5rem',
-    padding: '0.75rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+    backgroundColor: 'rgba(24, 24, 27, 0.95)', // zinc-900
+    border: '1px solid rgba(63, 63, 70, 0.5)', // zinc-800/50
+    borderRadius: '0.75rem',             // rounded-xl (12px)
+    padding: '0.75rem',                  // p-3
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3)', // shadow-md
+    backdropFilter: 'blur(12px)'
   },
   labelStyle: {
-    color: '#f9fafb',
-    fontWeight: 600,
+    color: '#f4f4f5',                    // zinc-100
+    fontWeight: 600,                     // font-semibold
+    fontSize: '0.875rem',                // text-sm
     marginBottom: '0.25rem'
   },
   itemStyle: {
-    color: '#d1d5db',
-    fontSize: '0.875rem'
+    color: '#a1a1aa',                    // zinc-400
+    fontSize: '0.875rem',                // text-sm
+    fontWeight: 400                      // font-normal
   }
 } as const;
 
@@ -120,45 +130,49 @@ export const LEGEND_CONFIG = {
 
 /**
  * Grid styling
+ * Aligned with unified design system colors
  */
 export const GRID_CONFIG = {
   strokeDasharray: '3 3',
-  stroke: '#e5e7eb',
+  stroke: '#e5e7eb',                     // gray-200
   strokeOpacity: 0.5
 } as const;
 
 /**
  * Dark mode grid styling
+ * Aligned with unified design system colors
  */
 export const GRID_CONFIG_DARK = {
   strokeDasharray: '3 3',
-  stroke: '#374151',
+  stroke: 'rgba(63, 63, 70, 0.5)',       // zinc-800/50
   strokeOpacity: 0.5
 } as const;
 
 /**
  * Axis styling
+ * Aligned with unified design system typography and colors
  */
 export const AXIS_CONFIG = {
   tick: {
-    fill: '#6b7280',
-    fontSize: 12
+    fill: '#4b5563',                     // gray-600 - secondary text
+    fontSize: 12                         // text-xs
   },
   axisLine: {
-    stroke: '#e5e7eb'
+    stroke: '#e5e7eb'                    // gray-200
   }
 } as const;
 
 /**
  * Dark mode axis styling
+ * Aligned with unified design system typography and colors
  */
 export const AXIS_CONFIG_DARK = {
   tick: {
-    fill: '#9ca3af',
-    fontSize: 12
+    fill: '#a1a1aa',                     // zinc-400 - secondary text
+    fontSize: 12                         // text-xs
   },
   axisLine: {
-    stroke: '#374151'
+    stroke: 'rgba(63, 63, 70, 0.5)'      // zinc-800/50
   }
 } as const;
 

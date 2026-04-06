@@ -49,21 +49,23 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
   const { t } = useTranslation();
 
   // Color coding for availability - memoized to avoid recalculation
+  // Using unified color system: emerald (success), amber (warning), rose (error)
   const availabilityColor = useMemo(() => {
     const rate = airport.availabilityRate;
     if (rate >= 95) return 'text-emerald-600 dark:text-emerald-400';
-    if (rate >= 90) return 'text-yellow-600 dark:text-yellow-400';
-    if (rate >= 80) return 'text-orange-600 dark:text-orange-400';
+    if (rate >= 90) return 'text-amber-600 dark:text-amber-400';
+    if (rate >= 80) return 'text-amber-600 dark:text-amber-400';
     return 'text-rose-600 dark:text-rose-400';
   }, [airport.availabilityRate]);
 
   // Color coding for latency - memoized to avoid recalculation
+  // Using unified color system: emerald (success), amber (warning), rose (error)
   const latencyColor = useMemo(() => {
     const latency = airport.avgLatency;
     if (latency === 0) return 'text-gray-400 dark:text-zinc-600';
     if (latency < 100) return 'text-emerald-600 dark:text-emerald-400';
-    if (latency < 200) return 'text-yellow-600 dark:text-yellow-400';
-    if (latency < 300) return 'text-orange-600 dark:text-orange-400';
+    if (latency < 200) return 'text-amber-600 dark:text-amber-400';
+    if (latency < 300) return 'text-amber-600 dark:text-amber-400';
     return 'text-rose-600 dark:text-rose-400';
   }, [airport.avgLatency]);
 
@@ -72,7 +74,7 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800/50 rounded-lg p-4 hover:border-indigo-500/30 transition-colors"
+      className="glass-card p-4"
       role="article"
       aria-label={`${airport.name} ${t('stats.airport.statsLabel')}`}
     >
@@ -80,11 +82,11 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Server className="w-5 h-5 text-indigo-400 flex-shrink-0" aria-hidden="true" />
-          <h4 className="text-gray-900 dark:text-white font-medium truncate" title={airport.name}>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={airport.name}>
             {airport.name}
           </h4>
         </div>
-        <span className="text-xs text-gray-600 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-1 rounded flex-shrink-0 whitespace-nowrap">
+        <span className="text-xs font-medium text-gray-600 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-800/50 px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap">
           {airport.totalNodes} {t('common.units.nodes')}
         </span>
       </div>
@@ -94,20 +96,20 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
         {/* Online/Offline Nodes */}
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600 dark:text-zinc-400 flex items-center gap-1">
-            <Globe2 className="w-3 h-3" aria-hidden="true" />
+            <Globe2 className="w-3.5 h-3.5" aria-hidden="true" />
             {t('stats.airport.onlineNodes')}
           </dt>
-          <dd className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+          <dd className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
             {airport.onlineNodes}
           </dd>
         </div>
 
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600 dark:text-zinc-400 flex items-center gap-1">
-            <Activity className="w-3 h-3" aria-hidden="true" />
+            <Activity className="w-3.5 h-3.5" aria-hidden="true" />
             {t('stats.airport.offlineNodes')}
           </dt>
-          <dd className="text-sm font-semibold text-rose-600 dark:text-rose-400">
+          <dd className="text-sm font-bold text-rose-600 dark:text-rose-400">
             {airport.offlineNodes}
           </dd>
         </div>
@@ -117,7 +119,7 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
           <dt className="text-sm text-gray-600 dark:text-zinc-400">
             {t('stats.airport.availability')}
           </dt>
-          <dd className={`text-sm font-semibold ${availabilityColor}`} aria-label={`${t('stats.airport.availability')}: ${airport.availabilityRate.toFixed(1)}%`}>
+          <dd className={`text-sm font-bold ${availabilityColor}`} aria-label={`${t('stats.airport.availability')}: ${airport.availabilityRate.toFixed(1)}%`}>
             {airport.availabilityRate.toFixed(1)}%
           </dd>
         </div>
@@ -125,10 +127,10 @@ const AirportCard = React.memo(({ airport, index }: AirportCardProps) => {
         {/* Average Latency */}
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600 dark:text-zinc-400 flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" aria-hidden="true" />
+            <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
             {t('stats.airport.avgLatency')}
           </dt>
-          <dd className={`text-sm font-semibold ${latencyColor}`} aria-label={`${t('stats.airport.avgLatency')}: ${airport.avgLatency > 0 ? `${airport.avgLatency} ${t('common.units.milliseconds')}` : t('stats.airport.noData')}`}>
+          <dd className={`text-sm font-bold ${latencyColor}`} aria-label={`${t('stats.airport.avgLatency')}: ${airport.avgLatency > 0 ? `${airport.avgLatency} ${t('common.units.milliseconds')}` : t('stats.airport.noData')}`}>
             {airport.avgLatency > 0 ? `${airport.avgLatency}ms` : '--'}
           </dd>
         </div>
@@ -226,7 +228,7 @@ export default function SimplifiedAirportPanel() {
           </p>
           <button
             onClick={refetch}
-            className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900"
+            className="btn-primary"
             aria-label={t('common.actions.retry')}
           >
             {t('common.actions.retry')}
@@ -287,7 +289,7 @@ export default function SimplifiedAirportPanel() {
             id="airport-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="text-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-colors"
+            className="text-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:border-indigo-500 dark:focus:border-indigo-500 rounded-lg px-3 py-1.5 text-gray-900 dark:text-white transition-colors duration-200 focus-visible-ring"
             aria-label={t('stats.airport.sortBy')}
           >
             <option value="availability">{t('stats.airport.fields.availability')}</option>

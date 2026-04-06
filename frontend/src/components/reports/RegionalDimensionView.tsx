@@ -66,7 +66,7 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-red-600 dark:text-red-400">
+      <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
         {error}
       </div>
     );
@@ -76,7 +76,7 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
   if (!data || !data.regions || data.regions.length === 0) {
     console.log('[RegionalDimensionView] No data or empty regions:', data);
     return (
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 text-yellow-600 dark:text-yellow-400">
+      <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
         {t('reports.regionalDimension.noData', 'No regional data available')}
       </div>
     );
@@ -149,18 +149,18 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
       />
 
       {/* Regional Statistics Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+      <div className="glass-panel p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
           <MapPin size={20} />
           {t('reports.regionalDimension.statistics', 'Regional Statistics')}
         </h3>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-200 dark:border-zinc-800">
                 <th
-                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('region')}
                 >
                   <div className="flex items-center gap-2">
@@ -169,7 +169,7 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('nodeCount')}
                 >
                   <div className="flex items-center justify-end gap-2">
@@ -178,7 +178,7 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('avgLatency')}
                 >
                   <div className="flex items-center justify-end gap-2">
@@ -187,7 +187,7 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
                   </div>
                 </th>
                 <th
-                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors duration-200"
                   onClick={() => handleSort('avgAvailability')}
                 >
                   <div className="flex items-center justify-end gap-2">
@@ -195,24 +195,24 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
                     <ArrowUpDown size={14} />
                   </div>
                 </th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400">
                   {t('reports.regionalDimension.healthDistribution', 'Health Distribution')}
                 </th>
               </tr>
             </thead>
             <tbody>
               {sortedRegions.map((region) => (
-                <tr key={region.region} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">
+                <tr key={region.region} className="border-b border-gray-100 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200">
+                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-zinc-100">
                     {region.region}
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {region.nodeCount}
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {region.avgLatency.toFixed(0)}ms
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {region.avgAvailability.toFixed(1)}%
                   </td>
                   <td className="py-3 px-4">
@@ -222,7 +222,7 @@ export const RegionalDimensionView: React.FC<RegionalDimensionViewProps> = ({
                         return (
                           <span
                             key={status}
-                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium"
                             style={{
                               backgroundColor: `${getHealthColor(status)}20`,
                               color: getHealthColor(status)

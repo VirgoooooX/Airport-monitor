@@ -133,25 +133,23 @@ export default function SettingsPanel({
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col 
+            className="glass-panel relative w-full max-w-4xl overflow-hidden flex flex-col 
                        max-h-[90vh] 
                        sm:max-w-2xl 
                        md:max-w-3xl 
                        lg:max-w-4xl"
           >
             {/* Header */}
-            <div className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-white/5 bg-white dark:bg-zinc-900/50">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-zinc-800">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-xl">
-                  <Settings className="w-5 h-5 text-gray-700 dark:text-zinc-300" />
+                <div className="p-2 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-lg">
+                  <Settings className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h2>
               </div>
               <button 
                 onClick={onClose} 
-                className="p-2 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg
-                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900
-                          touch-target"
+                className="btn-icon"
                 aria-label="Close settings"
               >
                 <X size={20} />
@@ -167,7 +165,7 @@ export default function SettingsPanel({
             />
 
             {/* Tab Content - Scrollable with custom scrollbar */}
-            <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
               <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
                 <div className={activeTab === 'general' ? 'block' : 'hidden'}>
                   <GeneralTab 

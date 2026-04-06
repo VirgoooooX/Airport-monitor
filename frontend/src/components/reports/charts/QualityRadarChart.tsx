@@ -116,7 +116,7 @@ export const QualityRadarChart: React.FC<QualityRadarChartProps> = ({
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-gray-700 dark:text-gray-300">
+            <span className="text-gray-700 dark:text-zinc-300">
               {entry.value}
             </span>
           </li>
@@ -141,19 +141,21 @@ export const QualityRadarChart: React.FC<QualityRadarChartProps> = ({
         data={chartData}
       >
         {/* Grid lines */}
-        <PolarGrid stroke="#e5e7eb" strokeOpacity={0.5} />
+        <PolarGrid stroke="#e5e7eb" strokeOpacity={0.5} className="dark:stroke-zinc-800" />
 
         {/* Metric labels around the perimeter */}
         <PolarAngleAxis
           dataKey="metric"
-          tick={{ fill: '#6b7280', fontSize: 12 }}
+          tick={{ fill: '#4b5563', fontSize: 12 }}
+          className="dark:fill-zinc-400"
         />
 
         {/* Score scale (0-100) */}
         <PolarRadiusAxis
           angle={90}
           domain={[0, 100]}
-          tick={{ fill: '#6b7280', fontSize: 10 }}
+          tick={{ fill: '#4b5563', fontSize: 10 }}
+          className="dark:fill-zinc-400"
         />
 
         {/* Tooltip */}

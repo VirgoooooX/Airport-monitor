@@ -139,12 +139,12 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
       {/* Total Nodes */}
       <motion.div
         variants={itemVariants}
-        className="glass-panel p-5 relative overflow-hidden group"
+        className="glass-panel p-6 relative overflow-hidden group"
       >
         <div className="absolute -right-4 -top-4 text-gray-900/5 dark:text-white/5 group-hover:text-indigo-500/10 transition-colors">
           <Server size={80} />
         </div>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-4 mb-4">
           <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
             <Server className="w-5 h-5" />
           </div>
@@ -152,7 +152,7 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
             {t('reports.summary.totalNodes', 'Total Nodes')}
           </h3>
         </div>
-        <div className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="text-4xl font-bold text-gray-900 dark:text-white">
           {summary.totalNodes}
         </div>
       </motion.div>
@@ -160,12 +160,12 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
       {/* Average Availability */}
       <motion.div
         variants={itemVariants}
-        className="glass-panel p-5 relative overflow-hidden group"
+        className="glass-panel p-6 relative overflow-hidden group"
       >
         <div className={`absolute -right-4 -top-4 text-gray-900/5 dark:text-white/5 group-hover:${getIconColor('availability', summary.avgAvailability)}/10 transition-colors`}>
           <TrendingUp size={80} />
         </div>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-4 mb-4">
           <div className={`p-2 ${getMetricCardBg('availability', summary.avgAvailability)} ${getIconColor('availability', summary.avgAvailability)} rounded-lg`}>
             <TrendingUp className="w-5 h-5" />
           </div>
@@ -173,7 +173,7 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
             {t('reports.summary.availability', 'Availability')}
           </h3>
         </div>
-        <div className={`text-3xl font-bold ${getAvailabilityColor(summary.avgAvailability)}`}>
+        <div className={`text-4xl font-bold ${getAvailabilityColor(summary.avgAvailability)}`}>
           {summary.avgAvailability.toFixed(1)}%
         </div>
       </motion.div>
@@ -181,12 +181,12 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
       {/* Average Latency */}
       <motion.div
         variants={itemVariants}
-        className="glass-panel p-5 relative overflow-hidden group"
+        className="glass-panel p-6 relative overflow-hidden group"
       >
         <div className={`absolute -right-4 -top-4 text-gray-900/5 dark:text-white/5 group-hover:${getIconColor('latency', summary.avgLatency)}/10 transition-colors`}>
           <Activity size={80} />
         </div>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-4 mb-4">
           <div className={`p-2 ${getMetricCardBg('latency', summary.avgLatency)} ${getIconColor('latency', summary.avgLatency)} rounded-lg`}>
             <Activity className="w-5 h-5" />
           </div>
@@ -194,7 +194,7 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
             {t('reports.summary.latency', 'Avg Latency')}
           </h3>
         </div>
-        <div className={`text-3xl font-bold ${getLatencyColor(summary.avgLatency)}`}>
+        <div className={`text-4xl font-bold ${getLatencyColor(summary.avgLatency)}`}>
           {Math.round(summary.avgLatency)}
           <span className="text-lg text-gray-500 dark:text-zinc-500 font-normal ml-1">ms</span>
         </div>
@@ -203,12 +203,12 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
       {/* Quality Score */}
       <motion.div
         variants={itemVariants}
-        className="glass-panel p-5 relative overflow-hidden group"
+        className="glass-panel p-6 relative overflow-hidden group"
       >
         <div className={`absolute -right-4 -top-4 text-gray-900/5 dark:text-white/5 group-hover:${getIconColor('quality', summary.qualityScore)}/10 transition-colors`}>
           <Award size={80} />
         </div>
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-4 mb-4">
           <div className={`p-2 ${getMetricCardBg('quality', summary.qualityScore)} ${getIconColor('quality', summary.qualityScore)} rounded-lg`}>
             <Award className="w-5 h-5" />
           </div>
@@ -216,8 +216,8 @@ export default function ReportSummary({ summary, className = '' }: ReportSummary
             {t('reports.summary.qualityScore', 'Quality Score')}
           </h3>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-2xl font-bold border ${getQualityScoreColor(summary.qualityScore)}`}>
+        <div className="flex items-center gap-4">
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-4xl font-bold border ${getQualityScoreColor(summary.qualityScore)}`}>
             {summary.qualityScore.toFixed(1)}
           </span>
           <span className="text-sm text-gray-500 dark:text-zinc-500">/100</span>

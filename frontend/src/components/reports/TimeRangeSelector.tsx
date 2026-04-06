@@ -153,10 +153,10 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   const PresetButton = ({ preset, label }: { preset: PresetOption; label: string }) => (
     <button
       onClick={() => handlePresetClick(preset)}
-      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus-visible-ring ${
         selectedPreset === preset
-          ? 'bg-indigo-600 text-white'
-          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm hover:shadow-md'
+          : 'bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-900 dark:text-white border border-gray-200 dark:border-zinc-700 shadow-sm hover:shadow-md'
       }`}
     >
       {label}
@@ -164,8 +164,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   );
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 ${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+    <div className={`glass-panel p-6 ${className}`}>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <Clock size={20} />
         {t('reports.timeRange.title', 'Time Range')}
       </h3>
@@ -181,11 +181,11 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
       {/* Custom Range Inputs */}
       {selectedPreset === 'custom' && (
-        <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+        <div className="space-y-4 p-4 bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-gray-200 dark:border-zinc-800/50">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Start Time */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="form-label">
                 <Calendar size={16} className="inline mr-1" />
                 {t('reports.timeRange.startTime', 'Start Time')}
               </label>
@@ -193,13 +193,13 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 type="datetime-local"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="input-text"
               />
             </div>
 
             {/* End Time */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="form-label">
                 <Calendar size={16} className="inline mr-1" />
                 {t('reports.timeRange.endTime', 'End Time')}
               </label>
@@ -207,7 +207,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 type="datetime-local"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="input-text"
               />
             </div>
           </div>
@@ -215,7 +215,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
           {/* Apply Button */}
           <button
             onClick={handleCustomApply}
-            className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+            className="btn-primary w-full"
           >
             {t('reports.timeRange.apply', 'Apply Custom Range')}
           </button>
@@ -224,25 +224,25 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
       {/* Validation Error */}
       {validationError && (
-        <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
-          <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" size={16} />
-          <p className="text-sm text-red-600 dark:text-red-400">{validationError}</p>
+        <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-lg flex items-start gap-2">
+          <AlertTriangle className="text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" size={16} />
+          <p className="text-sm text-rose-600 dark:text-rose-400">{validationError}</p>
         </div>
       )}
 
       {/* Warning */}
       {warning && !validationError && (
-        <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-start gap-2">
-          <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" size={16} />
-          <p className="text-sm text-yellow-600 dark:text-yellow-400">{warning}</p>
+        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start gap-2">
+          <AlertTriangle className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" size={16} />
+          <p className="text-sm text-amber-600 dark:text-amber-400">{warning}</p>
         </div>
       )}
 
       {/* Current Range Display */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
+        <p className="text-sm text-gray-600 dark:text-zinc-400">
           {t('reports.timeRange.current', 'Current range')}:{' '}
-          <span className="font-medium text-gray-900 dark:text-gray-100">
+          <span className="font-medium text-gray-900 dark:text-white">
             {value.start.toLocaleString()} - {value.end.toLocaleString()}
           </span>
         </p>

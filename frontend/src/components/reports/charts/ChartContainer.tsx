@@ -28,17 +28,17 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 ${className}`}>
+    <div className={`glass-card p-4 ${className}`}>
       {/* Header */}
       {(title || description) && (
         <div className="mb-4">
           {title && (
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">
               {title}
             </h3>
           )}
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">
               {description}
             </p>
           )}
@@ -63,14 +63,15 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
 
 /**
  * Loading skeleton for charts
+ * Aligned with unified design system colors
  */
 const ChartSkeleton: React.FC<{ height: number }> = ({ height }) => {
   return (
     <div
-      className="flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded animate-pulse"
+      className="flex items-center justify-center bg-gray-100 dark:bg-zinc-800 rounded animate-pulse"
       style={{ height: `${height}px` }}
     >
-      <div className="text-gray-400 dark:text-gray-500">
+      <div className="text-gray-400 dark:text-zinc-500">
         <svg
           className="w-12 h-12"
           fill="none"
@@ -91,13 +92,14 @@ const ChartSkeleton: React.FC<{ height: number }> = ({ height }) => {
 
 /**
  * Error display for charts
+ * Aligned with unified design system colors (rose for error)
  */
 const ChartError: React.FC<{ message: string }> = ({ message }) => {
   return (
-    <div className="flex items-center justify-center h-full bg-red-50 dark:bg-red-900/20 rounded">
+    <div className="flex items-center justify-center h-full bg-rose-50 dark:bg-rose-900/20 rounded">
       <div className="text-center p-4">
         <svg
-          className="w-12 h-12 text-red-500 mx-auto mb-2"
+          className="w-12 h-12 text-rose-500 mx-auto mb-2"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -109,7 +111,7 @@ const ChartError: React.FC<{ message: string }> = ({ message }) => {
             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p className="text-sm text-red-600 dark:text-red-400">{message}</p>
+        <p className="text-sm text-rose-600 dark:text-rose-400">{message}</p>
       </div>
     </div>
   );

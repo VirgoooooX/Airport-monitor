@@ -75,27 +75,12 @@ export const DistributionPieChart: React.FC<DistributionPieChartProps> = ({
     }
   };
 
-  // Custom label renderer for percentage display
-  const renderLabel = (entry: any) => {
-    if (!showPercentageLabels) {
-      return null;
-    }
-    
-    // Only show label if percentage is significant enough (>3%)
-    if (entry.percentage < 3) {
-      return null;
-    }
-
-    return `${entry.percentage.toFixed(1)}%`;
-  };
-
   // Calculate label position to avoid overlap
   const RADIAN = Math.PI / 180;
   const renderCustomLabel = ({
     cx,
     cy,
     midAngle,
-    innerRadius,
     outerRadius,
     percent
   }: any) => {
@@ -112,7 +97,7 @@ export const DistributionPieChart: React.FC<DistributionPieChartProps> = ({
         x={x}
         y={y}
         fill="currentColor"
-        className="text-xs font-medium fill-gray-700 dark:fill-gray-300"
+        className="text-xs font-medium fill-gray-700 dark:fill-zinc-300"
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
@@ -163,7 +148,7 @@ export const DistributionPieChart: React.FC<DistributionPieChartProps> = ({
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-gray-700 dark:text-gray-300">
+            <span className="text-gray-700 dark:text-zinc-300">
               {entry.value}: {entry.payload.value}
             </span>
           </li>
@@ -189,7 +174,7 @@ export const DistributionPieChart: React.FC<DistributionPieChartProps> = ({
           labelLine={{
             stroke: 'currentColor',
             strokeWidth: 1,
-            className: 'stroke-gray-400 dark:stroke-gray-600'
+            className: 'stroke-gray-400 dark:stroke-zinc-600'
           }}
           label={renderCustomLabel}
           outerRadius={height * 0.3}

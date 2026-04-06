@@ -65,7 +65,7 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-red-600 dark:text-red-400">
+      <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
         {error}
       </div>
     );
@@ -97,8 +97,8 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
 
       {/* Peak Periods */}
       {data.peakPeriods && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+        <div className="glass-panel p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
             <Clock size={20} />
             {t('reports.timeDimension.peakPeriods', 'Peak Periods')}
           </h3>
@@ -106,17 +106,17 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Highest Latency Period */}
             {data.peakPeriods.highestLatencyPeriod && (
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+              <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 border border-rose-200 dark:border-rose-800">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="text-red-600 dark:text-red-400" size={20} />
-                  <h4 className="font-semibold text-red-900 dark:text-red-100">
+                  <TrendingUp className="text-rose-600 dark:text-rose-400" size={20} />
+                  <h4 className="text-sm font-semibold text-rose-900 dark:text-rose-100">
                     {t('reports.timeDimension.highestLatency', 'Highest Latency')}
                   </h4>
                 </div>
-                <p className="text-sm text-red-700 dark:text-red-300">
+                <p className="text-sm text-rose-700 dark:text-rose-300">
                   {data.peakPeriods.highestLatencyPeriod.startHour}:00 - {data.peakPeriods.highestLatencyPeriod.endHour}:00
                 </p>
-                <p className="text-2xl font-bold text-red-900 dark:text-red-100 mt-2">
+                <p className="text-2xl font-bold text-rose-900 dark:text-rose-100 mt-2">
                   {data.peakPeriods.highestLatencyPeriod.avgLatency.toFixed(0)}ms
                 </p>
               </div>
@@ -124,17 +124,17 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
 
             {/* Lowest Latency Period */}
             {data.peakPeriods.lowestLatencyPeriod && (
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="text-green-600 dark:text-green-400" size={20} />
-                  <h4 className="font-semibold text-green-900 dark:text-green-100">
+                  <TrendingDown className="text-emerald-600 dark:text-emerald-400" size={20} />
+                  <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
                     {t('reports.timeDimension.lowestLatency', 'Lowest Latency')}
                   </h4>
                 </div>
-                <p className="text-sm text-green-700 dark:text-green-300">
+                <p className="text-sm text-emerald-700 dark:text-emerald-300">
                   {data.peakPeriods.lowestLatencyPeriod.startHour}:00 - {data.peakPeriods.lowestLatencyPeriod.endHour}:00
                 </p>
-                <p className="text-2xl font-bold text-green-900 dark:text-green-100 mt-2">
+                <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mt-2">
                   {data.peakPeriods.lowestLatencyPeriod.avgLatency.toFixed(0)}ms
                 </p>
               </div>
@@ -144,48 +144,48 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
       )}
 
       {/* Time Segment Comparison */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+      <div className="glass-panel p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-4">
           {t('reports.timeDimension.timeSegments', 'Time Segment Comparison')}
         </h3>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+              <tr className="border-b border-gray-200 dark:border-zinc-800">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400">
                   {t('reports.timeDimension.segment', 'Segment')}
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400">
                   {t('reports.timeDimension.avgLatency', 'Avg Latency')}
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400">
                   {t('reports.timeDimension.p95Latency', 'P95 Latency')}
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400">
                   {t('reports.timeDimension.availability', 'Availability')}
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-zinc-400">
                   {t('reports.timeDimension.checks', 'Checks')}
                 </th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(data.timeSegments).map(([segment, stats]) => (
-                <tr key={segment} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100 capitalize">
+                <tr key={segment} className="border-b border-gray-100 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200">
+                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-zinc-100 capitalize">
                     {t(`reports.timeDimension.segments.${segment}`, segment)}
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {stats.avgLatency.toFixed(0)}ms
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {stats.p95Latency.toFixed(0)}ms
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {stats.availabilityRate.toFixed(1)}%
                   </td>
-                  <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                  <td className="py-3 px-4 text-right text-gray-700 dark:text-zinc-400">
                     {stats.checkCount}
                   </td>
                 </tr>

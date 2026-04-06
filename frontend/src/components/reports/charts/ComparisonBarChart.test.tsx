@@ -375,7 +375,7 @@ describe('ComparisonBarChart', () => {
       );
       
       // ChartContainer adds specific styling classes
-      const wrapper = container.querySelector('.bg-white');
+      const wrapper = container.querySelector('.glass-card');
       expect(wrapper).toBeTruthy();
     });
 

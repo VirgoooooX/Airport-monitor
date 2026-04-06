@@ -103,18 +103,18 @@ export function VirtualTable<T extends Record<string, any>>({
   const totalHeight = sortedData.length * rowHeight;
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden ${className}`}>
+    <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-md overflow-hidden ${className}`}>
       {/* Fixed Header */}
-      <div className="overflow-x-auto border-b border-gray-200 dark:border-gray-700">
+      <div className="overflow-x-auto border-b border-gray-200 dark:border-zinc-800">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-900">
+          <thead className="bg-gray-50 dark:bg-zinc-900">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 ${
+                  className={`py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 ${
                     column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
-                  } ${column.sortable !== false ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800' : ''}`}
+                  } ${column.sortable !== false ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800' : ''}`}
                   style={{ width: column.width }}
                   onClick={() => column.sortable !== false && handleSort(column.key)}
                 >
@@ -132,17 +132,17 @@ export function VirtualTable<T extends Record<string, any>>({
       {/* Scrollable Body with Virtual Rendering */}
       <div
         ref={scrollContainerRef}
-        className="overflow-y-auto overflow-x-auto"
+        className="overflow-y-auto overflow-x-auto custom-scrollbar"
         style={{ height: containerHeight }}
         onScroll={handleScroll}
       >
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+            <div className="text-gray-500 dark:text-zinc-500">Loading...</div>
           </div>
         ) : sortedData.length === 0 ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-gray-500 dark:text-gray-400">{emptyMessage}</div>
+            <div className="text-gray-500 dark:text-zinc-500">{emptyMessage}</div>
           </div>
         ) : (
           <div style={{ height: totalHeight, position: 'relative' }}>
@@ -151,13 +151,13 @@ export function VirtualTable<T extends Record<string, any>>({
                 {visibleRows.map((row) => (
                   <tr
                     key={String(row[keyField])}
-                    className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    className="border-b border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors duration-200"
                     style={{ height: rowHeight }}
                   >
                     {columns.map((column) => (
                       <td
                         key={column.key}
-                        className={`py-3 px-4 text-gray-700 dark:text-gray-300 ${
+                        className={`py-3 px-4 text-gray-900 dark:text-zinc-100 ${
                           column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
                         }`}
                       >
@@ -173,10 +173,10 @@ export function VirtualTable<T extends Record<string, any>>({
       </div>
 
       {/* Footer with row count */}
-      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
+      <div className="px-4 py-3 border-t border-gray-200 dark:border-zinc-800 text-sm text-gray-600 dark:text-zinc-400">
         Showing {startIndex + 1}-{Math.min(endIndex, sortedData.length)} of {sortedData.length} rows
         {sortedData.length > 100 && (
-          <span className="ml-2 text-xs text-gray-500 dark:text-gray-500">
+          <span className="ml-2 text-xs text-gray-500 dark:text-zinc-500">
             (Virtual scrolling enabled)
           </span>
         )}

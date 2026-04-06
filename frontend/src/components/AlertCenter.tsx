@@ -99,7 +99,8 @@ export default function AlertCenter() {
       {/* Alert Icon with Badge */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="btn-icon relative"
+        aria-label="Open alerts"
       >
         <Bell size={20} />
         {unacknowledgedCount > 0 && (
@@ -129,12 +130,12 @@ export default function AlertCenter() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-96 max-h-[32rem] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50"
+              className="glass-panel absolute right-0 top-full mt-2 w-96 max-h-[32rem] shadow-xl overflow-hidden z-50"
             >
               {/* Header */}
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Bell size={16} className="text-indigo-400" />
+                  <Bell size={16} className="text-indigo-500 dark:text-indigo-400" />
                   {t('alerts.title')}
                   {unacknowledgedCount > 0 && (
                     <span className="text-xs text-gray-500 dark:text-zinc-500">
@@ -178,10 +179,10 @@ export default function AlertCenter() {
                               <span
                                 className={`text-xs font-semibold uppercase tracking-wider flex-shrink-0 ${
                                   alert.severity === 'critical'
-                                    ? 'text-rose-400'
+                                    ? 'text-rose-600 dark:text-rose-400'
                                     : alert.severity === 'error'
-                                    ? 'text-orange-400'
-                                    : 'text-amber-400'
+                                    ? 'text-orange-600 dark:text-orange-400'
+                                    : 'text-amber-600 dark:text-amber-400'
                                 }`}
                               >
                                 {t(`alerts.severity.${alert.severity}`)}
@@ -199,14 +200,14 @@ export default function AlertCenter() {
                               <button
                                 onClick={() => handleAcknowledge(alert.id)}
                                 disabled={loading}
-                                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
+                                className="text-xs text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors disabled:opacity-50 focus-visible-ring rounded px-1"
                               >
                                 <Check size={14} />
                                 {t('common.actions.acknowledge')}
                               </button>
                             )}
                             {alert.acknowledged && (
-                              <span className="text-xs text-emerald-500 flex items-center gap-1">
+                              <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                 <Check size={14} />
                                 {t('common.status.acknowledged')}
                               </span>

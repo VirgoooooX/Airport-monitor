@@ -86,7 +86,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-red-600 dark:text-red-400">
+      <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800 p-4 text-rose-600 dark:text-rose-400">
         {error}
       </div>
     );
@@ -221,11 +221,11 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
     ];
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
           <Server size={20} />
           {t('reports.nodeDetails.title', 'Node Details')}
-          <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+          <span className="text-sm font-normal text-gray-500 dark:text-zinc-500">
             ({nodes.length} {t('reports.nodeDetails.nodes', 'nodes')})
           </span>
         </h3>
@@ -245,21 +245,21 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
   // Use regular paginated table for smaller datasets (≤100 nodes)
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-md p-6">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
         <Server size={20} />
         {t('reports.nodeDetails.title', 'Node Details')}
-        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+        <span className="text-sm font-normal text-gray-500 dark:text-zinc-500">
           ({nodes.length} {t('reports.nodeDetails.nodes', 'nodes')})
         </span>
       </h3>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
+            <tr className="border-b border-gray-200 dark:border-zinc-800">
               <th
-                className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('nodeName')}
               >
                 <div className="flex items-center gap-2">
@@ -268,7 +268,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
                 </div>
               </th>
               <th
-                className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('protocol')}
               >
                 <div className="flex items-center gap-2">
@@ -277,7 +277,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
                 </div>
               </th>
               <th
-                className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('region')}
               >
                 <div className="flex items-center gap-2">
@@ -286,7 +286,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
                 </div>
               </th>
               <th
-                className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-right py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('latency')}
               >
                 <div className="flex items-center justify-end gap-2">
@@ -295,7 +295,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
                 </div>
               </th>
               <th
-                className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-right py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('availability')}
               >
                 <div className="flex items-center justify-end gap-2">
@@ -304,7 +304,7 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
                 </div>
               </th>
               <th
-                className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-right py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('stability')}
               >
                 <div className="flex items-center justify-end gap-2">
@@ -312,11 +312,11 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
                   <ArrowUpDown size={14} />
                 </div>
               </th>
-              <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+              <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400">
                 {t('reports.nodeDetails.health', 'Health')}
               </th>
               <th
-                className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="text-right py-3 px-4 text-xs font-semibold text-gray-600 dark:text-zinc-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/50"
                 onClick={() => handleSort('qualityScore')}
               >
                 <div className="flex items-center justify-end gap-2">
@@ -328,29 +328,29 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
           </thead>
           <tbody>
             {paginatedNodes.map((node) => (
-              <tr key={node.nodeId} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">
+              <tr key={node.nodeId} className="border-b border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors duration-200">
+                <td className="py-3 px-4 font-medium text-gray-900 dark:text-zinc-100">
                   {node.nodeName}
                 </td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300 uppercase">
+                <td className="py-3 px-4 text-gray-900 dark:text-zinc-100 uppercase">
                   {node.protocol}
                 </td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
+                <td className="py-3 px-4 text-gray-900 dark:text-zinc-100">
                   {node.region}
                 </td>
-                <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                <td className="py-3 px-4 text-right text-gray-900 dark:text-zinc-100">
                   {node.latency.p95.toFixed(0)}ms
                 </td>
-                <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                <td className="py-3 px-4 text-right text-gray-900 dark:text-zinc-100">
                   {node.availability.rate.toFixed(1)}%
                 </td>
-                <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300">
+                <td className="py-3 px-4 text-right text-gray-900 dark:text-zinc-100">
                   {node.stability.score.toFixed(0)}
                 </td>
                 <td className="py-3 px-4">
                   {getHealthBadge(node.healthStatus)}
                 </td>
-                <td className="py-3 px-4 text-right font-semibold text-gray-900 dark:text-gray-100">
+                <td className="py-3 px-4 text-right font-semibold text-gray-900 dark:text-zinc-100">
                   {node.qualityScore.overall.toFixed(1)}
                 </td>
               </tr>
@@ -361,25 +361,25 @@ export const NodeDetailsTable: React.FC<NodeDetailsTableProps> = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-zinc-800">
+          <div className="text-sm text-gray-600 dark:text-zinc-400">
             {t('reports.nodeDetails.showing', 'Showing')} {startIndex + 1}-{Math.min(startIndex + itemsPerPage, nodes.length)} {t('reports.nodeDetails.of', 'of')} {nodes.length}
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-sm font-medium text-gray-900 dark:text-white bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus-visible-ring"
             >
               {t('reports.nodeDetails.previous', 'Previous')}
             </button>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-gray-600 dark:text-zinc-400">
               {t('reports.nodeDetails.page', 'Page')} {currentPage} {t('reports.nodeDetails.of', 'of')} {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-sm font-medium text-gray-900 dark:text-white bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus-visible-ring"
             >
               {t('reports.nodeDetails.next', 'Next')}
             </button>

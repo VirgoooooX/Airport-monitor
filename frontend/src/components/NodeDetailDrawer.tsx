@@ -61,19 +61,20 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 bg-white dark:bg-zinc-900 border-l border-gray-200 dark:border-zinc-800 shadow-2xl flex flex-col"
+            className="glass-panel fixed right-0 top-0 bottom-0 w-full max-w-md z-50 shadow-xl flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-900/50">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-zinc-800">
               <div className="flex-1 min-w-0 mr-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 truncate" title={node.name}>{node.name}</h2>
-                <span className="px-2 py-0.5 text-xs font-mono bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 rounded uppercase">
+                <span className="px-2 py-0.5 text-xs font-mono bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded uppercase">
                   {node.protocol}
                 </span>
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white flex-shrink-0"
+                className="btn-icon"
+                aria-label="Close drawer"
               >
                 <X size={20} />
               </button>
@@ -138,7 +139,7 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
                   <Activity size={16} className="text-indigo-500 dark:text-indigo-400" />
                   {t('nodes.detail.logsTitle')}
                 </h3>
-                <div className="bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden relative">
+                <div className="glass-card overflow-hidden">
                   <table className="w-full text-left text-sm relative z-10">
                     <thead className="bg-gray-100 dark:bg-zinc-900/80 text-gray-600 dark:text-zinc-400 text-[10px] tracking-widest uppercase sticky top-0 backdrop-blur-md">
                       <tr>
@@ -183,7 +184,7 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
             </div>
             
             {/* Footer */}
-            <div className="p-6 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-zinc-950/80 mt-auto">
+            <div className="p-6 border-t border-gray-200 dark:border-zinc-800 mt-auto">
               <div className="flex items-center gap-2 text-emerald-500 dark:text-emerald-400">
                 <CheckCircle size={16} />
                 <span className="text-sm font-medium">{t('nodes.detail.integrated')}</span>

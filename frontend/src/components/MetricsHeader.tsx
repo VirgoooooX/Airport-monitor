@@ -22,7 +22,7 @@ export default function MetricsHeader({ status, onToggleEngine, loadingToggle }:
 
   return (
     <motion.div 
-      className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+      className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
       initial="hidden"
       animate="visible"
       variants={{
@@ -37,7 +37,7 @@ export default function MetricsHeader({ status, onToggleEngine, loadingToggle }:
           <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl">
             <Activity className="w-6 h-6" />
           </div>
-          <h3 className="text-gray-600 dark:text-zinc-400 font-medium">{t('dashboard.metrics.engine')}</h3>
+          <h3 className="text-sm text-gray-600 dark:text-zinc-400 font-medium">{t('dashboard.metrics.engine')}</h3>
         </div>
         <div className="flex items-end gap-3">
           <span className="text-4xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
@@ -56,7 +56,7 @@ export default function MetricsHeader({ status, onToggleEngine, loadingToggle }:
           <button
             onClick={() => onToggleEngine(!isRunning)}
             disabled={loadingToggle}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm transition-all shadow-lg border backdrop-blur-md ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm transition-all shadow-lg border backdrop-blur-md focus-visible-ring ${
               isRunning 
                 ? 'bg-rose-500/10 border-rose-500/50 text-rose-400 hover:bg-rose-500/20 hover:shadow-rose-500/20' 
                 : 'bg-indigo-500/10 border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/20 hover:shadow-indigo-500/20'
@@ -76,7 +76,7 @@ export default function MetricsHeader({ status, onToggleEngine, loadingToggle }:
           <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
             <Server className="w-6 h-6" />
           </div>
-          <h3 className="text-gray-600 dark:text-zinc-400 font-medium">{t('dashboard.metrics.nodes')}</h3>
+          <h3 className="text-sm text-gray-600 dark:text-zinc-400 font-medium">{t('dashboard.metrics.nodes')}</h3>
         </div>
         <div className="text-4xl font-bold text-gray-900 dark:text-white">
           {nodes} <span className="text-lg text-gray-500 dark:text-zinc-500 font-normal">{t('dashboard.metrics.active')}</span>
@@ -91,7 +91,7 @@ export default function MetricsHeader({ status, onToggleEngine, loadingToggle }:
           <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl">
             <Zap className="w-6 h-6" />
           </div>
-          <h3 className="text-gray-600 dark:text-zinc-400 font-medium">{t('dashboard.metrics.dispatch')}</h3>
+          <h3 className="text-sm text-gray-600 dark:text-zinc-400 font-medium">{t('dashboard.metrics.dispatch')}</h3>
         </div>
         <div className="text-4xl font-bold text-gray-900 dark:text-white">
           {checks.toLocaleString()} <span className="text-lg text-gray-500 dark:text-zinc-500 font-normal">{t('dashboard.metrics.pings')}</span>
