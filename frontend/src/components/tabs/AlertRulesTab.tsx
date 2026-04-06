@@ -29,7 +29,9 @@ export default function AlertRulesTab({ onClose, onOpenAlertRules }: TabContentP
 
       <button 
         onClick={handleOpenAlertRules}
-        className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 rounded-lg flex items-center justify-center gap-2 transition-colors"
+        className="btn-secondary w-full flex items-center justify-center gap-2 
+                  !bg-amber-500/10 hover:!bg-amber-500/20 !text-amber-600 dark:!text-amber-400 
+                  !border-amber-500/20 hover:!border-amber-500/30"
       >
         <Settings size={16} /> {t('settings.alertManagement.configureButton')}
       </button>

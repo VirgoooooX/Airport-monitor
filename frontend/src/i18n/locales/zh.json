@@ -151,7 +151,29 @@
       "rawLabel": "粘贴原始订阅配置（Base64 / Yaml）",
       "rawPlaceholder": "在此粘贴您的 base64 编码字符串或 YAML 配置……",
       "fileLabel": "选择文件（.yaml、.txt）",
-      "importButton": "导入订阅"
+      "importButton": "导入订阅",
+      "listTitle": "我的订阅",
+      "totalSubscriptions": "个订阅",
+      "emptyState": "暂无订阅",
+      "emptyStateHint": "在上方导入您的第一个订阅以开始使用",
+      "createdAt": "添加于",
+      "refresh": "刷新",
+      "deleteConfirmTitle": "删除订阅",
+      "deleteConfirmMessage": "确定要删除\"{{name}}\"吗？此操作将永久删除该机场及其所有节点和检查记录。",
+      "deleteSuccess": "已成功删除机场\"{{name}}\"",
+      "deleteFailed": "删除机场失败：{{error}}",
+      "refreshSuccess": "已刷新\"{{name}}\"：新增 {{added}} 个节点，移除 {{removed}} 个节点",
+      "refreshFailed": "刷新\"{{name}}\"失败：{{error}}",
+      "updateInterval": "自动更新",
+      "updateIntervalOptions": {
+        "disabled": "禁用",
+        "6h": "每 6 小时",
+        "12h": "每 12 小时",
+        "24h": "每 24 小时",
+        "48h": "每 48 小时"
+      },
+      "intervalUpdateSuccess": "自动更新间隔已更新",
+      "intervalUpdateFailed": "更新间隔失败：{{error}}"
     },
     "errors": {
       "airportNameRequired": "请提供机场名称。",
@@ -160,7 +182,8 @@
       "fileRequired": "请选择配置文件。",
       "fetchFailed": "获取配置失败",
       "updateFailed": "更新检查配置失败",
-      "saveFailed": "保存检查配置失败"
+      "saveFailed": "保存检查配置失败",
+      "loadFailed": "加载订阅列表失败"
     },
     "success": {
       "configSaved": "配置保存成功。",

@@ -225,6 +225,62 @@ export function startApiServer(
     }
   });
 
+  // 8c. Update Airport Update Interval
+  app.patch('/api/config/airports/:id', async (req, res) => {
+    try {
+      const airportId = req.params.id;
+      const { updateInterval } = req.body;
+      
+      // Validate updateInterval parameter
+      if (updateInterval !== undefined && updateInterval !== null) {
+        if (typeof updateInterval !== 'number' || updateInterval <= 0) {
+          return res.status(400).json({ 
+            error: 'updateInterval must be null or a positive number' 
+          });
+        }
+      }
+      
+      // Get airport from database
+      const airports = db.getAirports();
+      const airport = airports.find(a => a.id === airportId);
+      
+      if (!airport) {
+        return res.status(404).json({ error: 'Airport not found' });
+      }
+      
+      // Update airport interval in database
+      db.updateAirportInterval(airportId, updateInterval);
+      
+      // Update config.json file
+      const cpath = controller.getStatus().configPath;
+      if (cpath) {
+        const config = await configManager.loadConfig(cpath);
+        
+        // Find and update the airport in config
+        const configAirport = config.airports.find((a: any) => a.id === airportId);
+        if (configAirport) {
+          configAirport.updateInterval = updateInterval;
+        }
+        
+        // Save configuration file
+        const fs = await import('fs');
+        fs.writeFileSync(cpath, JSON.stringify(config, null, 2));
+      }
+      
+      // Get updated airport data
+      const updatedAirports = db.getAirports();
+      const updatedAirport = updatedAirports.find(a => a.id === airportId);
+      
+      res.json({ 
+        success: true, 
+        airport: updatedAirport 
+      });
+    } catch (err: any) {
+      console.error('[API] Update airport interval failed:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // 9. Update core config params (checkInterval, etc)
   app.post('/api/config', async (req, res) => {
     try {

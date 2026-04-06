@@ -151,7 +151,29 @@
       "rawLabel": "Paste Raw Subscription Config (Base64 / Yaml)",
       "rawPlaceholder": "Paste your base64 encoded string or YAML configuration here...",
       "fileLabel": "Select File (.yaml, .txt)",
-      "importButton": "Import Subscription"
+      "importButton": "Import Subscription",
+      "listTitle": "My Subscriptions",
+      "totalSubscriptions": "subscriptions",
+      "emptyState": "No subscriptions yet",
+      "emptyStateHint": "Import your first subscription above to get started",
+      "createdAt": "Added",
+      "refresh": "Refresh",
+      "deleteConfirmTitle": "Delete Subscription",
+      "deleteConfirmMessage": "Are you sure you want to delete \"{{name}}\"? This will permanently remove the airport and all its nodes and check results.",
+      "deleteSuccess": "Successfully deleted airport \"{{name}}\"",
+      "deleteFailed": "Failed to delete airport: {{error}}",
+      "refreshSuccess": "Refreshed \"{{name}}\": added {{added}} nodes, removed {{removed}} nodes",
+      "refreshFailed": "Failed to refresh \"{{name}}\": {{error}}",
+      "updateInterval": "Auto-Update",
+      "updateIntervalOptions": {
+        "disabled": "Disabled",
+        "6h": "Every 6 hours",
+        "12h": "Every 12 hours",
+        "24h": "Every 24 hours",
+        "48h": "Every 48 hours"
+      },
+      "intervalUpdateSuccess": "Auto-update interval updated successfully",
+      "intervalUpdateFailed": "Failed to update interval: {{error}}"
     },
     "errors": {
       "airportNameRequired": "Please provide Airport Name.",
@@ -160,7 +182,8 @@
       "fileRequired": "Please select a configuration file.",
       "fetchFailed": "Failed to fetch configuration",
       "updateFailed": "Failed to update check configuration",
-      "saveFailed": "Failed to save check configuration"
+      "saveFailed": "Failed to save check configuration",
+      "loadFailed": "Failed to load subscriptions"
     },
     "success": {
       "configSaved": "Config saved successfully.",

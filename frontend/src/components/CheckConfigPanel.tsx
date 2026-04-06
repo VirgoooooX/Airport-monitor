@@ -145,8 +145,9 @@ export default function CheckConfigPanel({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="form-label">{t('settings.checkConfig.tcpTimeout')}</label>
+          <label htmlFor="tcp-timeout" className="form-label">{t('settings.checkConfig.tcpTimeout')}</label>
           <input 
+            id="tcp-timeout"
             type="number" 
             min="1"
             max="30"
@@ -157,8 +158,9 @@ export default function CheckConfigPanel({
         </div>
         
         <div>
-          <label className="form-label">{t('settings.checkConfig.httpTimeout')}</label>
+          <label htmlFor="http-timeout" className="form-label">{t('settings.checkConfig.httpTimeout')}</label>
           <input 
+            id="http-timeout"
             type="number" 
             min="1"
             max="60"
@@ -169,8 +171,9 @@ export default function CheckConfigPanel({
         </div>
         
         <div>
-          <label className="form-label">{t('settings.checkConfig.latencyTimeout')}</label>
+          <label htmlFor="latency-timeout" className="form-label">{t('settings.checkConfig.latencyTimeout')}</label>
           <input 
+            id="latency-timeout"
             type="number" 
             min="1"
             max="30"
@@ -181,8 +184,9 @@ export default function CheckConfigPanel({
         </div>
         
         <div>
-          <label className="form-label">{t('settings.checkConfig.bandwidthTimeout')}</label>
+          <label htmlFor="bandwidth-timeout" className="form-label">{t('settings.checkConfig.bandwidthTimeout')}</label>
           <input 
+            id="bandwidth-timeout"
             type="number" 
             min="10"
             max="300"
@@ -194,8 +198,9 @@ export default function CheckConfigPanel({
       </div>
 
       <div>
-        <label className="form-label">{t('settings.checkConfig.httpTestUrl')}</label>
+        <label htmlFor="http-test-url" className="form-label">{t('settings.checkConfig.httpTestUrl')}</label>
         <input 
+          id="http-test-url"
           type="url" 
           value={config.httpTestUrl}
           onChange={e => updateConfig('httpTestUrl', e.target.value)}
@@ -205,8 +210,9 @@ export default function CheckConfigPanel({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="form-label">{t('settings.checkConfig.bandwidthTestSize')}</label>
+          <label htmlFor="bandwidth-test-size" className="form-label">{t('settings.checkConfig.bandwidthTestSize')}</label>
           <input 
+            id="bandwidth-test-size"
             type="number" 
             min="1"
             value={config.bandwidthTestSize}
@@ -216,14 +222,15 @@ export default function CheckConfigPanel({
         </div>
         
         <div className="flex items-end">
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label htmlFor="bandwidth-enabled" className="flex items-center gap-2 cursor-pointer">
             <input 
+              id="bandwidth-enabled"
               type="checkbox" 
               checked={config.bandwidthEnabled}
               onChange={e => updateConfig('bandwidthEnabled', e.target.checked)}
               className="input-checkbox"
             />
-            <span className="text-sm text-gray-600 dark:text-zinc-400">{t('settings.checkConfig.bandwidthEnabled')}</span>
+            <span className="text-sm text-gray-900 dark:text-white">{t('settings.checkConfig.bandwidthEnabled')}</span>
           </label>
         </div>
       </div>
@@ -231,7 +238,7 @@ export default function CheckConfigPanel({
       <button 
         onClick={handleSave}
         disabled={loading}
-        className="btn-secondary w-full"
+        className="btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Save size={16} /> {t('settings.checkConfig.saveButton')}
       </button>

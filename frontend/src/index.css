@@ -112,7 +112,7 @@
 
   /* Icon button */
   .btn-icon {
-    @apply p-2 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 active:bg-gray-100 dark:active:bg-zinc-600 border border-gray-200 dark:border-zinc-700 rounded-lg transition-all duration-200 focus-visible-ring touch-target;
+    @apply p-3 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors focus-visible-ring touch-target flex items-center justify-center;
   }
 
   /* Ghost button (minimal styling) */

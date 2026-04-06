@@ -52,7 +52,7 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-gray-900/50 dark:bg-zinc-950/60 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-gray-900/50 dark:bg-zinc-950/80 backdrop-blur-sm"
           />
           
           {/* Drawer */}
@@ -61,19 +61,19 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="glass-panel fixed right-0 top-0 bottom-0 w-full max-w-md z-50 shadow-xl flex flex-col"
+            className="glass-panel fixed right-0 top-0 bottom-0 w-full max-w-md z-50 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-zinc-800">
               <div className="flex-1 min-w-0 mr-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 truncate" title={node.name}>{node.name}</h2>
-                <span className="px-2 py-0.5 text-xs font-mono bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded uppercase">
+                <span className="badge-info font-mono uppercase">
                   {node.protocol}
                 </span>
               </div>
               <button 
                 onClick={onClose}
-                className="btn-icon"
+                className="btn-icon touch-target"
                 aria-label="Close drawer"
               >
                 <X size={20} />
@@ -84,7 +84,7 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
             <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
               {/* 24H Chart */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-400 mb-4 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Zap size={16} className="text-amber-500" />
                   {t('nodes.detail.trendTitle')}
                 </h3>
@@ -135,13 +135,13 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
 
               {/* Detailed Ping Logs */}
               <div className="mt-8">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-400 mb-4 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Activity size={16} className="text-indigo-500 dark:text-indigo-400" />
                   {t('nodes.detail.logsTitle')}
                 </h3>
                 <div className="glass-card overflow-hidden">
                   <table className="w-full text-left text-sm relative z-10">
-                    <thead className="bg-gray-100 dark:bg-zinc-900/80 text-gray-600 dark:text-zinc-400 text-[10px] tracking-widest uppercase sticky top-0 backdrop-blur-md">
+                    <thead className="bg-gray-100 dark:bg-zinc-900/80 text-gray-600 dark:text-zinc-400 text-xs tracking-wider uppercase sticky top-0 backdrop-blur-md">
                       <tr>
                         <th className="px-4 py-3 font-semibold w-1/3">{t('nodes.detail.table.timestamp')}</th>
                         <th className="px-4 py-3 font-semibold w-1/3">{t('nodes.detail.table.status')}</th>
@@ -150,27 +150,27 @@ export default function NodeDetailDrawer({ node, onClose }: DrawerProps) {
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-zinc-800/50">
                       {logs.length > 0 ? logs.map((log: any, i) => (
-                        <tr key={i} className="hover:bg-gray-100 dark:hover:bg-white/[0.02] transition-colors group">
-                          <td className="px-4 py-2.5 text-gray-600 dark:text-zinc-500 group-hover:text-gray-900 dark:group-hover:text-zinc-300 font-mono text-xs whitespace-nowrap transition-colors">
+                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group">
+                          <td className="px-4 py-2.5 text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-zinc-300 font-mono text-xs whitespace-nowrap transition-colors">
                             {new Date(log.timestamp).toLocaleString()}
                           </td>
                           <td className="px-4 py-2.5">
                             {log.available ? 
-                              <span className="text-emerald-500 dark:text-emerald-400/80 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 flex items-center gap-1.5 transition-colors"><CheckCircle size={12}/> {t('common.status.online')}</span> : 
-                              <span className="text-rose-500 dark:text-rose-400/80 group-hover:text-rose-600 dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors"><XCircle size={12}/> {t('common.status.failed')}</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 flex items-center gap-1.5 transition-colors"><CheckCircle size={12}/> {t('common.status.online')}</span> : 
+                              <span className="text-rose-600 dark:text-rose-400 group-hover:text-rose-700 dark:group-hover:text-rose-300 flex items-center gap-1.5 transition-colors"><XCircle size={12}/> {t('common.status.failed')}</span>
                             }
                           </td>
                           <td className="px-4 py-2.5 font-mono text-gray-600 dark:text-zinc-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors text-right">
                             {log.available && log.responseTime != null ? (
-                              <span className="bg-gray-200 dark:bg-zinc-800/50 px-2 py-0.5 rounded text-xs">{log.responseTime}ms</span>
+                              <span className="bg-gray-200 dark:bg-zinc-800 px-2 py-0.5 rounded text-xs">{log.responseTime}ms</span>
                             ) : (
-                              <span className="text-gray-500 dark:text-zinc-600">{t('common.status.timeout')}</span>
+                              <span className="text-gray-500 dark:text-zinc-500">{t('common.status.timeout')}</span>
                             )}
                           </td>
                         </tr>
                       )) : (
                         <tr>
-                          <td colSpan={3} className="px-4 py-8 text-center text-gray-500 dark:text-zinc-600 text-xs">
+                          <td colSpan={3} className="px-4 py-8 text-center text-gray-500 dark:text-zinc-500 text-xs">
                             <Clock className="w-6 h-6 mx-auto mb-2 opacity-20" />
                             {t('nodes.detail.noLogs')}
                           </td>

@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Activity, Settings as SettingsIcon, Trash2, Server, Globe2, SignalHigh, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { Activity, Settings as SettingsIcon, Server, Globe2, SignalHigh, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useDashboardData, type NodeInfo } from './hooks/useDashboardData.ts';
-import { startEngine, stopEngine, deleteAirport } from './hooks/useControls.ts';
+import { startEngine, stopEngine } from './hooks/useControls.ts';
 import MetricsHeader from './components/MetricsHeader.tsx';
 import NodeCard from './components/NodeCard.tsx';
 import NodeDetailDrawer from './components/NodeDetailDrawer.tsx';
@@ -228,18 +228,6 @@ function App() {
     }
   };
 
-  const handleDeleteAirport = async (id: string, name: string) => {
-    if (window.confirm(t('dashboard.airport.deleteConfirm', { name }))) {
-      try {
-        await deleteAirport(id);
-        success(t('messages.airportDeleted', { name }));
-        refetch();
-      } catch (err: any) {
-        showError(t('messages.errors.airportDeleteFailed', { message: err.message }));
-      }
-    }
-  };
-
   const toggleAirportCollapse = (airportId: string) => {
     setCollapsedAirports(prev => {
       const newSet = new Set(prev);
@@ -314,7 +302,8 @@ function App() {
             <ThemeSwitcher variant="icon" />
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              className="btn-icon"
+              aria-label="Open settings"
             >
               <SettingsIcon size={20} />
             </button>
@@ -474,13 +463,6 @@ function App() {
                 </div>
 
                 <div className="h-px flex-1 bg-gradient-to-r from-gray-200 dark:from-white/10 to-transparent" />
-                
-                <button 
-                  onClick={() => handleDeleteAirport(airport.id, airport.name)}
-                  className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors flex items-center gap-1 text-sm font-medium border border-transparent hover:border-rose-500/20"
-                >
-                  <Trash2 size={16} /> {t('dashboard.actions.deleteAirport')}
-                </button>
               </div>
 
               {/* Node Cards - Collapsible */}

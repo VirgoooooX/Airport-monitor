@@ -345,20 +345,40 @@ export class DefaultConfigurationManager implements ConfigurationManager {
    * Remove an airport from the configuration
    */
   removeAirport(airportId: string): void {
-    // Determine if it exists
-    const airports = this.getAirports();
-    if (!airports.some(a => a.id === airportId)) {
+    // First, try to get airports from both sources
+    let airports: Airport[] = [];
+    
+    // Get from in-memory config
+    if (this.config) {
+      airports = this.config.airports;
+    }
+    
+    // If not found in config, try database
+    if (airports.length === 0 && this.database) {
+      airports = this.database.getAirports();
+    }
+    
+    // Check if airport exists in either source
+    const airportExists = airports.some(a => a.id === airportId);
+    
+    if (!airportExists) {
       throw new Error(`Airport with ID ${airportId} not found`);
     }
 
-    // Remove from in-memory config tracking
+    // Remove from in-memory config if it exists there
     if (this.config) {
       this.config.airports = this.config.airports.filter(a => a.id !== airportId);
     }
 
-    // Call database physical deletion
+    // Always try to delete from database (it might exist only there)
     if (this.database) {
-      this.database.deleteAirport(airportId);
+      try {
+        this.database.deleteAirport(airportId);
+      } catch (error) {
+        // If database deletion fails, log but don't throw
+        // The airport might not exist in DB but exist in config
+        console.warn(`Failed to delete airport ${airportId} from database:`, error);
+      }
     }
   }
 

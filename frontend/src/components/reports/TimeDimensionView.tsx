@@ -56,6 +56,18 @@ export interface TimeDimensionViewProps {
   error?: string;
 }
 
+/**
+ * Helper function to format latency values
+ * Returns "--" for invalid data (0, null, undefined, NaN)
+ * Returns formatted millisecond string for valid positive numbers
+ */
+const formatLatency = (avgLatency: number | null | undefined): string => {
+  if (avgLatency == null || avgLatency === 0 || isNaN(avgLatency) || avgLatency <= 0) {
+    return '--';
+  }
+  return `${avgLatency.toFixed(0)}ms`;
+};
+
 export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
   data,
   loading = false,
@@ -117,7 +129,7 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
                   {data.peakPeriods.highestLatencyPeriod.startHour}:00 - {data.peakPeriods.highestLatencyPeriod.endHour}:00
                 </p>
                 <p className="text-2xl font-bold text-rose-900 dark:text-rose-100 mt-2">
-                  {data.peakPeriods.highestLatencyPeriod.avgLatency.toFixed(0)}ms
+                  {formatLatency(data.peakPeriods.highestLatencyPeriod.avgLatency)}
                 </p>
               </div>
             )}
@@ -135,7 +147,7 @@ export const TimeDimensionView: React.FC<TimeDimensionViewProps> = ({
                   {data.peakPeriods.lowestLatencyPeriod.startHour}:00 - {data.peakPeriods.lowestLatencyPeriod.endHour}:00
                 </p>
                 <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mt-2">
-                  {data.peakPeriods.lowestLatencyPeriod.avgLatency.toFixed(0)}ms
+                  {formatLatency(data.peakPeriods.lowestLatencyPeriod.avgLatency)}
                 </p>
               </div>
             )}

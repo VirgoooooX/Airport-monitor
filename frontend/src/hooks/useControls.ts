@@ -29,6 +29,12 @@ export async function fetchConfig() {
   return res.json();
 }
 
+export async function fetchAirports() {
+  const res = await fetch('/api/airports');
+  if (!res.ok) throw new Error('Failed to fetch airports');
+  return res.json();
+}
+
 export async function updateConfig(updates: { checkInterval?: number; checkTimeout?: number }) {
   const res = await fetch('/api/config', {
     method: 'POST',
@@ -46,6 +52,42 @@ export async function deleteAirport(airportId: string) {
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.error || 'Failed to delete airport');
+  }
+  return res.json();
+}
+
+export interface RefreshSubscriptionResponse {
+  success: boolean;
+  addedCount: number;
+  removedCount: number;
+  totalNodes: number;
+}
+
+export async function refreshSubscription(airportId: string): Promise<RefreshSubscriptionResponse> {
+  const res = await fetch(`/api/subscriptions/${airportId}/refresh`, {
+    method: 'POST'
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Failed to refresh subscription');
+  }
+  return res.json();
+}
+
+export interface UpdateAirportIntervalResponse {
+  success: boolean;
+  airport: any;
+}
+
+export async function updateAirportInterval(airportId: string, updateInterval: number | null): Promise<UpdateAirportIntervalResponse> {
+  const res = await fetch(`/api/config/airports/${airportId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ updateInterval }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Failed to update airport interval');
   }
   return res.json();
 }

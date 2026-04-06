@@ -416,6 +416,24 @@ export class DatabaseManager implements DataStorage {
   }
 
   /**
+   * Update airport update interval
+   */
+  updateAirportInterval(airportId: string, updateInterval: number | null): void {
+    try {
+      this.db.run(
+        `UPDATE airports SET update_interval = ? WHERE id = ?`,
+        [updateInterval, airportId]
+      );
+      this.save();
+      console.log(`[DatabaseManager] Updated airport ${airportId} interval to ${updateInterval}`);
+    } catch (error) {
+      const errorMsg = `Failed to update airport ${airportId} interval`;
+      console.error(`[DatabaseManager] ${errorMsg}:`, error);
+      throw new Error(`${errorMsg}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
    * Save a node to the database
    */
   saveNode(node: Node): void {

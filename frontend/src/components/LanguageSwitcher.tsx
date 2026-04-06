@@ -51,15 +51,12 @@ export default function LanguageSwitcher({ onError }: LanguageSwitcherProps = {}
       {/* Language Switcher Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2"
+        className="btn-icon"
         aria-label="Change language"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         <Languages size={20} />
-        <span className="text-sm font-medium hidden sm:inline">
-          {SUPPORTED_LANGUAGES[currentLanguage]}
-        </span>
       </button>
 
       {/* Dropdown Menu */}
@@ -79,7 +76,7 @@ export default function LanguageSwitcher({ onError }: LanguageSwitcherProps = {}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50"
+              className="glass-panel absolute right-0 top-full mt-2 w-48 overflow-hidden z-50"
               role="menu"
               aria-orientation="vertical"
             >
@@ -87,12 +84,12 @@ export default function LanguageSwitcher({ onError }: LanguageSwitcherProps = {}
                 <button
                   key={code}
                   onClick={() => handleLanguageChange(code as SupportedLanguage)}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors flex items-center justify-between"
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors flex items-center justify-between focus-visible-ring"
                   role="menuitem"
                 >
                   <span className="text-sm text-gray-900 dark:text-white">{name}</span>
                   {currentLanguage === code && (
-                    <Check size={16} className="text-indigo-400" />
+                    <Check size={16} className="text-indigo-500 dark:text-indigo-400" />
                   )}
                 </button>
               ))}

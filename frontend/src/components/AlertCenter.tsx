@@ -67,19 +67,6 @@ export default function AlertCenter() {
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return 'text-rose-500 bg-rose-500/10 border-rose-500/20';
-      case 'error':
-        return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
-      case 'warning':
-        return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-      default:
-        return 'text-zinc-500 bg-zinc-500/10 border-zinc-500/20';
-    }
-  };
-
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -130,7 +117,7 @@ export default function AlertCenter() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="glass-panel absolute right-0 top-full mt-2 w-96 max-h-[32rem] shadow-xl overflow-hidden z-50"
+              className="glass-panel absolute right-0 top-full mt-2 w-96 max-h-[32rem] overflow-hidden z-50"
             >
               {/* Header */}
               <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800">
@@ -166,9 +153,13 @@ export default function AlertCenter() {
                         <div className="flex items-start gap-3">
                           {/* Severity Icon */}
                           <div
-                            className={`p-2 rounded-lg border ${getSeverityColor(
-                              alert.severity
-                            )}`}
+                            className={`p-2 rounded-lg border ${
+                              alert.severity === 'critical'
+                                ? 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
+                                : alert.severity === 'error'
+                                ? 'bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400'
+                                : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                            }`}
                           >
                             {getSeverityIcon(alert.severity)}
                           </div>
@@ -200,7 +191,7 @@ export default function AlertCenter() {
                               <button
                                 onClick={() => handleAcknowledge(alert.id)}
                                 disabled={loading}
-                                className="text-xs text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors disabled:opacity-50 focus-visible-ring rounded px-1"
+                                className="btn-ghost !px-2 !py-1 text-xs flex items-center gap-1 disabled:opacity-50"
                               >
                                 <Check size={14} />
                                 {t('common.actions.acknowledge')}

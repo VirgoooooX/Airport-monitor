@@ -73,7 +73,7 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={exporting}
-        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-500/50 text-white font-medium rounded-lg transition-colors"
+        className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Download className="w-4 h-4" />
         {t('export.button')}
@@ -86,32 +86,32 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden z-50"
+            className="glass-panel absolute right-0 mt-2 w-64 overflow-hidden z-50"
           >
-            <div className="p-3 border-b border-zinc-800">
-              <h3 className="text-sm font-semibold text-white">{t('export.title')}</h3>
-              <p className="text-xs text-zinc-400 mt-1">{t('export.subtitle')}</p>
+            <div className="p-3 border-b border-gray-200 dark:border-zinc-800">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('export.title')}</h3>
+              <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1">{t('export.subtitle')}</p>
             </div>
 
             <div className="p-2">
               {/* Report Export */}
               <div className="mb-3">
-                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-2">{t('export.reportData')}</p>
+                <p className="text-xs text-gray-600 dark:text-zinc-500 uppercase tracking-wider mb-2 px-2">{t('export.reportData')}</p>
                 <div className="space-y-1">
                   <button
                     onClick={() => handleExport('report', 'csv')}
                     disabled={exporting}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
+                    className="btn-ghost w-full !justify-start gap-3 disabled:opacity-50"
                   >
-                    <FileText className="w-4 h-4 text-emerald-400" />
+                    <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>{t('export.formats.csv')}</span>
                   </button>
                   <button
                     onClick={() => handleExport('report', 'json')}
                     disabled={exporting}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
+                    className="btn-ghost w-full !justify-start gap-3 disabled:opacity-50"
                   >
-                    <FileJson className="w-4 h-4 text-blue-400" />
+                    <FileJson className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>{t('export.formats.json')}</span>
                   </button>
                 </div>
@@ -119,22 +119,22 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
 
               {/* History Export */}
               <div>
-                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-2">{t('export.historicalData')}</p>
+                <p className="text-xs text-gray-600 dark:text-zinc-500 uppercase tracking-wider mb-2 px-2">{t('export.historicalData')}</p>
                 <div className="space-y-1">
                   <button
                     onClick={() => handleExport('history', 'csv')}
                     disabled={exporting}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
+                    className="btn-ghost w-full !justify-start gap-3 disabled:opacity-50"
                   >
-                    <FileText className="w-4 h-4 text-emerald-400" />
+                    <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>{t('export.formats.csv')}</span>
                   </button>
                   <button
                     onClick={() => handleExport('history', 'json')}
                     disabled={exporting}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors disabled:opacity-50"
+                    className="btn-ghost w-full !justify-start gap-3 disabled:opacity-50"
                   >
-                    <FileJson className="w-4 h-4 text-blue-400" />
+                    <FileJson className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>{t('export.formats.json')}</span>
                   </button>
                 </div>
@@ -142,8 +142,8 @@ export default function ExportButton({ startTime, endTime }: ExportButtonProps) 
             </div>
 
             {exporting && (
-              <div className="p-3 border-t border-zinc-800 bg-zinc-900/50">
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+              <div className="p-3 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-zinc-400">
                   <div className="w-3 h-3 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
                   <span>{t('export.exporting')}</span>
                 </div>

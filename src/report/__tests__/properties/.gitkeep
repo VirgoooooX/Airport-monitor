@@ -1,3 +1,0 @@
-# Property-based tests directory
-# This directory contains property-based tests using fast-check
-# Each test validates universal correctness properties across randomized inputs

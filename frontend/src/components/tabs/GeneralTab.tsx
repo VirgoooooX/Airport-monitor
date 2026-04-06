@@ -123,7 +123,7 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
       {/* Responsive grid - stacks on mobile, side-by-side on larger screens */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="check-interval" className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">
+          <label htmlFor="check-interval" className="form-label">
             {t('settings.engineParameters.checkInterval')}
           </label>
           <input 
@@ -131,9 +131,7 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
             type="number" 
             value={interval}
             onChange={e => setCheckInterval(Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white 
-                      focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 
-                      transition-all touch-target"
+            className="input-text touch-target"
             aria-describedby="check-interval-desc"
           />
           <p id="check-interval-desc" className="sr-only">
@@ -142,7 +140,7 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
         </div>
         
         <div>
-          <label htmlFor="check-timeout" className="block text-sm text-gray-600 dark:text-zinc-500 mb-1">
+          <label htmlFor="check-timeout" className="form-label">
             {t('settings.engineParameters.checkTimeout')}
           </label>
           <input 
@@ -150,9 +148,7 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
             type="number" 
             value={timeout}
             onChange={e => setCheckTimeout(Number(e.target.value))}
-            className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-2 text-gray-900 dark:text-white 
-                      focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 
-                      transition-all touch-target"
+            className="input-text touch-target"
             aria-describedby="check-timeout-desc"
           />
           <p id="check-timeout-desc" className="sr-only">
@@ -164,11 +160,8 @@ function GeneralTab({ onSuccess, savedData, onDataChange, onMarkChanged }: TabCo
       <button 
         onClick={handleSave}
         disabled={loading}
-        className="w-full py-2.5 bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 text-gray-900 dark:text-white rounded-lg 
-                  flex items-center justify-center gap-2 transition-colors 
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900
-                  touch-target"
+        className="btn-secondary w-full flex items-center justify-center gap-2 
+                  disabled:opacity-50 disabled:cursor-not-allowed touch-target"
         aria-busy={loading}
       >
         <Save size={16} /> {t('settings.engineParameters.saveButton')}

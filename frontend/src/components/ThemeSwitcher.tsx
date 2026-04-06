@@ -33,7 +33,7 @@ export default function ThemeSwitcher({ variant = 'full' }: ThemeSwitcherProps) 
     return (
       <button
         onClick={toggleTheme}
-        className="p-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+        className="btn-icon"
         aria-label={theme === 'dark' ? t('appearance.theme.light') : t('appearance.theme.dark')}
       >
         {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -59,12 +59,11 @@ export default function ThemeSwitcher({ variant = 'full' }: ThemeSwitcherProps) 
             aria-checked={isSelected}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            className={`w-full px-4 py-3 rounded-lg border transition-all flex items-center justify-between
-                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-900
-                      touch-target ${
+            className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 flex items-center justify-between
+                      focus-visible-ring touch-target ${
               isSelected
-                ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
-                : 'bg-white dark:bg-zinc-950 border-gray-300 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:border-gray-400 dark:hover:border-zinc-700'
+                ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400'
+                : 'bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -77,7 +76,7 @@ export default function ThemeSwitcher({ variant = 'full' }: ThemeSwitcherProps) 
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
-                <Check size={18} className="text-indigo-400" aria-hidden="true" />
+                <Check size={18} className="text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
               </motion.div>
             )}
           </motion.button>
