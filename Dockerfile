@@ -24,6 +24,9 @@ FROM node:20-alpine AS backend-builder
 
 WORKDIR /app
 
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
 # Copy package files for dependency installation
 COPY package*.json ./
 
